@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex align-items-center mb-3">
+    <h3 class="mb-0 fw-bold"><i class="bi bi-credit-card me-2"></i>Payments</h3>
+    <form class="ms-auto d-flex gap-2" method="get" action="/admin/payments">
+      <select name="status" class="form-select form-select-sm" style="width:auto;">
+        <option value="" {% if not status %}selected{% endif %}>All</option>
+        <option value="pending" {% if status=='pending' %}selected{% endif %}>Pending</option>
+        <option value="paid" {% if status=='paid' %}selected{% endif %}>Paid</option>
+        <option value="failed" {% if status=='failed' %}selected{% endif %}>Failed</option>
+      </select>
+      <button class="btn btn-sm btn-success" type="submit"><i class="bi bi-funnel me-1"></i>Filter</button>
+      {% if status %}
+      <a href="/admin/payments" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x-circle me-1"></i>Clear</a>
+      {% endif %}
+    </form>
+  </div>
+
+  {% if payments %}
+  <div class="table-responsive border rounded shadow-sm">
+    <table class="table align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>Order</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Method</th>
+          <th>Reference</th>
+          <th>Created</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in payments %}
+        <tr>
+          <td>#{{ p.id }}</td>
+          <td>
+            {% if p.order %}
+              <a href="/admin/orders" class="text-decoration-none">Order #{{ p.order.id }}</a>
+            {% else %}
+              <span class="text-muted">-</span>
+            {% endif %}
+          </td>
+          <td>Ksh {{ p.amount }}</td>
+          <td>
+            {% if p.status=='paid' %}
+              <span class="badge bg-success">paid</span>
+            {% elif p.status=='failed' %}
+              <span class="badge bg-danger">failed</span>
+            {% else %}
+              <span class="badge bg-secondary">pending</span>
+            {% endif %}
+          </td>
+          <td>{{ p.method or 'mpesa' }}</td>
+          <td class="text-truncate" style="max-width: 220px;" title="{{ p.reference or '' }}">{{ p.reference or '' }}</td>
+          <td>{{ p.created_at.strftime('%Y-%m-%d %H:%M') if p.created_at else '' }}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#raw{{p.id}}" aria-expanded="false" aria-controls="raw{{p.id}}">
+              <i class="bi bi-chevron-down"></i>
+            </button>
+          </td>
+        </tr>
+        <tr class="collapse" id="raw{{p.id}}">
+          <td colspan="8">
+            <pre class="mb-0 small bg-light p-3 rounded" style="white-space: pre-wrap;">{{ p.raw_payload or '' }}</pre>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="alert alert-info">No payments found.</div>
+  {% endif %}
+</div>
+{% endblock %}

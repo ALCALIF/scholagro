@@ -1,0 +1,388 @@
+{% extends 'base.html' %}
+{% block meta %}
+  {{ super() }}
+  {% set base = url_for('shop.shop', _external=True) %}
+  {% set q = request.args.get('q') %}
+  {% set cat = request.args.get('category') %}
+  {% set canon_params = [] %}
+  {% if q %}{% set _ = canon_params.append('q=' ~ q) %}{% endif %}
+  {% if cat %}{% set _ = canon_params.append('category=' ~ cat) %}{% endif %}
+  <link rel="canonical" href="{{ base }}{% if canon_params %}?{{ canon_params|join('&') }}{% endif %}">
+  {% if pagination %}
+    {% if pagination.has_prev %}
+      <link rel="prev" href="{{ base }}?page={{ pagination.prev_num }}{% if q %}&q={{ q }}{% endif %}{% if cat %}&category={{ cat }}{% endif %}">
+    {% endif %}
+    {% if pagination.has_next %}
+      <link rel="next" href="{{ base }}?page={{ pagination.next_num }}{% if q %}&q={{ q }}{% endif %}{% if cat %}&category={{ cat }}{% endif %}">
+    {% endif %}
+  {% endif %}
+{% endblock %}
+{% block content %}
+
+<!-- Page Header -->
+<div class="mb-5 animate-fadeInUp">
+  <h1 class="fw-bold mb-2 heading-accent display-5">
+    <i class="bi bi-shop me-2"></i>Shop Our Products
+  </h1>
+  <p class="text-muted lead">
+    {% if request.args.get('q') %}
+      Search results for "{{ request.args.get('q') }}"
+    {% elif request.args.get('category') %}
+      Explore our fresh selection in this category
+    {% else %}
+      Discover our premium fresh grocery collection
+    {% endif %}
+  </p>
+</div>
+
+<div class="row g-4">
+  <!-- Sidebar Filters -->
+  <div class="col-lg-3 animate-slideInLeft">
+    <div class="sticky-lg-filter">
+      <!-- Categories Filter -->
+      <div class="card border-0 shadow-sm mb-3 hover-lift">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3 heading-accent">
+            <i class="bi bi-bookmark-fill me-2"></i>Categories
+          </h6>
+          <div class="list-group list-group-flush">
+            <a href="/shop" class="list-group-item list-group-item-action border-0 px-0 {% if not request.args.category %}active bg-success bg-opacity-10 text-success{% endif %}">
+              <i class="bi bi-circle-fill me-2 icon-small"></i>All Categories
+            </a>
+            {% for parent in categories if not parent.parent_id %}
+              <a href="/shop?category={{parent.id}}" class="list-group-item list-group-item-action border-0 px-0 {% if request.args.category and (request.args.category|string == parent.id|string) %}active bg-success bg-opacity-10 text-success{% endif %}">
+                <i class="bi bi-folder-fill me-2 icon-small"></i>{{parent.name}}
+              </a>
+              {% for child in categories if child.parent_id and (child.parent_id == parent.id) %}
+              <a href="/shop?category={{child.id}}" class="list-group-item list-group-item-action border-0 ps-4 {% if request.args.category and (request.args.category|string == child.id|string) %}active bg-success bg-opacity-10 text-success{% endif %}">
+                <i class="bi bi-chevron-right me-2 icon-small"></i>{{child.name}}
+              </a>
+              {% endfor %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Store Hours & Location -->
+      {% include 'partials/hours_map_compact.html' %}
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="col-lg-9">
+    <!-- Filter Bar -->
+    <div class="card border-0 shadow-sm mb-4 animate-slideInUp sticky-top" style="top: 64px; z-index: 1019;">
+      <div class="card-body">
+        <form class="row g-3 align-items-end" action="/shop" method="get">
+          <!-- Search Input -->
+          <div class="col-12 col-md-5">
+            <label class="form-label fw-600 small">
+              <i class="bi bi-search me-1"></i>Search Products
+            </label>
+            <input class="form-control form-control-lg" type="text" name="q" value="{{ request.args.q or '' }}" placeholder="Search by name, category..." autocomplete="off">
+          </div>
+
+          <!-- Sort Dropdown -->
+          <div class="col-6 col-md-3">
+            <label class="form-label fw-600 small" for="sortSelect">
+              <i class="bi bi-arrow-down-up me-1"></i>Sort By
+            </label>
+            <select class="form-select form-select-lg" name="sort" id="sortSelect" title="Sort products by selected option">
+              {% set s = request.args.get('sort','newest') %}
+              <option value="newest" {% if s=='newest' %}selected{% endif %}>Newest First</option>
+              <option value="price_asc" {% if s=='price_asc' %}selected{% endif %}>Price: Low to High</option>
+              <option value="price_desc" {% if s=='price_desc' %}selected{% endif %}>Price: High to Low</option>
+              <option value="rating" {% if s=='rating' %}selected{% endif %}>Best Rated</option>
+            </select>
+          </div>
+
+          <!-- Price Range -->
+          <div class="col-6 col-md-2">
+            <label class="form-label fw-600 small">Min (KES)</label>
+            <input class="form-control form-control-lg" type="number" step="10" name="min" value="{{ request.args.min or '' }}" placeholder="0">
+          </div>
+
+          <div class="col-6 col-md-2">
+            <label class="form-label fw-600 small">Max (KES)</label>
+            <input class="form-control form-control-lg" type="number" step="10" name="max" value="{{ request.args.max or '' }}" placeholder="50000" id="maxInput">
+          </div>
+
+          <!-- Price Slider (syncs with Max) -->
+          <div class="col-12 col-md-4">
+            <label class="form-label fw-600 small">Max Slider</label>
+            <input type="range" min="0" max="100000" step="100" class="form-range" id="maxRange">
+          </div>
+
+          <!-- Checkboxes Row -->
+          <div class="col-12">
+            <div class="d-flex flex-wrap gap-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="deals" value="1" id="fDeals" {% if request.args.get('deals')=='1' %}checked{% endif %}>
+                <label class="form-check-label fw-500 small" for="fDeals">
+                  <i class="bi bi-lightning-fill text-warning me-1"></i>Hot Deals Only
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="new" value="1" id="fNew" {% if request.args.get('new')=='1' %}checked{% endif %}>
+                <label class="form-check-label fw-500 small" for="fNew">
+                  <i class="bi bi-star-fill text-warning me-1"></i>New Products
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="in_stock" value="1" id="fStock" {% if request.args.get('in_stock')=='1' %}checked{% endif %}>
+                <label class="form-check-label fw-500 small" for="fStock">
+                  <i class="bi bi-check-circle-fill text-success me-1"></i>In Stock Only
+                </label>
+              </div>
+              <!-- Rating Filter -->
+              <div class="ms-auto d-flex align-items-center gap-2">
+                <label class="form-label fw-600 small mb-0">Min Rating</label>
+                <select class="form-select form-select-sm" name="rating" style="width: auto;">
+                  {% set r = request.args.get('rating')|int if request.args.get('rating') else 0 %}
+                  <option value="">Any</option>
+                  <option value="5" {% if r==5 %}selected{% endif %}>5★</option>
+                  <option value="4" {% if r==4 %}selected{% endif %}>4★+</option>
+                  <option value="3" {% if r==3 %}selected{% endif %}>3★+</option>
+                  <option value="2" {% if r==2 %}selected{% endif %}>2★+</option>
+                  <option value="1" {% if r==1 %}selected{% endif %}>1★+</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {% if request.args.category %}<input type="hidden" name="category" value="{{ request.args.category }}">{% endif %}
+
+          <!-- Action Buttons -->
+          <div class="col-12 d-flex gap-2 flex-wrap align-items-center">
+            <button type="submit" class="btn btn-success fw-600">
+              <i class="bi bi-funnel-fill me-1"></i>Apply Filters
+            </button>
+            <a href="/shop" class="btn btn-outline-secondary fw-600">
+              <i class="bi bi-arrow-clockwise me-1"></i>Reset All
+            </a>
+
+            {% set args_dict = request.args.to_dict() %}
+            {% if 'page' in args_dict %}{% set _ = args_dict.pop('page') %}{% endif %}
+            {% set filters_count = args_dict|length %}
+            {% if filters_count > 0 %}
+            <div class="ms-auto d-flex flex-wrap gap-2 align-items-center small text-muted">
+              <span>
+                <i class="bi bi-info-circle me-1"></i>
+                {{ filters_count }} filter{{ 's' if filters_count != 1 else '' }} applied
+              </span>
+              <a href="/shop" class="link-secondary text-decoration-none fw-600">
+                <i class="bi bi-x-circle me-1"></i>Clear all
+              </a>
+            </div>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Quick Category Chips -->
+    <div class="mb-4 animate-stagger pb-3">
+      <small class="text-muted d-block mb-2"><i class="bi bi-tag-fill me-1"></i>Quick Browse</small>
+      <div class="d-flex flex-wrap gap-2">
+        <a class="badge rounded-pill px-3 py-2 text-decoration-none {% if not request.args.category %}bg-success text-white{% else %}bg-light text-dark{% endif %} fw-600 hover-lift" href="/shop">All</a>
+        {% for c in categories %}
+        <a class="badge rounded-pill px-3 py-2 text-decoration-none {% if request.args.category and (request.args.category|string == c.id|string) %}bg-success text-white{% else %}bg-light text-dark{% endif %} fw-600 hover-lift" href="/shop?category={{c.id}}">{{c.name}}</a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Quick Rating Chips -->
+    <div class="mb-4 animate-stagger">
+      <small class="text-muted d-block mb-2"><i class="bi bi-star-fill me-1"></i>Filter by Rating</small>
+      <div class="d-flex flex-wrap gap-2">
+        {% set r = request.args.get('rating')|int if request.args.get('rating') else 0 %}
+        <a class="badge rounded-pill px-3 py-2 text-decoration-none {% if not r %}bg-success text-white{% else %}bg-light text-dark{% endif %} fw-600 hover-lift" href="{{ url_for('shop.shop', **(request.args.to_dict() | dict(rating=''))) }}">Any</a>
+        <a class="badge rounded-pill px-3 py-2 text-decoration-none {% if r==5 %}bg-success text-white{% else %}bg-light text-dark{% endif %} fw-600 hover-lift" href="{{ url_for('shop.shop', **(request.args.to_dict() | dict(rating='5'))) }}">5★</a>
+        <a class="badge rounded-pill px-3 py-2 text-decoration-none {% if r==4 %}bg-success text-white{% else %}bg-light text-dark{% endif %} fw-600 hover-lift" href="{{ url_for('shop.shop', **(request.args.to_dict() | dict(rating='4'))) }}">4★+</a>
+        <a class="badge rounded-pill px-3 py-2 text-decoration-none {% if r==3 %}bg-success text-white{% else %}bg-light text-dark{% endif %} fw-600 hover-lift" href="{{ url_for('shop.shop', **(request.args.to_dict() | dict(rating='3'))) }}">3★+</a>
+        <a class="badge rounded-pill px-3 py-2 text-decoration-none {% if r==2 %}bg-success text-white{% else %}bg-light text-dark{% endif %} fw-600 hover-lift" href="{{ url_for('shop.shop', **(request.args.to_dict() | dict(rating='2'))) }}">2★+</a>
+        <a class="badge rounded-pill px-3 py-2 text-decoration-none {% if r==1 %}bg-success text-white{% else %}bg-light text-dark{% endif %} fw-600 hover-lift" href="{{ url_for('shop.shop', **(request.args.to_dict() | dict(rating='1'))) }}">1★+</a>
+      </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="mb-4 animate-slideInUp">
+      {% if products %}
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0 fw-bold">
+            <span id="productCount">{{products|length}}</span> Products Found
+          </h5>
+          <small class="text-muted" id="viewMode">
+            <button class="btn btn-sm btn-outline-secondary" id="gridViewBtn" title="Grid View">
+              <i class="bi bi-grid-3x3-gap"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" id="listViewBtn" title="List View">
+              <i class="bi bi-list-ul"></i>
+            </button>
+          </small>
+        </div>
+
+        <div class="row g-3" id="productsGrid">
+          {% for p in products %}
+          <div class="col-12 col-sm-6 col-lg-4 animate-stagger product-item">
+            <div class="card h-100 product-card position-relative shadow-sm hover-lift">
+              <!-- Product Badges -->
+              <div class="product-badges">
+                {% if p.old_price and p.price and p.old_price|float > p.price|float %}
+                  {% set pct = ((1 - (p.price|float / p.old_price|float)) * 100) | round(0, 'floor') %}
+                  <span class="badge-deal animate-pulse"><i class="bi bi-lightning-fill me-1"></i>-{{ pct|int }}%</span>
+                {% endif %}
+                {% if p.created_at and (p.created_at.date() >= (datetime.utcnow().date() - timedelta(days=14))) %}
+                  <span class="badge-new"><i class="bi bi-star-fill me-1"></i>New</span>
+                {% endif %}
+              </div>
+
+              <!-- Product Image -->
+              <div class="ratio ratio-4x3 overflow-hidden bg-light">
+                <img loading="lazy" class="card-img-top object-fit-cover" src="{{ cl_transform(p.image_url, 600, 450) or 'https://placehold.co/600x400' }}" alt="{{p.name}}" title="{{p.name}}">
+              </div>
+
+              <!-- Product Info -->
+              <div class="card-body d-flex flex-column">
+                <h6 class="card-title mb-2 fw-600 text-truncate-2" title="{{p.name}}">{{p.name}}</h6>
+                
+                <!-- Price -->
+                <div class="mb-3">
+                  <span class="text-success fs-6 fw-bold">Ksh {{p.price}}</span>
+                  {% if p.old_price %}
+                    <small class="text-muted text-decoration-line-through ms-1 d-block">Ksh {{p.old_price}}</small>
+                  {% endif %}
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-auto d-flex gap-2 flex-wrap">
+                  <a class="btn btn-sm btn-outline-success fw-600 flex-grow-1" href="/product/{{p.slug}}" aria-label="View {{p.name}}" data-bs-toggle="tooltip" title="View Full Details">
+                    <i class="bi bi-eye me-1"></i>View
+                  </a>
+                  <button class="btn btn-sm btn-warning fw-600 btn-quick-view" aria-label="Quick view {{p.name}}"
+                    data-product-id="{{p.id}}" 
+                    data-name="{{p.name}}" 
+                    data-price="{{p.price}}" 
+                    data-oldprice="{{p.old_price or ''}}" 
+                    data-image="{{ cl_transform(p.image_url, 800, 600) or 'https://placehold.co/800x600' }}" 
+                    data-url="/product/{{p.slug}}" 
+                    data-bs-toggle="tooltip" title="Quick Preview">
+                    <i class="bi bi-zoom-in"></i>
+                  </button>
+                  {% if current_user.is_authenticated %}
+                    <button class="btn btn-sm btn-success fw-600 btn-add-to-cart btn-async flex-grow-1" data-product-id="{{p.id}}" aria-label="Add {{p.name}} to cart" data-bs-toggle="tooltip" title="Add to Cart">
+                      <i class="bi bi-bag-plus me-1"></i>Add
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger fw-600 btn-wishlist btn-async" data-product-id="{{p.id}}" aria-label="Add {{p.name}} to wishlist" data-bs-toggle="tooltip" title="Save for Later">
+                      <i class="bi bi-heart"></i>
+                    </button>
+                  {% else %}
+                    <a class="btn btn-sm btn-success fw-600 flex-grow-1" href="/auth/login" data-bs-toggle="tooltip" title="Login to shop">
+                      <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                    </a>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if pagination and pagination.pages > 1 %}
+        <nav aria-label="Page navigation" class="mt-5 pt-4 border-top">
+          <ul class="pagination justify-content-center">
+            <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+              <a class="page-link" href="?page={{ pagination.prev_num }}{% if request.args.q %}&q={{ request.args.q }}{% endif %}{% if request.args.category %}&category={{ request.args.category }}{% endif %}&sort={{ request.args.get('sort','newest') }}">
+                <i class="bi bi-chevron-left me-1"></i>Previous
+              </a>
+            </li>
+            
+            {% set start = [1, pagination.page - 2]|max %}
+            {% set end = [pagination.pages, pagination.page + 2]|min %}
+            
+            {% if start > 1 %}
+              <li class="page-item"><a class="page-link" href="?page=1{% if request.args.q %}&q={{ request.args.q }}{% endif %}{% if request.args.category %}&category={{ request.args.category }}{% endif %}">1</a></li>
+              {% if start > 2 %}<li class="page-item disabled"><span class="page-link">...</span></li>{% endif %}
+            {% endif %}
+            
+            {% for p in range(start, end + 1) %}
+            <li class="page-item {% if p == pagination.page %}active{% endif %}">
+              <a class="page-link" href="?page={{p}}{% if request.args.q %}&q={{ request.args.q }}{% endif %}{% if request.args.category %}&category={{ request.args.category }}{% endif %}">{{p}}</a>
+            </li>
+            {% endfor %}
+            
+            {% if end < pagination.pages %}
+              {% if end < pagination.pages - 1 %}<li class="page-item disabled"><span class="page-link">...</span></li>{% endif %}
+              <li class="page-item"><a class="page-link" href="?page={{ pagination.pages }}{% if request.args.q %}&q={{ request.args.q }}{% endif %}{% if request.args.category %}&category={{ request.args.category }}{% endif %}">{{ pagination.pages }}</a></li>
+            {% endif %}
+            
+            <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+              <a class="page-link" href="?page={{ pagination.next_num }}{% if request.args.q %}&q={{ request.args.q }}{% endif %}{% if request.args.category %}&category={{ request.args.category }}{% endif %}&sort={{ request.args.get('sort','newest') }}">
+                Next <i class="bi bi-chevron-right ms-1"></i>
+              </a>
+            </li>
+          </ul>
+          {% set start_idx = (pagination.page - 1) * pagination.per_page + 1 %}
+          {% set end_idx = (pagination.page - 1) * pagination.per_page + products|length %}
+          <div class="text-center text-muted small mt-2">
+            Showing <strong>{{ start_idx }}</strong>–<strong>{{ end_idx }}</strong> of
+            <strong>{{ pagination.total }}</strong> products ·
+            Page <strong>{{ pagination.page }}</strong> of <strong>{{ pagination.pages }}</strong>
+          </div>
+        </nav>
+        {% endif %}
+
+      {% else %}
+      <!-- No Products Message -->
+      <div class="card border-0 bg-light p-5 text-center animate-fadeIn">
+        <i class="bi bi-search empty-state-large"></i>
+        <h4 class="mt-3 fw-bold text-muted">No Products Found</h4>
+        <p class="text-muted mb-3">We couldn't find any products matching your filters. Try adjusting your search.</p>
+        <div class="d-flex gap-2 justify-content-center">
+          <a href="/shop" class="btn btn-success">
+            <i class="bi bi-house me-1"></i>Back to Shop
+          </a>
+          <a href="/shop" class="btn btn-outline-success">
+            <i class="bi bi-arrow-clockwise me-1"></i>Clear Filters
+          </a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  // View mode toggle (Grid/List)
+  document.getElementById('gridViewBtn').addEventListener('click', () => {
+    document.getElementById('productsGrid').classList.remove('list-view');
+  });
+
+  document.getElementById('listViewBtn').addEventListener('click', () => {
+    document.getElementById('productsGrid').classList.add('list-view');
+  });
+
+  // Dynamic sort on select change
+  document.getElementById('sortSelect').addEventListener('change', function() {
+    const form = this.closest('form');
+    form.submit();
+  });
+
+  // Sync price slider with Max input and vice versa
+  const maxInput = document.getElementById('maxInput');
+  const maxRange = document.getElementById('maxRange');
+  if (maxInput && maxRange) {
+    const init = parseInt(maxInput.value || '0', 10);
+    if (!isNaN(init)) maxRange.value = Math.min(Math.max(init, 0), parseInt(maxRange.max, 10));
+    maxRange.addEventListener('input', () => {
+      maxInput.value = maxRange.value;
+    });
+    maxInput.addEventListener('change', () => {
+      const v = parseInt(maxInput.value || '0', 10);
+      if (!isNaN(v)) maxRange.value = Math.min(Math.max(v, 0), parseInt(maxRange.max, 10));
+    });
+  }
+</script>
+
+{% endblock %}

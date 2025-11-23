@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Admin Dashboard</h3>
+<div class="row">
+  <div class="col-md-4"><div class="border rounded p-3">Products: <strong>{{product_count}}</strong></div></div>
+  <div class="col-md-4"><div class="border rounded p-3">Orders: <strong>{{order_count}}</strong></div></div>
+</div>
+<hr>
+<a class="btn btn-outline-success" href="/admin/products">Manage Products</a>
+<a class="btn btn-outline-primary" href="/admin/orders">Manage Orders</a>
+{% endblock %}

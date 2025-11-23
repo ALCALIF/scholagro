@@ -1,0 +1,427 @@
+{% extends 'base.html' %}
+
+{% block title %}FAQs • {{ site_name }}{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-5"><h1>FAQs</h1>
+
+  <!-- Hero Section --><div class="accordion" id="faq">
+
+  <div class="row mb-5 animate-fadeInUp">  <div class="accordion-item">
+
+    <div class="col-12">    <h2 class="accordion-header"><button class="accordion-button" data-bs-toggle="collapse" data-bs-target="#f1">Where do you deliver?</button></h2>
+
+      <div style="background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 100%); border-radius: 20px; padding: 80px 40px; color: white; text-align: center;">    <div id="f1" class="accordion-collapse collapse show" data-bs-parent="#faq"><div class="accordion-body">We deliver across Nairobi, Kiambu, Juja, Ruiru, KU and nearby areas.</div></div>
+
+        <h1 class="display-4 fw-bold mb-3">Frequently Asked Questions</h1>  </div>
+
+        <p class="lead fs-5 mb-4">Find answers to common questions about our products, delivery, and services.</p>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#f2">What are delivery times?</button></h2>
+          <div id="f2" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body">Choose Morning, Afternoon, or Evening slots at checkout.</div></div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#f3">How do I pay?</button></h2>
+          <div id="f3" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body">M-Pesa STK Push (coming soon) and cashless options.</div></div>
+        </div>
+
+        <div class="mx-auto" style="max-width: 500px;">
+          <div class="input-group input-group-lg rounded-3 overflow-hidden">
+            <input type="text" class="form-control border-0" id="faqSearch" placeholder="Search FAQs...">
+            <button class="btn btn-light" type="button">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Category Filters -->
+    <div class="col-12 col-lg-3 mb-4">
+      <div class="card border-0 shadow-sm rounded-3 sticky-top" style="top: 20px;">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-4">Categories</h5>
+          <div class="list-group list-group-flush">
+            <button class="list-group-item list-group-item-action border-0 px-0 py-2 faq-category active" 
+                    data-category="all">
+              <i class="bi bi-check-lg text-emerald me-2"></i>All Questions
+            </button>
+            <button class="list-group-item list-group-item-action border-0 px-0 py-2 faq-category" 
+                    data-category="delivery">
+              <i class="bi bi-truck text-amber me-2"></i>Delivery
+            </button>
+            <button class="list-group-item list-group-item-action border-0 px-0 py-2 faq-category" 
+                    data-category="payment">
+              <i class="bi bi-credit-card text-success me-2"></i>Payment
+            </button>
+            <button class="list-group-item list-group-item-action border-0 px-0 py-2 faq-category" 
+                    data-category="products">
+              <i class="bi bi-shop text-info me-2"></i>Products
+            </button>
+            <button class="list-group-item list-group-item-action border-0 px-0 py-2 faq-category" 
+                    data-category="orders">
+              <i class="bi bi-bag text-danger me-2"></i>Orders & Returns
+            </button>
+            <button class="list-group-item list-group-item-action border-0 px-0 py-2 faq-category" 
+                    data-category="account">
+              <i class="bi bi-person text-purple me-2"></i>Account
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ Content -->
+    <div class="col-12 col-lg-9">
+      <!-- Delivery Category -->
+      <div class="faq-category-content" data-category="delivery">
+        <h3 class="fw-bold mb-4 animate-fadeInUp">
+          <i class="bi bi-truck text-amber"></i> Delivery Questions
+        </h3>
+
+        <div class="accordion accordion-flush faq-accordion" id="deliveryFAQ">
+          <div class="accordion-item mb-3 card border-0 shadow-sm rounded-3 animate-fadeInUp">
+            <h2 class="accordion-header">
+              <button class="accordion-button rounded-3 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                <i class="bi bi-geo-alt me-2 text-emerald"></i>Where do you deliver?
+              </button>
+            </h2>
+            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#deliveryFAQ">
+              <div class="accordion-body">
+                We deliver across Nairobi, Kiambu, Juja, Ruiru, and KU areas. Check our delivery zones during checkout 
+                to see if your location is covered. We're constantly expanding to serve more areas!
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item mb-3 card border-0 shadow-sm rounded-3 animate-fadeInUp" style="animation-delay: 0.05s;">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed rounded-3 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                <i class="bi bi-clock me-2 text-amber"></i>What are your delivery time slots?
+              </button>
+            </h2>
+            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#deliveryFAQ">
+              <div class="accordion-body">
+                <p><strong>Morning Slot:</strong> 6:00 AM - 12:00 PM</p>
+                <p><strong>Afternoon Slot:</strong> 12:00 PM - 5:00 PM</p>
+                <p><strong>Evening Slot:</strong> 5:00 PM - 9:00 PM</p>
+                <p class="mb-0">Select your preferred slot at checkout. Delivery fees vary by zone.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item mb-3 card border-0 shadow-sm rounded-3 animate-fadeInUp" style="animation-delay: 0.1s;">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed rounded-3 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                <i class="bi bi-box me-2 text-success"></i>Is there a minimum order amount?
+              </button>
+            </h2>
+            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#deliveryFAQ">
+              <div class="accordion-body">
+                We don't have a strict minimum order. However, we recommend ordering at least Ksh 500 to maximize 
+                delivery efficiency and value. Orders below this may incur higher delivery fees.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item card border-0 shadow-sm rounded-3 animate-fadeInUp" style="animation-delay: 0.15s;">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed rounded-3 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                <i class="bi bi-question-circle me-2 text-info"></i>What if I'm not home at delivery time?
+              </button>
+            </h2>
+            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#deliveryFAQ">
+              <div class="accordion-body">
+                Our drivers will call you 15 minutes before arrival. If you're not available, you can:
+                <ul class="mb-0 mt-2">
+                  <li>Reschedule for another time slot</li>
+                  <li>Authorize a trusted person to receive the order</li>
+                  <li>Request special delivery instructions (e.g., leave at gate)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Category -->
+      <div class="faq-category-content" data-category="payment" style="display: none;">
+        <h3 class="fw-bold mb-4 animate-fadeInUp">
+          <i class="bi bi-credit-card text-success"></i> Payment Questions
+        </h3>
+
+        <div class="accordion accordion-flush faq-accordion" id="paymentFAQ">
+          <div class="accordion-item mb-3 card border-0 shadow-sm rounded-3 animate-fadeInUp">
+            <h2 class="accordion-header">
+              <button class="accordion-button rounded-3 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                <i class="bi bi-wallet2 me-2 text-emerald"></i>What payment methods do you accept?
+              </button>
+            </h2>
+            <div id="faq5" class="accordion-collapse collapse show" data-bs-parent="#paymentFAQ">
+              <div class="accordion-body">
+                We accept:
+                <ul class="mb-0 mt-2">
+                  <li><strong>M-Pesa</strong> - STK Push (most popular)</li>
+                  <li><strong>Debit/Credit Card</strong> - Visa, Mastercard</li>
+                  <li><strong>Cash on Delivery</strong> - Pay when we deliver</li>
+                  <li><strong>Mobile Money</strong> - Other providers coming soon</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item mb-3 card border-0 shadow-sm rounded-3 animate-fadeInUp" style="animation-delay: 0.05s;">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed rounded-3 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq6">
+                <i class="bi bi-shield-check me-2 text-amber"></i>Is my payment information secure?
+              </button>
+            </h2>
+            <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#paymentFAQ">
+              <div class="accordion-body">
+                Yes! All payments are processed through encrypted, secure channels (SSL/TLS). We're PCI DSS compliant 
+                and never store full card details on our servers. Your information is safe with us.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item card border-0 shadow-sm rounded-3 animate-fadeInUp" style="animation-delay: 0.1s;">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed rounded-3 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq7">
+                <i class="bi bi-percent me-2 text-success"></i>Do you offer discounts or promo codes?
+              </button>
+            </h2>
+            <div id="faq7" class="accordion-collapse collapse" data-bs-parent="#paymentFAQ">
+              <div class="accordion-body">
+                Yes! We regularly offer:
+                <ul class="mb-0 mt-2">
+                  <li>Seasonal promotions</li>
+                  <li>First-time user discounts</li>
+                  <li>Bulk order discounts</li>
+                  <li>Referral bonuses</li>
+                </ul>
+                {% if coupons %}
+                <hr>
+                <p class="mb-2 fw-semibold">Current active promo codes:</p>
+                <ul class="mb-0">
+                  {% for c in coupons %}
+                  <li>
+                    <span class="badge bg-success text-white me-2">{{ c.code }}</span>
+                    {% if c.discount_percent and c.discount_percent > 0 %}
+                      {{ c.discount_percent }}% off
+                    {% elif c.discount_amount and c.discount_amount > 0 %}
+                      Ksh {{ '%.0f'|format(c.discount_amount) }} off
+                    {% else %}
+                      Special offer
+                    {% endif %}
+                    {% if c.expires_at %}
+                      <span class="text-slate-500 small">(valid until {{ c.expires_at.strftime('%d %b %Y') }})</span>
+                    {% endif %}
+                  </li>
+                  {% endfor %}
+                </ul>
+                {% else %}
+                <p class="mt-2 mb-0">Subscribe to our newsletter to get exclusive codes when they are available.</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products Category -->
+      <div class="faq-category-content" data-category="products" style="display: none;">
+        <h3 class="fw-bold mb-4 animate-fadeInUp">
+          <i class="bi bi-shop text-info"></i> Product Questions
+        </h3>
+
+        <div class="accordion accordion-flush faq-accordion" id="productsFAQ">
+          <div class="accordion-item mb-3 card border-0 shadow-sm rounded-3 animate-fadeInUp">
+            <h2 class="accordion-header">
+              <button class="accordion-button rounded-3 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq8">
+                <i class="bi bi-check-lg me-2 text-emerald"></i>Are your products fresh?
+              </button>
+            </h2>
+            <div id="faq8" class="accordion-collapse collapse show" data-bs-parent="#productsFAQ">
+              <div class="accordion-body">
+                Absolutely! We source directly from farms and local suppliers to ensure maximum freshness. 
+                Products are hand-picked and inspected before delivery. Fruits and vegetables are delivered within 24 hours of harvest.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item mb-3 card border-0 shadow-sm rounded-3 animate-fadeInUp" style="animation-delay: 0.05s;">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed rounded-3 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq9">
+                <i class="bi bi-leaf me-2 text-amber"></i>Do you sell organic products?
+              </button>
+            </h2>
+            <div id="faq9" class="accordion-collapse collapse" data-bs-parent="#productsFAQ">
+              <div class="accordion-body">
+                Yes! We have an expanding selection of certified organic products. These are clearly marked with an 
+                organic badge in our shop. We work directly with certified organic farmers to bring you the best options.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item card border-0 shadow-sm rounded-3 animate-fadeInUp" style="animation-delay: 0.1s;">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed rounded-3 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq10">
+                <i class="bi bi-bag-fill me-2 text-success"></i>Can I return produce if I'm not satisfied?
+              </button>
+            </h2>
+            <div id="faq10" class="accordion-collapse collapse" data-bs-parent="#productsFAQ">
+              <div class="accordion-body">
+                Yes! If products don't meet our quality standards or your expectations, contact us within 24 hours. 
+                We offer replacements or refunds. No questions asked. We stand behind the quality of everything we deliver.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders & Returns Category -->
+      <div class="faq-category-content" data-category="orders" style="display: none;">
+        <h3 class="fw-bold mb-4 animate-fadeInUp">
+          <i class="bi bi-bag text-danger"></i> Orders & Returns
+        </h3>
+
+        <div class="accordion accordion-flush faq-accordion" id="ordersFAQ">
+          <div class="accordion-item mb-3 card border-0 shadow-sm rounded-3 animate-fadeInUp">
+            <h2 class="accordion-header">
+              <button class="accordion-button rounded-3 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq11">
+                <i class="bi bi-pencil me-2 text-emerald"></i>Can I modify my order after placing it?
+              </button>
+            </h2>
+            <div id="faq11" class="accordion-collapse collapse show" data-bs-parent="#ordersFAQ">
+              <div class="accordion-body">
+                If your order hasn't been picked yet, you can modify it within the first 5 minutes. After that, 
+                contact support immediately. We'll try our best to help!
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item mb-3 card border-0 shadow-sm rounded-3 animate-fadeInUp" style="animation-delay: 0.05s;">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed rounded-3 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq12">
+                <i class="bi bi-x-circle me-2 text-amber"></i>How do I cancel an order?
+              </button>
+            </h2>
+            <div id="faq12" class="accordion-collapse collapse" data-bs-parent="#ordersFAQ">
+              <div class="accordion-body">
+                You can cancel within 5 minutes of placing the order from your account. After that, contact support. 
+                Cancellations after picking start will be charged Ksh 150. Full refunds are issued within 24 hours.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item card border-0 shadow-sm rounded-3 animate-fadeInUp" style="animation-delay: 0.1s;">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed rounded-3 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq13">
+                <i class="bi bi-arrow-counterclockwise me-2 text-success"></i>What's your return/refund policy?
+              </button>
+            </h2>
+            <div id="faq13" class="accordion-collapse collapse" data-bs-parent="#ordersFAQ">
+              <div class="accordion-body">
+                We offer 24-hour refunds for quality issues. Return items in original condition. If you receive 
+                wrong items or damaged products, contact us immediately with photos. Refunds are processed within 24-48 hours.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Category -->
+      <div class="faq-category-content" data-category="account" style="display: none;">
+        <h3 class="fw-bold mb-4 animate-fadeInUp">
+          <i class="bi bi-person text-danger"></i> Account Questions
+        </h3>
+
+        <div class="accordion accordion-flush faq-accordion" id="accountFAQ">
+          <div class="accordion-item mb-3 card border-0 shadow-sm rounded-3 animate-fadeInUp">
+            <h2 class="accordion-header">
+              <button class="accordion-button rounded-3 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq14">
+                <i class="bi bi-key me-2 text-emerald"></i>How do I reset my password?
+              </button>
+            </h2>
+            <div id="faq14" class="accordion-collapse collapse show" data-bs-parent="#accountFAQ">
+              <div class="accordion-body">
+                Click "Forgot Password" on the login page. Enter your email. You'll receive a reset link within minutes. 
+                Click it and create a new password. Link expires in 1 hour for security.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item card border-0 shadow-sm rounded-3 animate-fadeInUp" style="animation-delay: 0.05s;">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed rounded-3 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq15">
+                <i class="bi bi-person-plus me-2 text-amber"></i>Can I have multiple accounts?
+              </button>
+            </h2>
+            <div id="faq15" class="accordion-collapse collapse" data-bs-parent="#accountFAQ">
+              <div class="accordion-body">
+                One account per email address for security and referral tracking purposes. If you need a separate account, 
+                use a different email address.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- All FAQs (Combined) -->
+      <div class="faq-category-content" data-category="all" style="display: none;">
+        <!-- This category shows all FAQs combined -->
+        <p class="text-center text-slate-600">Use the category filter on the left to browse FAQs by topic.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact CTA -->
+  <div class="row mt-5">
+    <div class="col-12">
+      <div class="card border-0 rounded-3 overflow-hidden animate-fadeInUp" style="background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 100%);">
+        <div class="card-body p-5 text-center text-white">
+          <h3 class="fw-bold mb-3">Didn't find your answer?</h3>
+          <p class="lead mb-4">Our support team is here to help! Reach out with any questions.</p>
+          <a href="/pages/contact" class="btn btn-light rounded-2 px-5 fw-semibold">
+            <i class="bi bi-chat-dots"></i> Contact Us
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Category filter functionality
+document.querySelectorAll('.faq-category').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const category = this.dataset.category;
+    
+    // Update active button
+    document.querySelectorAll('.faq-category').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    
+    // Show/hide content
+    document.querySelectorAll('.faq-category-content').forEach(content => {
+      content.style.display = 'none';
+    });
+    document.querySelector(`[data-category="${category}"]`).style.display = 'block';
+  });
+});
+
+// Search functionality
+document.getElementById('faqSearch').addEventListener('input', function(e) {
+  const searchTerm = e.target.value.toLowerCase();
+  document.querySelectorAll('.accordion-item').forEach(item => {
+    const text = item.innerText.toLowerCase();
+    item.style.display = text.includes(searchTerm) ? 'block' : 'none';
+  });
+});
+</script>
+{% endblock %}

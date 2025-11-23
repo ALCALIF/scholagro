@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid py-5">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/" class="text-emerald">Home</a></li>
+      <li class="breadcrumb-item"><a href="/cart" class="text-emerald">Cart</a></li>
+      <li class="breadcrumb-item active">Checkout</li>
+    </ol>
+  </nav>
+
+  <h2 class="mb-5 animate-fadeInUp">
+    <i class="bi bi-credit-card text-emerald me-2"></i>Secure Checkout
+  </h2>
+
+  <form method="post" class="needs-validation" novalidate id="checkoutForm">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="row g-4">
+      <div class="col-12 col-lg-8">
+        <div id="checkout-steps">
+          <!-- Step 1: Delivery Address -->
+          <div class="checkout-step" id="step-address">
+            ...existing code...
+          </div>
+          <!-- Step 2: Delivery Options -->
+          <div class="checkout-step d-none" id="step-delivery">
+            ...existing code...
+          </div>
+          <!-- Step 3: Payment & Discounts -->
+          <div class="checkout-step d-none" id="step-payment">
+            ...existing code...
+          </div>
+        </div>
+        <div class="d-flex justify-content-between mt-4">
+          <button type="button" class="btn btn-outline-emerald" id="prevStep" disabled>Previous</button>
+          <button type="button" class="btn btn-emerald" id="nextStep">Next</button>
+        </div>
+      </div>
+      ...existing code...
+    </div>
+  </form>
+
+<script>
+let currentStep = 0;
+const steps = ["step-address", "step-delivery", "step-payment"];
+
+function showStep(idx) {
+  steps.forEach((id, i) => {
+    document.getElementById(id).classList.toggle('d-none', i !== idx);
+  });
+  document.getElementById('prevStep').disabled = idx === 0;
+  document.getElementById('nextStep').textContent = idx === steps.length - 1 ? 'Place Order' : 'Next';
+}
+
+document.getElementById('nextStep').addEventListener('click', function() {
+  if (currentStep < steps.length - 1) {
+    currentStep++;
+    showStep(currentStep);
+  } else {
+    document.getElementById('checkoutForm').submit();
+  }
+});
+document.getElementById('prevStep').addEventListener('click', function() {
+  if (currentStep > 0) {
+    currentStep--;
+    showStep(currentStep);
+  }
+});
+document.addEventListener('DOMContentLoaded', () => showStep(currentStep));
+</script>
+</div>
+
+<script>
+let appliedDiscount = 0;
+
+function getCsrfToken() {
+  const m = document.querySelector('meta[name="csrf-token"]');
+  return m ? m.getAttribute('content') : '';
+}
+
+function recalcTotal() {
+  const select = document.querySelector('select[name="zone_id"]');
+  const option = select && select.options[select.selectedIndex] ? select.options[select.selectedIndex] : { dataset: { fee: 0 } };
+  const fee = parseFloat(option.dataset.fee || 0);
+  const subtotal = {{ total }};
+  const total = Math.max(0, subtotal + fee - appliedDiscount);
+  document.getElementById('delivery-fee-display').textContent = `Ksh ${fee.toFixed(2)}`;
+  document.getElementById('total-amount-display').textContent = `Ksh ${total.toFixed(2)}`;
+}
+
+function updateDeliveryFee() {
+  recalcTotal();
+}
+
+async function applyCoupon() {
+  const code = document.getElementById('coupon-input').value.trim();
+  if (!code) {
+    showCouponFeedback('Please enter a coupon code', 'warning');
+    return;
+  }
+  const subtotal = {{ total }};
+  try {
+    const res = await fetch('/orders/apply-coupon', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken(),
+      },
+      body: JSON.stringify({ code, subtotal })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      appliedDiscount = 0;
+      document.getElementById('discount-display-row').style.display = 'none';
+      showCouponFeedback(data.message || 'Coupon not valid', 'warning');
+      recalcTotal();
+      return;
+    }
+    appliedDiscount = parseFloat(data.discount || 0);
+    document.getElementById('discount-display').textContent = `-Ksh ${appliedDiscount.toFixed(2)}`;
+    document.getElementById('discount-display-row').style.display = 'flex';
+    showCouponFeedback('Coupon applied', 'success');
+    recalcTotal();
+  } catch (e) {
+    showCouponFeedback('Network error applying coupon', 'warning');
+  }
+}
+
+function showCouponFeedback(msg, type) {
+  const el = document.getElementById('coupon-feedback');
+  el.className = `text-${type === 'success' ? 'success' : 'warning'}`;
+  el.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`;
+}
+
+// Init totals and form validation
+document.addEventListener('DOMContentLoaded', () => {
+  recalcTotal();
+  const form = document.querySelector('form');
+  form.addEventListener('submit', function(e) {
+    if (!this.checkValidity()) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    this.classList.add('was-validated');
+  });
+});
+</script>
+{% endblock %}

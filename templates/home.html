@@ -1,0 +1,534 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid p-4 p-md-5">
+<!-- Premium Hero Section -->
+<section class="hero rounded shadow-lg mb-5 p-5 text-center text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 50%, #f59e0b 100%); display: block; visibility: visible;">
+  <h1 class="fw-bold display-4 mb-3 hero-title-main" style="color: white; display: block;">
+    Fresh Groceries Delivered
+    <br>
+    <span class="hero-title-accent" style="background: linear-gradient(135deg, #fbbf24, #fcd34d); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; display: inline-block;">To Your Doorstep</span>
+  </h1>
+  <p class="lead mb-4 hero-subtitle" style="color: white; display: block; max-width: 600px; margin: 0 auto;">Speed, freshness, and convenience across Nairobi & surrounding areas with guaranteed quality produce.</p>
+  <div class="d-flex gap-3 justify-content-center flex-wrap">
+    <a href="/shop" class="btn btn-lg btn-light fw-bold px-5 hover-lift animate-slideInUp">
+      <i class="bi bi-bag-fill me-2"></i>Shop Now
+    </a>
+    <a href="#deals" class="btn btn-lg btn-outline-light fw-bold px-5 hover-lift hero-cta-secondary">
+      <i class="bi bi-lightning-charge-fill me-2"></i>Today's Deals
+    </a>
+  </div>
+  <div class="mt-4 small hero-info">
+    <i class="bi bi-clock-fill me-2"></i>Morning · Afternoon · Evening delivery slots available
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-gradient"></div>
+</section>
+
+<!-- Premium Image Carousel - 10 High Quality Product Images -->
+<div id="bannerCarousel" class="carousel slide mb-5 animate-fadeIn" data-bs-ride="carousel" data-bs-interval="4000">
+  <div class="carousel-inner rounded overflow-hidden shadow-lg">
+    <!-- Slide 1: Fresh Vegetables -->
+    <div class="carousel-item active">
+      <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=1600&h=500&fit=crop" class="d-block w-100 carousel-img" alt="Fresh Organic Vegetables - Premium Quality">
+      <div class="carousel-caption d-none d-md-block carousel-caption-custom">
+        <h3 class="fw-bold mb-2">Fresh Organic Vegetables</h3>
+        <p class="mb-0">Hand-picked from local farms, delivered fresh daily</p>
+      </div>
+    </div>
+    
+    <!-- Slide 2: Tropical Fruits -->
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1599599810694-c6920dd06fcc?w=1600&h=500&fit=crop" class="d-block w-100 carousel-img" alt="Tropical Fruits Assortment">
+      <div class="carousel-caption d-none d-md-block carousel-caption-custom">
+        <h3 class="fw-bold mb-2">Tropical Fruits Collection</h3>
+        <p class="mb-0">Ripe, juicy, and bursting with natural flavors</p>
+      </div>
+    </div>
+    
+    <!-- Slide 3: Green Leafy Vegetables -->
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=1600&h=500&fit=crop" class="d-block w-100 carousel-img" alt="Green Leafy Vegetables">
+      <div class="carousel-caption d-none d-md-block carousel-caption-custom">
+        <h3 class="fw-bold mb-2">Leafy Greens & Salads</h3>
+        <p class="mb-0">Nutrient-rich greens for healthy living</p>
+      </div>
+    </div>
+    
+    <!-- Slide 4: Citrus Fruits -->
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1581365865159-fd70dbb2d23d?w=1600&h=500&fit=crop" class="d-block w-100 carousel-img" alt="Fresh Citrus Fruits">
+      <div class="carousel-caption d-none d-md-block carousel-caption-custom">
+        <h3 class="fw-bold mb-2">Fresh Citrus Selection</h3>
+        <p class="mb-0">Rich in Vitamin C, perfect for immunity</p>
+      </div>
+    </div>
+    
+    <!-- Slide 5: Root Vegetables -->
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=1600&h=500&fit=crop" class="d-block w-100 carousel-img" alt="Root Vegetables Collection">
+      <div class="carousel-caption d-none d-md-block carousel-caption-custom">
+        <h3 class="fw-bold mb-2">Root Vegetables & Tubers</h3>
+        <p class="mb-0">Organic, nutritious, and delicious</p>
+      </div>
+    </div>
+    
+    <!-- Slide 6: Berries & Grapes -->
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1585518419759-63793807204e?w=1600&h=500&fit=crop" class="d-block w-100 carousel-img" alt="Fresh Berries & Grapes">
+      <div class="carousel-caption d-none d-md-block carousel-caption-custom">
+        <h3 class="fw-bold mb-2">Berries & Grapes</h3>
+        <p class="mb-0">Antioxidant-rich premium fruits</p>
+      </div>
+    </div>
+    
+    <!-- Slide 7: Herbs & Seasonings -->
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1596040565656-83a0cbc8d4fe?w=1600&h=500&fit=crop" class="d-block w-100 carousel-img" alt="Fresh Herbs & Seasonings">
+      <div class="carousel-caption d-none d-md-block carousel-caption-custom">
+        <h3 class="fw-bold mb-2">Fresh Herbs & Seasonings</h3>
+        <p class="mb-0">Aromatic flavors for your kitchen</p>
+      </div>
+    </div>
+    
+    <!-- Slide 8: Root Crops & Potatoes -->
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1550039257-8c38de65de65?w=1600&h=500&fit=crop" class="d-block w-100 carousel-img" alt="Potatoes & Root Crops">
+      <div class="carousel-caption d-none d-md-block carousel-caption-custom">
+        <h3 class="fw-bold mb-2">Potatoes & Root Crops</h3>
+        <p class="mb-0">Perfect for meals and cooking</p>
+      </div>
+    </div>
+    
+    <!-- Slide 9: Exotic Vegetables -->
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1609137144813-a02acd4014ae?w=1600&h=500&fit=crop" class="d-block w-100 carousel-img" alt="Exotic Vegetables">
+      <div class="carousel-caption d-none d-md-block carousel-caption-custom">
+        <h3 class="fw-bold mb-2">Exotic Vegetables</h3>
+        <p class="mb-0">Premium varieties for adventurous cooking</p>
+      </div>
+    </div>
+    
+    <!-- Slide 10: Farm Fresh Produce -->
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1488459716781-6f3ee3c3d87b?w=1600&h=500&fit=crop" class="d-block w-100 carousel-img" alt="Farm Fresh Produce">
+      <div class="carousel-caption d-none d-md-block carousel-caption-custom">
+        <h3 class="fw-bold mb-2">Farm Fresh Produce</h3>
+        <p class="mb-0">Direct from farms to your table</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Carousel Controls -->
+  <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarousel" data-bs-slide="prev" aria-label="Previous banner">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#bannerCarousel" data-bs-slide="next" aria-label="Next banner">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+  </button>
+  
+  <!-- Carousel Indicators -->
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Go to banner 1"></button>
+    <button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="1" aria-label="Go to banner 2"></button>
+    <button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="2" aria-label="Go to banner 3"></button>
+    <button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="3" aria-label="Go to banner 4"></button>
+    <button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="4" aria-label="Go to banner 5"></button>
+    <button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="5" aria-label="Go to banner 6"></button>
+    <button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="6" aria-label="Go to banner 7"></button>
+    <button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="7" aria-label="Go to banner 8"></button>
+    <button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="8" aria-label="Go to banner 9"></button>
+    <button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="9" aria-label="Go to banner 10"></button>
+  </div>
+</div>
+
+<!-- Daily Deals Section -->
+{% if deals %}
+<div id="deals" class="section-alt p-4 p-md-5 rounded-3 mb-5 animate-slideInLeft">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0 heading-accent fw-bold">
+      <i class="bi bi-lightning-fill me-2"></i>Daily Deals
+    </h3>
+    <a href="/shop?deals=1" class="btn btn-sm btn-outline-success fw-600">View All <i class="bi bi-arrow-right ms-1"></i></a>
+  </div>
+  <div class="row g-4 animate-stagger">
+    {% for p in deals %}
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card h-100 product-card position-relative shadow-sm hover-lift">
+        <div class="product-badges"><span class="badge-deal animate-pulse"><i class="bi bi-lightning-fill me-1"></i>Deal</span></div>
+        <div class="ratio ratio-4x3 overflow-hidden bg-light">
+          <img loading="lazy" class="card-img-top object-fit-cover" src="{{ cl_transform(p.image_url, 600, 450) or 'https://placehold.co/600x400' }}" alt="{{p.name}}">
+        </div>
+        <div class="card-body d-flex flex-column">
+          <h6 class="card-title mb-2 text-truncate fw-600" title="{{p.name}}">{{p.name}}</h6>
+          <div class="mb-3">
+            <span class="text-success fw-bold fs-5">Ksh {{p.price}}</span>
+            {% if p.old_price %}<small class="text-muted text-decoration-line-through ms-2">{{p.old_price}}</small>{% endif %}
+          </div>
+          <div class="mt-auto d-flex gap-2 flex-wrap">
+            <a class="btn btn-sm btn-outline-success fw-600" href="/product/{{p.slug}}"><i class="bi bi-eye"></i> <span class="d-none d-lg-inline">View</span></a>
+            {% if current_user.is_authenticated %}
+              <button class="btn btn-sm btn-success btn-add-to-cart btn-async fw-600" data-product-id="{{p.id}}"><i class="bi bi-bag-plus"></i> <span class="d-none d-lg-inline">Add</span></button>
+            {% else %}
+              <a class="btn btn-sm btn-success fw-600" href="/auth/login"><i class="bi bi-box-arrow-in-right"></i> <span class="d-none d-lg-inline">Login</span></a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- New Arrivals Section -->
+{% if new_arrivals %}
+<div class="p-4 p-md-5 rounded-3 mb-5 animate-slideInRight">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0 heading-accent fw-bold">
+      <i class="bi bi-stars me-2"></i>New Arrivals
+    </h3>
+    <a href="/shop?new=1" class="btn btn-sm btn-outline-success fw-600">View All <i class="bi bi-arrow-right ms-1"></i></a>
+  </div>
+  <div class="row g-4 animate-stagger">
+    {% for p in new_arrivals %}
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card h-100 product-card position-relative shadow-sm hover-lift">
+        <div class="product-badges"><span class="badge-new"><i class="bi bi-star-fill me-1"></i>New</span></div>
+        <div class="ratio ratio-4x3 overflow-hidden bg-light">
+          <img loading="lazy" class="card-img-top object-fit-cover" src="{{ cl_transform(p.image_url, 600, 450) or 'https://placehold.co/600x400' }}" alt="{{p.name}}">
+        </div>
+        <div class="card-body d-flex flex-column">
+          <h6 class="card-title mb-2 text-truncate fw-600" title="{{p.name}}">{{p.name}}</h6>
+          <div class="mb-3">
+            <span class="text-success fw-bold fs-5">Ksh {{p.price}}</span>
+          </div>
+          <div class="mt-auto d-flex gap-2 flex-wrap">
+            <a class="btn btn-sm btn-outline-success fw-600" href="/product/{{p.slug}}"><i class="bi bi-eye"></i> <span class="d-none d-lg-inline">View</span></a>
+            {% if current_user.is_authenticated %}
+              <button class="btn btn-sm btn-success btn-add-to-cart btn-async fw-600" data-product-id="{{p.id}}"><i class="bi bi-bag-plus"></i> <span class="d-none d-lg-inline">Add</span></button>
+            {% else %}
+              <a class="btn btn-sm btn-success fw-600" href="/auth/login"><i class="bi bi-box-arrow-in-right"></i> <span class="d-none d-lg-inline">Login</span></a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Top Selling Section -->
+{% if top_selling %}
+<div class="section-alt p-4 p-md-5 rounded-3 mb-5 animate-fadeInUp">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0 heading-accent fw-bold">
+      <i class="bi bi-trophy-fill me-2"></i>Top Selling
+    </h3>
+    <a href="/shop" class="btn btn-sm btn-outline-success fw-600">Browse All <i class="bi bi-arrow-right ms-1"></i></a>
+  </div>
+  <div class="row g-4 animate-stagger">
+    {% for p in top_selling %}
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card h-100 product-card position-relative shadow-sm hover-lift">
+        <div class="ratio ratio-4x3 overflow-hidden bg-light">
+          <img loading="lazy" class="card-img-top object-fit-cover" src="{{ cl_transform(p.image_url, 600, 450) or 'https://placehold.co/600x400' }}" alt="{{p.name}}">
+        </div>
+        <div class="card-body d-flex flex-column">
+          <h6 class="card-title mb-2 text-truncate fw-600" title="{{p.name}}">{{p.name}}</h6>
+          <div class="mb-3">
+            <span class="text-success fw-bold fs-5">Ksh {{p.price}}</span>
+          </div>
+          <div class="mt-auto d-flex gap-2 flex-wrap">
+            <a class="btn btn-sm btn-outline-success fw-600" href="/product/{{p.slug}}"><i class="bi bi-eye"></i> <span class="d-none d-lg-inline">View</span></a>
+            {% if current_user.is_authenticated %}
+              <button class="btn btn-sm btn-success btn-add-to-cart btn-async fw-600" data-product-id="{{p.id}}"><i class="bi bi-bag-plus"></i> <span class="d-none d-lg-inline">Add</span></button>
+            {% else %}
+              <a class="btn btn-sm btn-success fw-600" href="/auth/login"><i class="bi bi-box-arrow-in-right"></i> <span class="d-none d-lg-inline">Login</span></a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Flash Sales Section -->
+{% if flash_sales %}
+<div class="p-4 p-md-5 rounded-3 mb-5 animate-fadeIn">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0 heading-accent fw-bold">
+      <i class="bi bi-clock-fill me-2"></i>Flash Sales
+    </h3>
+    <a href="/shop" class="btn btn-sm btn-outline-success fw-600">Shop More <i class="bi bi-arrow-right ms-1"></i></a>
+  </div>
+  <div class="row g-4 animate-stagger">
+    {% for fs in flash_sales %}
+    <div class="col-12 col-md-6 col-lg-3">
+      <div class="card h-100 shadow-sm hover-lift">
+        <div class="ratio ratio-4x3 overflow-hidden bg-light">
+          <img loading="lazy" class="card-img-top object-fit-cover" src="{{ cl_transform(fs.product.image_url, 600, 450) or 'https://placehold.co/600x400' }}" alt="{{fs.product.name}}">
+        </div>
+        <div class="card-body d-flex flex-column">
+          <h6 class="card-title mb-2 text-truncate fw-600" title="{{fs.product.name}}">{{fs.product.name}}</h6>
+          <div class="mb-2"><span class="badge bg-warning text-dark"><i class="bi bi-percent me-1"></i>{{fs.discount_percent}}% OFF</span></div>
+          <div class="small text-muted mb-3">Ends in: <span class="js-countdown" data-end="{{ fs.ends_at.isoformat() }}"></span></div>
+          <div class="mt-auto d-flex gap-2 flex-wrap">
+            <a class="btn btn-sm btn-outline-success fw-600" href="/product/{{fs.product.slug}}"><i class="bi bi-eye"></i> <span class="d-none d-lg-inline">View</span></a>
+            {% if current_user.is_authenticated %}
+              <button class="btn btn-sm btn-success btn-add-to-cart btn-async fw-600" data-product-id="{{fs.product.id}}"><i class="bi bi-bag-plus"></i> <span class="d-none d-lg-inline">Add</span></button>
+            {% else %}
+              <a class="btn btn-sm btn-success fw-600" href="/auth/login"><i class="bi bi-box-arrow-in-right"></i> <span class="d-none d-lg-inline">Login</span></a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Trust & Benefits Section -->
+<div class="row mb-5 animate-stagger">
+  <div class="col-md-4 mb-3 mb-md-0">
+    <div class="card border-0 shadow-md text-center p-4 hover-lift h-100">
+      <div class="mb-3">
+        <i class="bi bi-lightning-fill text-success" style="font-size: 2.5rem;"></i>
+      </div>
+      <h5 class="fw-bold mb-2">Lightning Fast Delivery</h5>
+      <p class="text-muted small mb-0">Get your groceries delivered within hours, not days</p>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3 mb-md-0">
+    <div class="card border-0 shadow-md text-center p-4 hover-lift h-100">
+      <div class="mb-3">
+        <i class="bi bi-leaf-fill text-success" style="font-size: 2.5rem;"></i>
+      </div>
+      <h5 class="fw-bold mb-2">100% Fresh & Organic</h5>
+      <p class="text-muted small mb-0">Hand-picked quality from certified local farms</p>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3 mb-md-0">
+    <div class="card border-0 shadow-md text-center p-4 hover-lift h-100">
+      <div class="mb-3">
+        <i class="bi bi-percent text-success" style="font-size: 2.5rem;"></i>
+      </div>
+      <h5 class="fw-bold mb-2">Best Prices Guaranteed</h5>
+      <p class="text-muted small mb-0">Competitive pricing with regular exclusive deals</p>
+    </div>
+  </div>
+</div>
+
+<!-- Featured Categories Section -->
+<div class="mb-5 animate-fadeInUp">
+  <h3 class="mb-4 fw-bold heading-accent">
+    <i class="bi bi-bookmark-star-fill me-2"></i>Featured Categories
+  </h3>
+  <div class="d-flex flex-wrap gap-3 mb-4 animate-stagger">
+    {% for c in categories %}
+      <a class="badge rounded-pill px-4 py-2 text-decoration-none category-chip hover-lift fw-600" href="/shop?category={{c.id}}">
+        <i class="bi bi-tag-fill me-2"></i>{{c.name}}
+      </a>
+    {% endfor %}
+    {% if not categories %}
+      <span class="text-muted fs-6">No categories yet. Check back soon!</span>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Top Picks Section -->
+<div class="section-alt p-4 p-md-5 rounded-3 mb-5 animate-slideInRight">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0 heading-accent fw-bold">
+      <i class="bi bi-star-fill me-2"></i>Top Picks For You
+    </h3>
+    <a href="/shop" class="btn btn-sm btn-outline-success fw-600">
+      View All <i class="bi bi-arrow-right ms-1"></i>
+    </a>
+  </div>
+  <div class="row g-4 animate-stagger">
+    {% for p in products %}
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card h-100 product-card position-relative shadow-sm hover-lift">
+        <div class="product-badges">
+          {% if p.old_price %}<span class="badge-deal animate-pulse"><i class="bi bi-lightning-fill me-1"></i>Deal</span>{% endif %}
+          {% if p.created_at and (p.created_at.date() >= (datetime.utcnow().date() - timedelta(days=14))) %}<span class="badge-new"><i class="bi bi-star-fill me-1"></i>New</span>{% endif %}
+        </div>
+        <div class="ratio ratio-4x3 overflow-hidden bg-light">
+          <img loading="lazy" class="card-img-top object-fit-cover" src="{{ cl_transform(p.image_url, 600, 450) or 'https://placehold.co/600x400' }}" alt="{{p.name}}">
+        </div>
+        <div class="card-body d-flex flex-column">
+          <h6 class="card-title mb-2 text-truncate fw-600" title="{{p.name}}">{{p.name}}</h6>
+          <div class="mb-3">
+            <span class="text-success fw-bold fs-5">Ksh {{p.price}}</span>
+            {% if p.old_price %}<small class="text-muted text-decoration-line-through ms-2">{{p.old_price}}</small>{% endif %}
+          </div>
+          <div class="mt-auto d-flex gap-2 flex-wrap">
+            <a class="btn btn-sm btn-outline-success fw-600" href="/product/{{p.slug}}" aria-label="View details for {{p.name}}" data-bs-toggle="tooltip" title="View Details"><i class="bi bi-eye"></i> <span class="d-none d-lg-inline">View</span></a>
+            <button class="btn btn-sm btn-warning btn-quick-view fw-600" aria-label="Quick view for {{p.name}}" data-bs-toggle="tooltip" title="Quick View"
+              data-product-id="{{p.id}}" 
+              data-name="{{p.name}}" 
+              data-price="{{p.price}}" 
+              data-oldprice="{{p.old_price or ''}}" 
+              data-image="{{ cl_transform(p.image_url, 800, 600) or 'https://placehold.co/800x600' }}" 
+              data-url="/product/{{p.slug}}">
+              <i class="bi bi-zoom-in"></i> <span class="d-none d-lg-inline">Quick</span>
+            </button>
+            {% if current_user.is_authenticated %}
+              <button class="btn btn-sm btn-success btn-add-to-cart btn-async fw-600" data-product-id="{{p.id}}" aria-label="Add {{p.name}} to cart" data-bs-toggle="tooltip" title="Add to Cart"><i class="bi bi-bag-plus"></i> <span class="d-none d-lg-inline">Add</span></button>
+              <button class="btn btn-sm btn-outline-danger btn-wishlist btn-async fw-600" data-product-id="{{p.id}}" aria-label="Add {{p.name}} to wishlist" data-bs-toggle="tooltip" title="Add to Wishlist"><i class="bi bi-heart"></i> <span class="d-none d-lg-inline">Like</span></button>
+            {% else %}
+              <a class="btn btn-sm btn-success fw-600" href="/auth/login" aria-label="Login to continue" data-bs-toggle="tooltip" title="Login to purchase"><i class="bi bi-box-arrow-in-right"></i> <span class="d-none d-lg-inline">Login</span></a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% if not products %}
+      <div class="col-12 text-center text-muted py-5">
+        <i class="bi bi-box-seam empty-state-icon"></i>
+        Premium products coming soon!
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Customer Reviews Section -->
+<div class="section-alt p-4 p-md-5 rounded-3 mb-5 bg-light">
+  <h3 class="mb-4 fw-bold heading-accent">
+    <i class="bi bi-chat-dots-fill me-2"></i>What Customers Say
+  </h3>
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100 hover-lift">
+        <div class="card-body">
+          <div class="mb-2">
+            <i class="bi bi-star-fill text-warning"></i>
+            <i class="bi bi-star-fill text-warning"></i>
+            <i class="bi bi-star-fill text-warning"></i>
+            <i class="bi bi-star-fill text-warning"></i>
+            <i class="bi bi-star-fill text-warning"></i>
+          </div>
+          <p class="card-text mb-3">"Fastest delivery and freshest groceries I've found. Highly recommend!"</p>
+          <small class="text-muted"><strong>Sarah K.</strong> - Verified Buyer</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100 hover-lift">
+        <div class="card-body">
+          <div class="mb-2">
+            <i class="bi bi-star-fill text-warning"></i>
+            <i class="bi bi-star-fill text-warning"></i>
+            <i class="bi bi-star-fill text-warning"></i>
+            <i class="bi bi-star-fill text-warning"></i>
+            <i class="bi bi-star-fill text-warning"></i>
+          </div>
+          <p class="card-text mb-3">"Amazing quality and great prices. My go-to grocery store now!"</p>
+          <small class="text-muted"><strong>John M.</strong> - Verified Buyer</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100 hover-lift">
+        <div class="card-body">
+          <div class="mb-2">
+            <i class="bi bi-star-fill text-warning"></i>
+            <i class="bi bi-star-fill text-warning"></i>
+            <i class="bi bi-star-fill text-warning"></i>
+            <i class="bi bi-star-fill text-warning"></i>
+            <i class="bi bi-star-fill text-warning"></i>
+          </div>
+          <p class="card-text mb-3">"Professional service and always fresh. Worth every penny!"</p>
+          <small class="text-muted"><strong>Emma R.</strong> - Verified Buyer</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Newsletter Section -->
+<div class="section-alt p-5 rounded-3 mb-5 text-white" style="background: linear-gradient(135deg, #10b981, #059669);">
+  <div class="row align-items-center">
+    <div class="col-md-6 mb-3 mb-md-0">
+      <h3 class="fw-bold mb-2">Get Exclusive Deals</h3>
+      <p class="mb-0">Subscribe to our newsletter for special offers and fresh product updates</p>
+    </div>
+    <div class="col-md-6">
+      <form class="d-flex gap-2" id="newsletterForm">
+        <input type="email" class="form-control" placeholder="Enter your email" required>
+        <button type="submit" class="btn btn-light fw-bold px-4">
+          <i class="bi bi-envelope-fill me-2"></i>Subscribe
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Why Choose Us Section -->
+<div class="mb-5">
+  <h3 class="mb-4 fw-bold heading-accent text-center">
+    <i class="bi bi-check-circle-fill me-2"></i>Why Choose ScholaGro?
+  </h3>
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="d-flex gap-3">
+        <div class="flex-shrink-0">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success text-white" style="width: 50px; height: 50px;">
+            <i class="bi bi-check-lg"></i>
+          </div>
+        </div>
+        <div>
+          <h5 class="fw-bold mb-1">Quality Guaranteed</h5>
+          <p class="text-muted small mb-0">Every product is hand-selected for freshness and quality</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="d-flex gap-3">
+        <div class="flex-shrink-0">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success text-white" style="width: 50px; height: 50px;">
+            <i class="bi bi-check-lg"></i>
+          </div>
+        </div>
+        <div>
+          <h5 class="fw-bold mb-1">Fast Delivery</h5>
+          <p class="text-muted small mb-0">Same-day delivery available in most areas</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="d-flex gap-3">
+        <div class="flex-shrink-0">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success text-white" style="width: 50px; height: 50px;">
+            <i class="bi bi-check-lg"></i>
+          </div>
+        </div>
+        <div>
+          <h5 class="fw-bold mb-1">Best Prices</h5>
+          <p class="text-muted small mb-0">Competitive prices with exclusive member discounts</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="d-flex gap-3">
+        <div class="flex-shrink-0">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success text-white" style="width: 50px; height: 50px;">
+            <i class="bi bi-check-lg"></i>
+          </div>
+        </div>
+        <div>
+          <h5 class="fw-bold mb-1">24/7 Support</h5>
+          <p class="text-muted small mb-0">Dedicated customer service always ready to help</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+{% endblock %}

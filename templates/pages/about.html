@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+{% block title %}About Us • {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container-fluid py-5">
+  <!-- Hero Section -->
+  <div class="row mb-5 animate-fadeInUp">
+    <div class="col-12">
+      <div class="bg-gradient" style="background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 100%); border-radius: 20px; padding: 80px 40px; color: white; text-align: center;">
+        <h1 class="display-4 fw-bold mb-3">About Scholagro</h1>
+        <p class="lead fs-5 mb-0">
+          Bringing fresh, quality groceries to your doorstep with speed, care, and integrity
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Our Story -->
+  <div class="row g-4 mb-5 align-items-center">
+    <div class="col-12 col-lg-6 animate-slideInLeft">
+      <h2 class="display-6 fw-bold mb-3">Our Story</h2>
+      <p class="text-slate-700 mb-3">
+        Founded in 2025, Scholagro started with a simple mission: to make fresh groceries accessible and convenient 
+        for every household in Wendani Nairobi along thika supper highway before reaching K.U and surrounding areas. What began as a small operation has grown into a trusted 
+        platform serving thousands of families daily.
+      </p>
+      <p class="text-slate-700 mb-3">
+        We partner directly with local farmers and suppliers to ensure every product meets our strict quality standards. 
+        From fresh vegetables and fruits to household essentials, we've built a supply chain that prioritizes freshness 
+        and sustainability.
+      </p>
+      <p class="text-slate-700">
+        Today, Scholagro represents reliability, quality, and customer-first service in the grocery delivery space.
+      </p>
+    </div>
+    <div class="col-12 col-lg-6 animate-slideInRight">
+      <div class="card border-0 shadow-lg rounded-3 overflow-hidden">
+        <div style="background: linear-gradient(135deg, var(--emerald) 0%, var(--amber) 100%); height: 350px; display: flex; align-items: center; justify-content: center;">
+          <i class="bi bi-shop" style="font-size: 6rem; color: white; opacity: 0.3;"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Our Mission, Vision, Values -->
+  <div class="row g-4 mb-5">
+    <div class="col-12 col-md-4 animate-fadeInUp" style="animation-delay: 0.1s;">
+      <div class="card border-0 shadow-md rounded-3 h-100 hover-shadow transition-all">
+        <div class="card-body p-4 text-center">
+          <div class="mb-3">
+            <i class="bi bi-bullseye text-emerald" style="font-size: 2.5rem;"></i>
+          </div>
+          <h5 class="fw-bold mb-3">Our Mission</h5>
+          <p class="text-slate-600 text-sm">
+            To provide convenient, affordable access to fresh groceries while supporting local farmers and promoting 
+            sustainable farming practices.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-4 animate-fadeInUp" style="animation-delay: 0.2s;">
+      <div class="card border-0 shadow-md rounded-3 h-100 hover-shadow transition-all">
+        <div class="card-body p-4 text-center">
+          <div class="mb-3">
+            <i class="bi bi-rocket text-amber" style="font-size: 2.5rem;"></i>
+          </div>
+          <h5 class="fw-bold mb-3">Our Vision</h5>
+          <p class="text-slate-600 text-sm">
+            To revolutionize food delivery by being the most trusted, customer-centric grocery platform across 
+            East Africa.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-4 animate-fadeInUp" style="animation-delay: 0.3s;">
+      <div class="card border-0 shadow-md rounded-3 h-100 hover-shadow transition-all">
+        <div class="card-body p-4 text-center">
+          <div class="mb-3">
+            <i class="bi bi-heart text-danger" style="font-size: 2.5rem;"></i>
+          </div>
+          <h5 class="fw-bold mb-3">Our Values</h5>
+          <p class="text-slate-600 text-sm">
+            Quality, Transparency, Sustainability, and Customer Care guide every decision we make.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core Values -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <h2 class="display-6 fw-bold mb-4 text-center">Our Core Values</h2>
+    </div>
+
+    <div class="col-12 col-lg-6 mb-4 animate-slideInLeft">
+      <div class="d-flex gap-3 mb-4">
+        <div>
+          <div class="badge bg-emerald-light text-emerald rounded-circle p-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+            <i class="bi bi-check-lg fs-5"></i>
+          </div>
+        </div>
+        <div>
+          <h5 class="fw-bold">Quality First</h5>
+          <p class="text-slate-600">Every product is hand-picked and inspected to ensure freshness and quality. 
+          We work directly with trusted suppliers to maintain the highest standards.</p>
+        </div>
+      </div>
+
+      <div class="d-flex gap-3 mb-4">
+        <div>
+          <div class="badge bg-amber-light text-amber rounded-circle p-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+            <i class="bi bi-eye fs-5"></i>
+          </div>
+        </div>
+        <div>
+          <h5 class="fw-bold">Transparency</h5>
+          <p class="text-slate-600">We believe in honest pricing, clear communication, and full visibility into 
+          our sourcing and delivery processes.</p>
+        </div>
+      </div>
+
+      <div class="d-flex gap-3">
+        <div>
+          <div class="badge bg-green-light text-success rounded-circle p-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+            <i class="bi bi-leaf fs-5"></i>
+          </div>
+        </div>
+        <div>
+          <h5 class="fw-bold">Sustainability</h5>
+          <p class="text-slate-600">We're committed to reducing plastic waste, supporting organic farming, and 
+          building an environmentally responsible supply chain.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6 animate-slideInRight">
+      <div class="d-flex gap-3 mb-4">
+        <div>
+          <div class="badge bg-rose-light text-rose rounded-circle p-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+            <i class="bi bi-people fs-5"></i>
+          </div>
+        </div>
+        <div>
+          <h5 class="fw-bold">Customer Care</h5>
+          <p class="text-slate-600">Your satisfaction is our priority. We provide responsive support, easy returns, 
+          and personalized service for every customer.</p>
+        </div>
+      </div>
+
+      <div class="d-flex gap-3 mb-4">
+        <div>
+          <div class="badge bg-indigo-light text-indigo rounded-circle p-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+            <i class="bi bi-lightning fs-5"></i>
+          </div>
+        </div>
+        <div>
+          <h5 class="fw-bold">Speed & Reliability</h5>
+          <p class="text-slate-600">Fast delivery doesn't mean compromising on quality. We've built logistics to 
+          get fresh products to you quickly and safely.</p>
+        </div>
+      </div>
+
+      <div class="d-flex gap-3">
+        <div>
+          <div class="badge bg-teal-light text-teal rounded-circle p-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+            <i class="bi bi-handshake fs-5"></i>
+          </div>
+        </div>
+        <div>
+          <h5 class="fw-bold">Community Impact</h5>
+          <p class="text-slate-600">We support local farmers, create employment opportunities, and invest in 
+          communities we serve.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- By The Numbers -->
+  <div class="row g-4 mb-5">
+    <div class="col-12">
+      <h2 class="display-6 fw-bold mb-4 text-center">By The Numbers</h2>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-3 text-center animate-slideInUp">
+      <div class="card border-0 bg-emerald-light rounded-3 p-4">
+        <div class="display-5 fw-bold text-emerald mb-2">15K+</div>
+        <p class="text-slate-600 mb-0">Happy Customers</p>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-3 text-center animate-slideInUp" style="animation-delay: 0.1s;">
+      <div class="card border-0 bg-amber-light rounded-3 p-4">
+        <div class="display-5 fw-bold text-amber mb-2">500+</div>
+        <p class="text-slate-600 mb-0">Products Available</p>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-3 text-center animate-slideInUp" style="animation-delay: 0.2s;">
+      <div class="card border-0 bg-green-light rounded-3 p-4">
+        <div class="display-5 fw-bold text-success mb-2">200+</div>
+        <p class="text-slate-600 mb-0">Farmer Partners</p>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-3 text-center animate-slideInUp" style="animation-delay: 0.3s;">
+      <div class="card border-0 bg-blue-light rounded-3 p-4">
+        <div class="display-5 fw-bold text-info mb-2">50K+</div>
+        <p class="text-slate-600 mb-0">Orders Delivered</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Section -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <h2 class="display-6 fw-bold mb-4 text-center">Leadership Team</h2>
+      <p class="text-center text-slate-600 mb-5 max-w-2xl mx-auto">
+        Our experienced team is dedicated to revolutionizing grocery delivery with innovation and integrity.
+      </p>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-3 mb-4 animate-fadeInUp" style="animation-delay: 0.1s;">
+      <div class="card border-0 shadow-md rounded-3 overflow-hidden hover-shadow transition-all text-center h-100">
+        <div style="background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 100%); height: 200px; display: flex; align-items: center; justify-content: center;">
+          <i class="bi bi-person-circle text-white" style="font-size: 4rem;"></i>
+        </div>
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-1">John Kamau</h5>
+          <p class="text-emerald text-sm fw-semibold mb-2">CEO & Co-founder</p>
+          <p class="text-slate-600 text-sm mb-0">Technology entrepreneur with 10+ years in logistics and supply chain optimization.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-3 mb-4 animate-fadeInUp" style="animation-delay: 0.2s;">
+      <div class="card border-0 shadow-md rounded-3 overflow-hidden hover-shadow transition-all text-center h-100">
+        <div style="background: linear-gradient(135deg, var(--amber) 0%, var(--orange) 100%); height: 200px; display: flex; align-items: center; justify-content: center;">
+          <i class="bi bi-person-circle text-white" style="font-size: 4rem;"></i>
+        </div>
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-1">Grace Njoroge</h5>
+          <p class="text-amber text-sm fw-semibold mb-2">COO & Co-founder</p>
+          <p class="text-slate-600 text-sm mb-0">Operations expert with extensive experience in agricultural value chains and farmer partnerships.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-3 mb-4 animate-fadeInUp" style="animation-delay: 0.3s;">
+      <div class="card border-0 shadow-md rounded-3 overflow-hidden hover-shadow transition-all text-center h-100">
+        <div style="background: linear-gradient(135deg, #34d399 0%, #059669 100%); height: 200px; display: flex; align-items: center; justify-content: center;">
+          <i class="bi bi-person-circle text-white" style="font-size: 4rem;"></i>
+        </div>
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-1">Samuel Kipchoge</h5>
+          <p class="text-success text-sm fw-semibold mb-2">Head of Logistics</p>
+          <p class="text-slate-600 text-sm mb-0">Delivery optimization specialist ensuring fast, fresh, and reliable service across all zones.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-3 mb-4 animate-fadeInUp" style="animation-delay: 0.4s;">
+      <div class="card border-0 shadow-md rounded-3 overflow-hidden hover-shadow transition-all text-center h-100">
+        <div style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); height: 200px; display: flex; align-items: center; justify-content: center;">
+          <i class="bi bi-person-circle text-white" style="font-size: 4rem;"></i>
+        </div>
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-1">Dr. Amara Patel</h5>
+          <p class="text-info text-sm fw-semibold mb-2">Quality & Sustainability</p>
+          <p class="text-slate-600 text-sm mb-0">Food safety scientist dedicated to quality assurance and environmentally responsible operations.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA Section -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card border-0 rounded-3 overflow-hidden" style="background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 100%);">
+        <div class="card-body p-5 text-center text-white">
+          <h3 class="fw-bold mb-3">Ready to Experience Fresh Groceries?</h3>
+          <p class="lead mb-4">Join thousands of satisfied customers who trust Scholagro for quality and convenience.</p>
+          <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="/shop" class="btn btn-light rounded-2 px-5 fw-semibold">
+              <i class="bi bi-shop"></i> Start Shopping
+            </a>
+            <a href="/pages/contact" class="btn btn-outline-light rounded-2 px-5 fw-semibold">
+              <i class="bi bi-telephone"></i> Contact Us
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.bg-emerald-light { background-color: rgba(16, 185, 129, 0.1); }
+.bg-amber-light { background-color: rgba(245, 158, 11, 0.1); }
+.bg-green-light { background-color: rgba(34, 197, 94, 0.1); }
+.bg-rose-light { background-color: rgba(244, 63, 94, 0.1); }
+.bg-indigo-light { background-color: rgba(99, 102, 241, 0.1); }
+.bg-teal-light { background-color: rgba(20, 184, 166, 0.1); }
+.bg-blue-light { background-color: rgba(59, 130, 246, 0.1); }
+.text-indigo { color: #6366f1; }
+.text-teal { color: #14b8a6; }
+</style>
+{% endblock %}

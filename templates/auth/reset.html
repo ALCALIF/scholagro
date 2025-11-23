@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Reset Password</h3>
+<form method="post" class="col-md-6">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="mb-3"><label class="form-label">New Password</label><input class="form-control" type="password" name="password" required></div>
+  <button class="btn btn-success">Update Password</button>
+</form>
+{% endblock %}

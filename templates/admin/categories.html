@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Manage Categories</h3>
+<form method="post" class="row g-2 mb-3">
+  <div class="col-md-5"><input class="form-control" name="name" placeholder="Name" required></div>
+  <div class="col-md-5"><input class="form-control" name="slug" placeholder="Slug (optional)"></div>
+  <div class="col-md-2 d-grid"><button class="btn btn-success">Add</button></div>
+</form>
+<table class="table table-sm align-middle">
+  <thead><tr><th>Name</th><th>Slug</th><th>Actions</th></tr></thead>
+  <tbody>
+    {% for c in categories %}
+    <tr>
+      <td>
+        <form method="post" action="/admin/categories/{{c.id}}/edit" class="d-flex gap-2">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input class="form-control form-control-sm" name="name" value="{{c.name}}" style="max-width:200px">
+          <input class="form-control form-control-sm" name="slug" value="{{c.slug}}" style="max-width:200px">
+          <button class="btn btn-sm btn-outline-primary">Save</button>
+        </form>
+      </td>
+      <td>{{c.slug}}</td>
+      <td class="d-flex gap-2">
+        <form method="post" action="/admin/categories/{{c.id}}/delete" class="js-confirm" data-confirm="Delete category?">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-sm btn-outline-danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/" class="text-emerald">Home</a></li>
+      <li class="breadcrumb-item active">Saved for later</li>
+    </ol>
+  </nav>
+
+  <h2 class="mb-4 animate-fadeInUp"><i class="bi bi-bookmark text-emerald me-2"></i>Saved for later</h2>
+
+  {% if items %}
+  <div class="row g-3">
+    {% for s in items %}
+    <div class="col-12 col-md-6 col-lg-4 animate-fadeInUp" style="animation-delay: {{ loop.index0 * 0.05 }}s">
+      <div class="card border-0 shadow-sm rounded-3 h-100">
+        {% if s.product %}
+        <img loading="lazy" class="card-img-top object-fit-cover" src="{{ cl_transform(s.product.image_url, 600, 450) or 'https://placehold.co/600x400' }}" alt="{{ s.product.name }}" title="{{ s.product.name }}">
+        {% endif %}
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ s.product.name if s.product else 'Product' }}</h5>
+          <div class="mb-3 text-slate-600">Ksh {{ '%.2f'|format(s.product.price if s.product else 0) }}</div>
+          <div class="mt-auto d-flex gap-2">
+            <a href="/cart/add/{{ s.product_id }}" class="btn btn-emerald rounded-2"><i class="bi bi-cart-plus"></i> Add to cart</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <div class="mb-3" style="font-size: 5rem; color: #d1d5db;"><i class="bi bi-bookmark"></i></div>
+    <h4 class="fw-bold mb-2">No saved items</h4>
+    <p class="text-slate-600 mb-4">Save products to view and buy later.</p>
+    <a href="/shop" class="btn btn-emerald rounded-2"><i class="bi bi-shop"></i> Browse shop</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

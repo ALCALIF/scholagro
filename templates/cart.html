@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid py-5">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/" class="text-emerald">Home</a></li>
+      <li class="breadcrumb-item active">Shopping Cart</li>
+    </ol>
+  </nav>
+
+  {% if items %}
+  <div class="row g-4">
+    <!-- Cart Items -->
+    <div class="col-12 col-lg-8">
+      <h2 class="mb-4 animate-fadeInUp">
+        <i class="bi bi-cart3 text-emerald me-2"></i>My Shopping Cart
+      </h2>
+
+      <div class="row g-3">
+        {% for i in items %}
+        <div class="col-12 animate-fadeInUp" style="animation-delay: {{ loop.index0 * 0.1 }}s">
+          <div class="card border-0 shadow-sm hover-shadow transition-all rounded-3" id="cart-item-{{ i.id }}">
+            <div class="card-body p-4">
+              <div class="row align-items-center g-4">
+                <!-- Product Image -->
+                <div class="col-12 col-sm-auto text-center">
+                  {% if i.product.main_image %}
+                    <img src="{{ i.product.main_image | cl_transform(w=120, h=120, c='fill', q='auto') }}" 
+                         alt="{{ i.product.name }}"
+                         class="img-fluid rounded-2" style="width: 120px; height: 120px; object-fit: cover;">
+                  {% else %}
+                    <div class="bg-slate-100 rounded-2 d-flex align-items-center justify-content-center" 
+                         style="width: 120px; height: 120px;">
+                      <i class="bi bi-image text-slate-400" style="font-size: 2rem;"></i>
+                    </div>
+                  {% endif %}
+                </div>
+
+                <!-- Promo Code -->
+                <div class="mb-4">
+                  <label class="form-label text-sm fw-semibold">Promo Code</label>
+                  <div class="input-group input-group-sm rounded-2 overflow-hidden">
+                    <input type="text" class="form-control border-0 bg-slate-50" 
+                           placeholder="Enter promo code" id="promo-input">
+                    <button class="btn btn-emerald" onclick="applyPromo()">
+                      <i class="bi bi-check"></i>
+                    </button>
+                  </div>
+                  <div id="promo-feedback" class="text-sm mt-2"></div>
+                </div>
+
+                <hr class="my-3">
+
+                <!-- Price Breakdown -->
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-slate-600">Subtotal:</span>
+                    <span id="subtotal-display">Ksh {{ '%.2f'|format(total) }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-slate-600">Delivery:</span>
+                    <span id="delivery-display" class="text-emerald fw-semibold">FREE</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center" id="discount-row" style="display: none;">
+                    <span class="text-slate-600">Discount:</span>
+                    <span id="discount-display" class="text-success fw-semibold">-Ksh 0.00</span>
+                  </div>
+                </div>
+
+                <hr class="my-3">
+
+                <!-- Total -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                  <span class="fw-bold text-lg">Total:</span>
+                  <span class="fw-bold text-lg text-emerald" id="total-display">Ksh {{ '%.2f'|format(total) }}</span>
+                </div>
+
+                <!-- Security Badge -->
+                <div class="alert alert-sm bg-emerald-light border-0 rounded-2 mb-3 text-center text-sm">
+                  <i class="bi bi-shield-check text-emerald"></i> Secure Checkout - SSL Encrypted
+                </div>
+
+          <!-- Checkout Button -->
+          <a href="/orders/checkout" class="btn btn-emerald w-100 rounded-2 fw-semibold btn-lg">
+            <i class="bi bi-lock-fill"></i> Proceed to Checkout
+          </a>
+
+          <!-- Continue Shopping -->
+          <a href="/shop" class="btn btn-outline-emerald w-100 rounded-2 mt-3 fw-semibold">
+            <i class="bi bi-arrow-left"></i> Continue Shopping
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <!-- Empty Cart State -->
+  <div class="row justify-content-center py-5">
+    <div class="col-12 col-md-6 text-center animate-fadeInUp">
+      <div class="mb-4">
+        <div class="empty-state-large mb-3">
+          <i class="bi bi-bag-x" style="font-size: 6rem; color: #d1d5db;"></i>
+        </div>
+        <h3 class="fw-bold mb-2">Your Cart is Empty</h3>
+        <p class="text-slate-600 mb-4">
+          Looks like you haven't added anything to your cart yet. Start shopping now!
+        </p>
+      </div>
+
+      <!-- Trust Badges -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-sm-4">
+          <div class="text-center">
+            <i class="bi bi-truck text-emerald" style="font-size: 2rem;"></i>
+            <p class="text-sm text-slate-600 mt-2">Fast Delivery</p>
+          </div>
+        </div>
+        <div class="col-6 col-sm-4">
+          <div class="text-center">
+            <i class="bi bi-award text-amber" style="font-size: 2rem;"></i>
+            <p class="text-sm text-slate-600 mt-2">Premium Quality</p>
+          </div>
+        </div>
+        <div class="col-6 col-sm-4">
+          <div class="text-center">
+            <i class="bi bi-percent text-emerald" style="font-size: 2rem;"></i>
+            <p class="text-sm text-slate-600 mt-2">Best Prices</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA Button -->
+      <a href="/shop" class="btn btn-emerald rounded-2 px-5 py-3 fw-semibold">
+        <i class="bi bi-shop"></i> Start Shopping
+      </a>
+    </div>
+  </div>
+  {% endif %}
+  </div>
+
+<script>
+function getCsrfToken() {
+  const m = document.querySelector('meta[name="csrf-token"]');
+  return m ? m.getAttribute('content') : '';
+}
+
+async function updateQty(itemId, newQty) {
+  if (newQty < 1) {
+    if (confirm('Remove this item from cart?')) {
+      window.location.href = `/cart/remove/${itemId}`;
+    }
+    return;
+  }
+  try {
+    const res = await fetch('/cart/update', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken(),
+      },
+      body: JSON.stringify({ item_id: itemId, quantity: newQty })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      window.SHOW_TOAST && window.SHOW_TOAST(data.message || 'Could not update quantity', 'warning');
+      return;
+    }
+    const qtyEl = document.getElementById(`qty-${itemId}`);
+    if (qtyEl) qtyEl.textContent = data.quantity;
+    const subEl = document.getElementById(`subtotal-${itemId}`);
+    if (subEl) subEl.textContent = `Ksh ${(data.item_subtotal || 0).toFixed(2)}`;
+    document.getElementById('subtotal-display').textContent = `Ksh ${(data.cart_subtotal || 0).toFixed(2)}`;
+    document.getElementById('total-display').textContent = `Ksh ${(data.cart_subtotal || 0).toFixed(2)}`;
+    if (data.removed) {
+      const card = document.getElementById(`cart-item-${itemId}`);
+      if (card) card.remove();
+      const hasItems = document.querySelector('[id^="qty-"]');
+      if (!hasItems) {
+        window.location.reload();
+      }
+    }
+    window.SHOW_TOAST && window.SHOW_TOAST('Quantity updated', 'info');
+  } catch (e) {
+    window.SHOW_TOAST && window.SHOW_TOAST('Network error updating quantity', 'warning');
+  }
+}
+
+async function applyPromo() {
+  const code = document.getElementById('promo-input').value.trim();
+  if (!code) {
+    showFeedback('Please enter a promo code', 'warning');
+    return;
+  }
+  const currentSubtotalText = document.getElementById('subtotal-display').textContent.replace('Ksh', '').trim() || '0';
+  const subtotal = parseFloat(currentSubtotalText) || 0;
+  try {
+    const res = await fetch('/orders/apply-coupon', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken(),
+      },
+      body: JSON.stringify({ code, subtotal })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      showFeedback(data.message || 'Promo not valid', 'warning');
+      document.getElementById('discount-row').style.display = 'none';
+      document.getElementById('total-display').textContent = `Ksh ${subtotal.toFixed(2)}`;
+      return;
+    }
+    const discount = parseFloat(data.discount || 0);
+    document.getElementById('discount-display').textContent = `-Ksh ${discount.toFixed(2)}`;
+    document.getElementById('discount-row').style.display = 'flex';
+    const newTotal = Math.max(0, subtotal - discount);
+    document.getElementById('total-display').textContent = `Ksh ${newTotal.toFixed(2)}`;
+    showFeedback('Promo code applied successfully!', 'success');
+  } catch (e) {
+    showFeedback('Network error applying promo', 'warning');
+  }
+}
+
+function showFeedback(msg, type) {
+  const el = document.getElementById('promo-feedback');
+  el.className = `text-${type === 'success' ? 'success' : 'warning'}`;
+  el.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`;
+}
+
+async function saveForLater(itemId) {
+  try {
+    const res = await fetch('/cart/save', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken(),
+      },
+      body: JSON.stringify({ item_id: itemId })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      window.SHOW_TOAST && window.SHOW_TOAST(data.message || 'Could not save item', 'warning');
+      return;
+    }
+    const card = document.getElementById(`cart-item-${itemId}`);
+    if (card) card.remove();
+    if (data.cart_subtotal !== undefined) {
+      document.getElementById('subtotal-display').textContent = `Ksh ${Number(data.cart_subtotal).toFixed(2)}`;
+      document.getElementById('total-display').textContent = `Ksh ${Number(data.cart_subtotal).toFixed(2)}`;
+    }
+    window.SHOW_TOAST && window.SHOW_TOAST('Saved for later', 'info');
+    const hasItems = document.querySelector('[id^="qty-"]');
+    if (!hasItems) {
+      window.location.reload();
+    }
+  } catch (e) {
+    window.SHOW_TOAST && window.SHOW_TOAST('Network error saving item', 'warning');
+  }
+}
+
+// Simple skeleton effect on first load
+document.addEventListener('DOMContentLoaded', () => {
+  const cartItems = document.querySelectorAll('.card');
+  cartItems.forEach(card => {
+    card.classList.add('skeleton-loading');
+    setTimeout(() => card.classList.remove('skeleton-loading'), 400 + Math.random() * 400);
+  });
+});
+</script>
+{% endblock %}
+

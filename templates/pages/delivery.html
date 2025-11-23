@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+
+{% block title %}Delivery Areas & Charges • {{ site_name }}{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-5"><h1>Delivery Areas & Charges</h1>
+
+  <!-- Hero Section -->
+  <p class="lead">Transparent fees and clear ETAs.</p>
+  <div class="row mb-5 animate-fadeInUp">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm rounded-3 p-4 text-center" style="background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 100%); color: white;">
+        <h1 class="display-4 fw-bold mb-3">Delivery Areas & Charges</h1>
+        <p class="lead mb-0">Fast, reliable delivery to your chosen zone with transparent pricing.</p>
+      </div>
+    </div>
+  </div>
+  <p>Final delivery fee and ETA are shown at checkout based on your selected zone.</p>
+
+  <!-- Key Features -->
+  <div class="row g-4 mb-5">
+    <div class="col-12 col-md-4 animate-fadeInUp">
+      <div class="card border-0 shadow-sm rounded-3 h-100 hover-shadow transition-all text-center">
+        <div class="card-body p-4">
+          <i class="bi bi-truck text-emerald" style="font-size: 2.5rem;"></i>
+          <h5 class="fw-bold mt-3 mb-2">Same Day Delivery</h5>
+          <p class="text-slate-600 text-sm mb-0">Order by 6 PM for same-day morning or afternoon delivery</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-4 animate-fadeInUp" style="animation-delay: 0.1s;">
+      <div class="card border-0 shadow-sm rounded-3 h-100 hover-shadow transition-all text-center">
+        <div class="card-body p-4">
+          <i class="bi bi-clock text-amber" style="font-size: 2.5rem;"></i>
+          <h5 class="fw-bold mt-3 mb-2">Flexible Slots</h5>
+          <p class="text-slate-600 text-sm mb-0">Choose morning (6-12), afternoon (12-5), or evening (5-9) slots</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-4 animate-fadeInUp" style="animation-delay: 0.2s;">
+      <div class="card border-0 shadow-sm rounded-3 h-100 hover-shadow transition-all text-center">
+        <div class="card-body p-4">
+          <i class="bi bi-shield-check text-success" style="font-size: 2.5rem;"></i>
+          <h5 class="fw-bold mt-3 mb-2">Safe Delivery</h5>
+          <p class="text-slate-600 text-sm mb-0">GPS tracking, driver verification, and quality guarantee</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delivery Zones Table -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <h2 class="fw-bold mb-4 animate-fadeInUp">Our Delivery Zones</h2>
+      
+      <div class="table-responsive animate-fadeInUp" style="animation-delay: 0.1s;">
+        <table class="table table-hover border-0">
+          <thead class="table-light">
+            <tr>
+              <th class="fw-bold text-emerald">Zone</th>
+              <th class="fw-bold text-emerald">Area Coverage</th>
+              <th class="fw-bold text-emerald text-end">Delivery Fee</th>
+              <th class="fw-bold text-emerald text-end">ETA</th>
+              <th class="fw-bold text-emerald text-center">Min Order</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for zone in zones %}
+            <tr class="border-bottom">
+              <td>
+                <div class="badge bg-emerald-light text-emerald rounded-pill px-3 py-2">{{ zone.name }}</div>
+              </td>
+              <td>
+                <span class="text-slate-600">Configured delivery area</span>
+              </td>
+              <td class="text-end">
+                <span class="fw-bold text-emerald">Ksh {{ '%.0f'|format(zone.fee or 0) }}</span>
+              </td>
+              <td class="text-end">
+                <span class="text-slate-600">{{ zone.eta or 'See checkout' }}</span>
+              </td>
+              <td class="text-center">See checkout</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="5" class="text-center text-muted py-4">No delivery zones configured yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="alert alert-info rounded-2 mt-4 animate-fadeInUp" style="animation-delay: 0.2s;">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>Note:</strong> Final delivery fee and estimated arrival time are calculated at checkout based on your exact location. 
+        ETAs may vary during peak hours (8-10 AM, 12-2 PM, 5-7 PM).
+      </div>
+    </div>
+  </div>
+
+  <!-- Delivery Timeline -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <h2 class="fw-bold mb-4 animate-fadeInUp">Your Delivery Journey</h2>
+    </div>
+
+    <div class="col-12">
+      <div class="row g-4 position-relative">
+        <!-- Timeline Line -->
+        <div class="col-12 position-relative mb-4" style="min-height: 300px;">
+          <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: linear-gradient(180deg, var(--emerald) 0%, #d1d5db 100%); transform: translateX(-50%);"></div>
+
+          <!-- Step 1 -->
+          <div class="row mb-4 align-items-center animate-slideInLeft" style="animation-delay: 0.1s;">
+            <div class="col-12 col-md-5 text-md-end pe-md-4">
+              <div class="card border-0 shadow-sm rounded-2 p-4">
+                <h5 class="fw-bold text-emerald mb-2"><i class="bi bi-1-circle me-2"></i>Order Placed</h5>
+                <p class="text-slate-600 text-sm mb-0">You select your products and delivery preferences</p>
+              </div>
+            </div>
+            <div class="col-12 col-md-2 text-center">
+              <div class="badge bg-emerald text-white rounded-circle p-3 position-relative" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                ✓
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="row mb-4 align-items-center animate-slideInRight" style="animation-delay: 0.2s;">
+            <div class="col-12 col-md-2 text-center">
+              <div class="badge bg-emerald text-white rounded-circle p-3 position-relative" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                ✓
+              </div>
+            </div>
+            <div class="col-12 col-md-5 ps-md-4">
+              <div class="card border-0 shadow-sm rounded-2 p-4">
+                <h5 class="fw-bold text-emerald mb-2"><i class="bi bi-2-circle me-2"></i>Payment Processed</h5>
+                <p class="text-slate-600 text-sm mb-0">Your payment is securely processed instantly</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="row mb-4 align-items-center animate-slideInLeft" style="animation-delay: 0.3s;">
+            <div class="col-12 col-md-5 text-md-end pe-md-4">
+              <div class="card border-0 shadow-sm rounded-2 p-4">
+                <h5 class="fw-bold text-emerald mb-2"><i class="bi bi-3-circle me-2"></i>Order Picked</h5>
+                <p class="text-slate-600 text-sm mb-0">Our team hand-picks fresh products for you</p>
+              </div>
+            </div>
+            <div class="col-12 col-md-2 text-center">
+              <div class="badge bg-emerald text-white rounded-circle p-3 position-relative" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                ✓
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="row align-items-center animate-slideInRight" style="animation-delay: 0.4s;">
+            <div class="col-12 col-md-2 text-center">
+              <div class="badge bg-emerald text-white rounded-circle p-3 position-relative" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                ✓
+              </div>
+            </div>
+            <div class="col-12 col-md-5 ps-md-4">
+              <div class="card border-0 shadow-sm rounded-2 p-4">
+                <h5 class="fw-bold text-emerald mb-2"><i class="bi bi-4-circle me-2"></i>Out for Delivery</h5>
+                <p class="text-slate-600 text-sm mb-0">Your driver is on the way with real-time tracking</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pricing Details -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <h2 class="fw-bold mb-4 animate-fadeInUp">Delivery Pricing Guide</h2>
+    </div>
+
+    <div class="col-12 col-lg-6 animate-slideInLeft">
+      <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <div class="card-header bg-emerald text-white px-4 py-3">
+          <h5 class="mb-0">
+            <i class="bi bi-percent me-2"></i>Free Delivery Offer
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <ul class="list-unstyled">
+            <li class="mb-3 d-flex gap-2">
+              <i class="bi bi-check text-success fw-bold"></i>
+              <span>FREE delivery on orders over <strong>Ksh 5,000</strong> within Nairobi</span>
+            </li>
+            <li class="mb-3 d-flex gap-2">
+              <i class="bi bi-check text-success fw-bold"></i>
+              <span>Reduced fees (50% off) on bulk orders over <strong>Ksh 10,000</strong></span>
+            </li>
+            <li class="mb-3 d-flex gap-2">
+              <i class="bi bi-check text-success fw-bold"></i>
+              <span><strong>First-time customers:</strong> 20% off delivery fee with code FRESH20</span>
+            </li>
+            <li class="d-flex gap-2">
+              <i class="bi bi-check text-success fw-bold"></i>
+              <span>Subscribe to weekly deliveries for <strong>10% discount</strong> on fees</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6 animate-slideInRight">
+      <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <div class="card-header bg-amber text-white px-4 py-3">
+          <h5 class="mb-0">
+            <i class="bi bi-clock me-2"></i>Delivery Timing
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <ul class="list-unstyled">
+            <li class="mb-3">
+              <strong>Early Bird (6-8 AM)</strong>
+              <p class="text-slate-600 text-sm mb-0">Best for fresh morning pickup - Priority delivery</p>
+            </li>
+            <li class="mb-3">
+              <strong>Morning (8 AM - 12 PM)</strong>
+              <p class="text-slate-600 text-sm mb-0">Most popular slot - Standard rates apply</p>
+            </li>
+            <li class="mb-3">
+              <strong>Afternoon (12 PM - 5 PM)</strong>
+              <p class="text-slate-600 text-sm mb-0">Mid-day delivery - Great for lunch prep</p>
+            </li>
+            <li>
+              <strong>Evening (5 PM - 9 PM)</strong>
+              <p class="text-slate-600 text-sm mb-0">After-work delivery - Standard rates apply</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact CTA -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card border-0 rounded-3 overflow-hidden animate-fadeInUp" style="background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 100%);">
+        <div class="card-body p-5 text-center text-white">
+          <h3 class="fw-bold mb-3">Need Help with Delivery?</h3>
+          <p class="lead mb-4">Our support team is available 7 AM - 10 PM daily</p>
+          <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="tel:+254757391071" class="btn btn-light rounded-2 px-5 fw-semibold">
+              <i class="bi bi-telephone"></i> Call Us
+            </a>
+            <a href="/pages/contact" class="btn btn-outline-light rounded-2 px-5 fw-semibold">
+              <i class="bi bi-chat-dots"></i> Contact Support
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.bg-emerald-light { background-color: rgba(16, 185, 129, 0.1); }
+.bg-amber-light { background-color: rgba(245, 158, 11, 0.1); }
+.bg-success-light { background-color: rgba(34, 197, 94, 0.1); }
+.bg-info-light { background-color: rgba(59, 130, 246, 0.1); }
+.bg-warning-light { background-color: rgba(217, 119, 6, 0.1); }
+.bg-purple-light { background-color: rgba(168, 85, 247, 0.1); }
+.text-purple { color: #a855f7; }
+</style>
+{% endblock %}

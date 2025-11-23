@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid py-5">
+  <!-- Header -->
+  <div class="row mb-5 animate-fadeInUp">
+    <div class="col-12">
+      <h2 class="fw-bold mb-2">
+        <i class="bi bi-heart-fill text-danger me-2"></i>My Wishlist
+      </h2>
+      <p class="text-slate-600">Save your favorite items and get notified on price drops</p>
+    </div>
+  </div>
+
+  {% if items %}
+  <div class="row g-4">
+    {% for w in items %}
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3 animate-fadeInUp" style="animation-delay: {{ loop.index0 * 0.05 }}s">
+      <div class="card border-0 shadow-sm rounded-3 h-100 hover-shadow transition-all overflow-hidden">
+        <!-- Image -->
+        <div class="position-relative overflow-hidden" style="height: 220px;">
+          <img class="img-fluid w-100 h-100 object-fit-cover" 
+               src="{{ w.product.main_image | cl_transform(w=400, h=300, c='fill', q='auto') if w.product.main_image else 'https://placehold.co/400x300' }}" 
+               alt="{{ w.product.name }}">
+          <div class="position-absolute top-0 end-0 p-3">
+            <button class="btn btn-danger btn-sm rounded-circle btn-wishlist" 
+                    data-product-id="{{ w.product.id }}"
+                    title="Remove from wishlist">
+              <i class="bi bi-heart-fill"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="card-body d-flex flex-column p-3">
+          <a href="/product/{{ w.product.slug }}" class="text-decoration-none">
+            <h6 class="card-title fw-bold text-slate-800 mb-2 text-truncate-2">
+              {{ w.product.name }}
+            </h6>
+          </a>
+
+          <!-- Category -->
+          <p class="text-slate-600 text-sm mb-3">
+            <i class="bi bi-tag me-1"></i>
+            {{ w.product.category.name if w.product.category else 'Category' }}
+          </p>
+
+          <!-- Price -->
+          <div class="mb-3">
+            {% if w.product.old_price and w.product.old_price > w.product.price %}
+            <div class="d-flex gap-2 align-items-center">
+              <span class="h5 fw-bold text-emerald mb-0">Ksh {{ '%.2f'|format(w.product.price) }}</span>
+              <span class="text-muted text-decoration-line-through small">Ksh {{ '%.2f'|format(w.product.old_price) }}</span>
+              <span class="badge bg-danger rounded-pill text-sm">
+                -{{ ((1 - (w.product.price / w.product.old_price)) * 100) | int }}%
+              </span>
+            </div>
+            {% else %}
+            <span class="h5 fw-bold text-emerald mb-0">Ksh {{ '%.2f'|format(w.product.price) }}</span>
+            {% endif %}
+          </div>
+
+          <!-- Stock Status -->
+          <div class="mb-3">
+            {% if w.product.stock and w.product.stock > 0 %}
+            <span class="badge bg-success-light text-success rounded-pill px-3 py-1">
+              <i class="bi bi-check-circle me-1"></i>In Stock
+            </span>
+            {% else %}
+            <span class="badge bg-danger-light text-danger rounded-pill px-3 py-1">
+              <i class="bi bi-x-circle me-1"></i>Out of Stock
+            </span>
+            {% endif %}
+          </div>
+
+          <!-- Actions -->
+          <div class="mt-auto d-flex gap-2">
+            <a href="/product/{{ w.product.slug }}" class="btn btn-sm btn-outline-emerald rounded-2 flex-grow-1">
+              <i class="bi bi-eye"></i> View
+            </a>
+            {% if w.product.stock and w.product.stock > 0 %}
+            <button class="btn btn-sm btn-emerald rounded-2 flex-grow-1 btn-add-to-cart" 
+                    data-product-id="{{ w.product.id }}">
+              <i class="bi bi-bag-plus"></i> Add
+            </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <!-- Empty State -->
+  <div class="row justify-content-center py-5">
+    <div class="col-12 col-md-6 text-center animate-fadeInUp">
+      <div class="mb-4">
+        <div style="font-size: 5rem; color: #d1d5db; margin-bottom: 1rem;">
+          <i class="bi bi-heart"></i>
+        </div>
+        <h3 class="fw-bold mb-2">Your Wishlist is Empty</h3>
+        <p class="text-slate-600 mb-4">
+          Add your favorite items to your wishlist to keep track of products you love. Save for later or watch for price drops!
+        </p>
+      </div>
+
+      <!-- Features -->
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6">
+          <div class="card border-0 bg-slate-50 p-3 rounded-2 text-center">
+            <i class="bi bi-heart text-danger mb-2" style="font-size: 1.5rem;"></i>
+            <p class="text-sm text-slate-600 mb-0"><strong>Save Items</strong><br>Keep track of favorites</p>
+          </div>
+        </div>
+        <div class="col-12 col-sm-6">
+          <div class="card border-0 bg-slate-50 p-3 rounded-2 text-center">
+            <i class="bi bi-bell text-amber mb-2" style="font-size: 1.5rem;"></i>
+            <p class="text-sm text-slate-600 mb-0"><strong>Price Alerts</strong><br>Get notified on drops</p>
+          </div>
+        </div>
+      </div>
+
+      <a href="/shop" class="btn btn-emerald rounded-2 px-5 py-3 fw-semibold">
+        <i class="bi bi-shop"></i> Browse Products
+      </a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<style>
+.bg-success-light { background-color: rgba(34, 197, 94, 0.1); }
+.text-success { color: #22c55e; }
+.bg-danger-light { background-color: rgba(239, 68, 68, 0.1); }
+.text-danger { color: #ef4444; }
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>
+{% endblock %}

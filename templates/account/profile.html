@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/" class="text-emerald">Home</a></li>
+      <li class="breadcrumb-item active">My Profile</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4">
+    <div class="col-12 col-lg-6">
+      <div class="card border-0 shadow-sm rounded-3 animate-fadeInUp">
+        <div class="card-header bg-emerald text-white rounded-top-3 px-4 py-3">
+          <h5 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>Profile Details</h5>
+        </div>
+        <div class="card-body p-4">
+          <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="mb-3">
+              <label class="form-label">Name</label>
+              <input class="form-control rounded-2" name="name" value="{{ current_user.name or '' }}" placeholder="Your full name">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Phone</label>
+              <input class="form-control rounded-2" name="phone" value="{{ current_user.phone or '' }}" placeholder="e.g. 07xx xxx xxx">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input class="form-control rounded-2" value="{{ current_user.email }}" disabled>
+            </div>
+            <button class="btn btn-emerald rounded-2 fw-semibold"><i class="bi bi-check-lg"></i> Save Changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card border-0 shadow-sm rounded-3 animate-fadeInUp" style="animation-delay: .05s;">
+        <div class="card-header bg-emerald-light rounded-top-3 px-4 py-3">
+          <h5 class="mb-0 text-emerald"><i class="bi bi-clipboard-check me-2"></i>Quick Links</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="d-grid gap-2">
+            <a href="/orders" class="btn btn-outline-emerald rounded-2"><i class="bi bi-receipt"></i> View Orders</a>
+            <a href="/account/addresses" class="btn btn-outline-emerald rounded-2"><i class="bi bi-geo-alt"></i> Manage Addresses</a>
+            <a href="/wishlist/" class="btn btn-outline-emerald rounded-2"><i class="bi bi-heart"></i> Wishlist</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+<div class="card mt-3 shadow-sm">
+  <div class="card-body p-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <strong class="text-success">We’re Open</strong>
+      <small class="text-muted">Today</small>
+    </div>
+    {% set today = (datetime.utcnow().strftime('%A')) %}
+    {% set hrs = hours or {
+      'Monday':('07:00 AM','07:00 PM'),
+      'Tuesday':('07:00 AM','07:00 PM'),
+      'Wednesday':('07:00 AM','07:00 PM'),
+      'Thursday':('07:00 AM','07:00 PM'),
+      'Friday':('07:00 AM','07:00 PM'),
+      'Saturday':('08:00 AM','06:00 PM'),
+      'Sunday':('Closed','Closed')
+    } %}
+    {% set t = hrs.get(today, ('07:00 AM','07:00 PM')) %}
+    <div class="d-flex justify-content-between small">
+      <span>{{today}}</span>
+      <span>{{t[0]}} - {{t[1]}}</span>
+    </div>
+    <div class="map-container rounded overflow-hidden border border-light-subtle" style="height:80px">
+      {# Default to Kahawa Wendani, Kenya if no coordinates are passed #}
+      {% set lat = business_lat or -1.1870 %}
+      {% set lng = business_lng or 36.9450 %}
+      <iframe src="https://www.openstreetmap.org/export/embed.html?bbox={{lng-0.01}},{{lat-0.01}},{{lng+0.01}},{{lat+0.01}}&layer=mapnik&marker={{lat}},{{lng}}" style="border:0; width:100%; height:100%;" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Store Location Map" aria-label="Store Location Map"></iframe>
+    </div>
+  </div>
+</div>

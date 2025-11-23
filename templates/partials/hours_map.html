@@ -1,0 +1,41 @@
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h6 class="text-center fw-bold mb-3" style="color:var(--sg-red)">Weekly Open/Close</h6>
+    {% set today = (datetime.utcnow().strftime('%A')) %}
+    <div class="table-responsive">
+      <table class="table table-sm mb-3 align-middle text-center hours-table">
+        <thead>
+          <tr class="text-white" style="background:var(--sg-red)"><th>Day</th><th>Open Time</th><th>Close Time</th></tr>
+        </thead>
+        <tbody>
+          {% set hrs = hours or {
+            'Monday':('07:00 AM','07:00 PM'),
+            'Tuesday':('07:00 AM','07:00 PM'),
+            'Wednesday':('07:00 AM','07:00 PM'),
+            'Thursday':('07:00 AM','07:00 PM'),
+            'Friday':('07:00 AM','07:00 PM'),
+            'Saturday':('07:00 AM','07:00 PM'),
+            'Sunday':('Closed','Closed')
+          } %}
+          {% for day, t in hrs.items() %}
+          <tr class="{% if day==today %}table-warning{% elif day=='Friday' %}table-danger-subtle{% endif %}">
+            <td class="text-start">{{day}}</td>
+            <td>{{t[0]}}</td>
+            <td>{{t[1]}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% set t = hrs.get(today, ('07:00 AM','07:00 PM')) %}
+    <div class="d-flex align-items-center gap-2 mb-2 small">
+      <span class="badge rounded-pill bg-success-subtle text-success js-open-now" data-open="{{t[0]}}" data-close="{{t[1]}}">Checking hours…</span>
+    </div>
+    <div class="ratio ratio-4x3 rounded overflow-hidden border">
+      {% set lat = business_lat or -1.2921 %}
+      {% set lng = business_lng or 36.8219 %}
+      {% set name = business_name or 'ScholaGro' %}
+      <iframe title="Store location map" src="https://www.openstreetmap.org/export/embed.html?bbox={{lng-0.01}},{{lat-0.01}},{{lng+0.01}},{{lat+0.01}}&layer=mapnik&marker={{lat}},{{lng}}" style="border:0" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+  </div>
+</div>

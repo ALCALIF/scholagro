@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Edit Product</h3>
+<form method="post" enctype="multipart/form-data" class="row g-2 mb-3">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="col-md-4"><label class="form-label">Name</label><input class="form-control" name="name" value="{{product.name}}" required></div>
+  <div class="col-md-2"><label class="form-label">Price</label><input class="form-control" name="price" value="{{product.price}}" required></div>
+  <div class="col-md-2"><label class="form-label">Stock</label><input class="form-control" name="stock" type="number" min="0" value="{{product.stock or 0}}"></div>
+  <div class="col-md-2"><label class="form-label">Slug</label><input class="form-control" name="slug" value="{{product.slug}}"></div>
+  <div class="col-md-2">
+    <label class="form-label">Category</label>
+    <select class="form-select" name="category_id">
+      {% for c in categories %}<option value="{{c.id}}" {% if product.category_id==c.id %}selected{% endif %}>{{c.name}}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-md-6"><label class="form-label">Image URL</label><input class="form-control" name="image_url" value="{{product.image_url}}" placeholder="Or upload below"></div>
+  <div class="col-md-3"><label class="form-label">Upload Image</label><input class="form-control" type="file" name="image_file" accept="image/*"></div>
+  <div class="col-12 d-flex gap-2 mt-2">
+    <button class="btn btn-success">Save</button>
+    <a class="btn btn-outline-secondary" href="/admin/products">Back</a>
+  </div>
+</form>
+{% endblock %}

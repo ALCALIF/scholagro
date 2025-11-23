@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+  <body style="font-family:Arial,Helvetica,sans-serif;background:#f6f9fc;margin:0;padding:20px;">
+    <table role="presentation" style="width:100%;max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;overflow:hidden">
+      <tr><td style="background:#198754;color:#fff;padding:16px 20px;font-weight:bold">ScholaGro</td></tr>
+      <tr><td style="padding:20px">
+        <h2 style="margin:0 0 10px">Thanks for your order, {{ user.name or user.email }}!</h2>
+        <p style="margin:0 0 16px">Order <strong>#{{ order.id }}</strong> has been placed successfully.</p>
+        <p style="margin:0 0 8px">Total: <strong>Ksh {{ order.total_amount }}</strong></p>
+        {% if order.delivery_zone %}<p style="margin:0 0 8px">Delivery Zone: {{ order.delivery_zone.name }} (Fee Ksh {{ order.delivery_fee }})</p>{% endif %}
+        {% if order.coupon_code %}<p style="margin:0 0 8px">Coupon: {{ order.coupon_code }} (Saved Ksh {{ order.discount_amount }})</p>{% endif %}
+        <hr style="border:none;border-top:1px solid #eee;margin:16px 0">
+        <p style="margin:0 0 10px">We will notify you when the status changes.</p>
+        <p style="margin:0;color:#667">ScholaGro • Fresh groceries delivered to your doorstep</p>
+      </td></tr>
+    </table>
+  </body>
+</html>

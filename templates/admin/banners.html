@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Homepage Banners</h3>
+<form method="post" enctype="multipart/form-data" class="row g-2 mb-3">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="col-md-3"><input class="form-control" name="title" placeholder="Title (optional)"></div>
+  <div class="col-md-5"><input class="form-control" name="image_url" placeholder="Image URL (or upload)"></div>
+  <div class="col-md-3"><input class="form-control" type="file" name="image_file" accept="image/*"></div>
+  <div class="col-md-3"><input class="form-control" name="link_url" placeholder="Link URL (optional)"></div>
+  <div class="col-md-1 d-grid"><button class="btn btn-success">Add</button></div>
+</form>
+<table class="table table-sm align-middle">
+  <thead><tr><th>Preview</th><th>Title</th><th>Link</th><th>Status</th><th>Actions</th></tr></thead>
+  <tbody>
+    {% for b in banners %}
+    <tr>
+      <td style="width:220px"><img src="{{b.image_url}}" class="img-fluid rounded" alt="{{b.title}}"></td>
+      <td>{{b.title}}</td>
+      <td class="text-truncate" style="max-width:240px">{{b.link_url}}</td>
+      <td>
+        {% if b.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}
+      </td>
+      <td class="d-flex gap-2">
+        <form method="post" action="/admin/banners/{{b.id}}/toggle" class="js-confirm" data-confirm="Toggle banner status?">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-sm btn-outline-primary">Toggle</button>
+        </form>
+        <form method="post" action="/admin/banners/{{b.id}}/delete" class="js-confirm" data-confirm="Delete banner?">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-sm btn-outline-danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

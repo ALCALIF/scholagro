@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Why Us • {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row align-items-center mb-5">
+    <div class="col-md-7">
+      <h1 class="display-5 fw-bold">Why choose ScholaGro?</h1>
+      <p class="lead text-muted">We combine farm-fresh quality, fast delivery and curated prices to bring groceries you can trust, straight to your doorstep.</p>
+      <a href="/shop" class="btn btn-emerald btn-lg mt-3"><i class="bi bi-bag-fill me-2"></i>Start shopping</a>
+    </div>
+    <div class="col-md-5 text-center">
+      <img src="https://images.unsplash.com/photo-1506806732259-39c2d0268443?w=900&h=600&fit=crop" class="img-fluid rounded shadow-lg" alt="Fresh produce" loading="lazy">
+    </div>
+  </div>
+
+  <div class="row g-4 mb-5">
+    <div class="col-md-6">
+      <div class="card h-100 border-0 shadow-sm p-4">
+        <h4 class="fw-bold">Farm-to-door freshness</h4>
+        <p class="text-muted">We partner with local farmers and suppliers to ensure produce moves quickly from farm to your basket, preserving taste and nutrition.</p>
+        <ul class="list-unstyled">
+          <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Daily sourced produce</li>
+          <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Temperature-controlled handling</li>
+          <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Quality inspection on every order</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card h-100 border-0 shadow-sm p-4">
+        <h4 class="fw-bold">Fast, reliable delivery</h4>
+        <p class="text-muted">Choose same-day slots and track your order in real-time. Our delivery partners are trained to handle fresh goods carefully.</p>
+        <ul class="list-unstyled">
+          <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Multiple delivery slots</li>
+          <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Real-time tracking</li>
+          <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Easy returns & refunds</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-5">
+    <div class="col-md-4">
+      <div class="text-center p-4 rounded shadow-sm h-100">
+        <i class="bi bi-wallet2 text-emerald fs-1 mb-3"></i>
+        <h5 class="fw-bold">Transparent pricing</h5>
+        <p class="text-muted small">No hidden fees — fair prices and frequent offers.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="text-center p-4 rounded shadow-sm h-100">
+        <i class="bi bi-award text-emerald fs-1 mb-3"></i>
+        <h5 class="fw-bold">Quality guarantee</h5>
+        <p class="text-muted small">If you're not satisfied with the quality, we'll make it right.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="text-center p-4 rounded shadow-sm h-100">
+        <i class="bi bi-people text-emerald fs-1 mb-3"></i>
+        <h5 class="fw-bold">Community-first</h5>
+        <p class="text-muted small">We support local growers and sustainable sourcing.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-5 align-items-center">
+    <div class="col-md-8">
+      <h3 class="fw-bold">How it works</h3>
+      <ol class="ps-3">
+        <li class="mb-2">Browse products and choose delivery slot</li>
+        <li class="mb-2">We pack with care and dispatch quickly</li>
+        <li class="mb-2">Track and receive fresh groceries at your door</li>
+      </ol>
+    </div>
+    <div class="col-md-4 text-center">
+      <a class="btn btn-outline-emerald btn-lg" href="/contact"><i class="bi bi-envelope me-2"></i>Contact sales</a>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm p-4 text-center">
+    <h4 class="fw-bold">Ready to try?</h4>
+    <p class="text-muted">Get Ksh 100 off your first order. Use code: WELCOME100</p>
+    <a href="/shop" class="btn btn-emerald btn-lg">Shop with discount</a>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid py-5">
+  <!-- Header -->
+  <div class="row mb-5 animate-fadeInUp">
+    <div class="col-12">
+      <h2 class="fw-bold mb-2">
+        <i class="bi bi-bag-check text-emerald me-2"></i>My Orders
+      </h2>
+      <p class="text-slate-600">Track and manage all your orders in one place</p>
+    </div>
+  </div>
+
+  {% if orders %}
+  <div class="row g-4">
+    {% for o in orders %}
+    <div class="col-12 animate-fadeInUp" data-anim-delay="{{ (loop.index0 * 0.1)|round(2) }}">
+      <div class="card border-0 shadow-sm rounded-3 hover-shadow transition-all">
+        <div class="card-body p-4">
+          <div class="row align-items-center g-4">
+            <!-- Order Info -->
+            <div class="col-12 col-md-6">
+              <div class="mb-3 mb-md-0">
+                <h5 class="fw-bold mb-2">
+                  Order #{{ o.id }}
+                  <span class="badge 
+                    {% if o.status == 'pending' %}bg-warning
+                    {% elif o.status == 'confirmed' %}bg-info
+                    {% elif o.status == 'delivered' %}bg-success
+                    {% elif o.status == 'cancelled' %}bg-danger
+                    {% else %}bg-slate-400{% endif %} 
+                    ms-2">
+                    {{ o.status | capitalize }}
+                  </span>
+                </h5>
+                <p class="text-slate-600 text-sm mb-2">
+                  <i class="bi bi-calendar me-1"></i>
+                  Placed on {{ o.created_at.strftime('%b %d, %Y') }}
+                </p>
+                <p class="text-slate-600 text-sm">
+                  <i class="bi bi-clock me-1"></i>
+                  {{ o.created_at.strftime('%I:%M %p') }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Amount & Actions -->
+            <div class="col-12 col-md-6">
+              <div class="text-md-end">
+                <div class="mb-3">
+                  <p class="text-slate-600 text-sm mb-1">Total Amount</p>
+                  <h4 class="fw-bold text-emerald mb-0">Ksh {{ '%.2f'|format(o.total_amount) }}</h4>
+                </div>
+                <div class="d-flex gap-2 justify-content-md-end flex-wrap">
+                  <a href="/orders/{{ o.id }}" class="btn btn-sm btn-outline-emerald rounded-2">
+                    <i class="bi bi-eye"></i> View Details
+                  </a>
+                  {% if not o.payment or o.payment.status != 'paid' %}
+                  <a href="/payments/mpesa/start/{{ o.id }}" class="btn btn-sm btn-success rounded-2">
+                    <i class="bi bi-phone"></i> Pay with M-Pesa
+                  </a>
+                  {% endif %}
+                  {% if (o.status in ['pending', 'confirmed']) and (not o.payment or o.payment.status != 'paid') %}
+                  <a href="/orders/{{ o.id }}/cancel" class="btn btn-sm btn-outline-danger rounded-2" onclick="return confirm('Cancel this order?')">
+                    <i class="bi bi-x-circle"></i> Cancel
+                  </a>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status Timeline -->
+          <div class="row mt-4 pt-4 border-top">
+            <div class="col-12">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="text-center flex-grow-1">
+                  <div class="badge bg-emerald rounded-circle p-2 mb-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-check"></i>
+                  </div>
+                  <p class="text-sm fw-semibold mb-0">Ordered</p>
+                </div>
+
+                <div class="mx-2 flex-grow-1 bg-secondary" style="height: 2px;"></div>
+
+                <div class="text-center flex-grow-1">
+                  <div class="badge {{ 'bg-emerald' if o.status in ['confirmed', 'delivered'] else 'bg-slate-300' }} rounded-circle p-2 mb-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-check"></i>
+                  </div>
+                  <p class="text-sm fw-semibold mb-0">Confirmed</p>
+                </div>
+
+                <div class="mx-2 flex-grow-1 {{ 'bg-success' if o.status == 'delivered' else 'bg-secondary' }}" style="height: 2px;"></div>
+
+                <div class="text-center flex-grow-1">
+                  <div class="badge {{ 'bg-emerald' if o.status == 'delivered' else 'bg-slate-300' }} rounded-circle p-2 mb-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-check"></i>
+                  </div>
+                  <p class="text-sm fw-semibold mb-0">Delivered</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <!-- Empty State -->
+  <div class="row justify-content-center py-5">
+    <div class="col-12 col-md-6 text-center animate-fadeInUp">
+      <div class="mb-4">
+        <div style="font-size: 5rem; color: #d1d5db; margin-bottom: 1rem;">
+          <i class="bi bi-inbox"></i>
+        </div>
+        <h3 class="fw-bold mb-2">No Orders Yet</h3>
+        <p class="text-slate-600 mb-4">
+          Start shopping to place your first order. We have fresh produce waiting for you!
+        </p>
+      </div>
+
+      <!-- Trust Badges -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-sm-4">
+          <div class="text-center">
+            <i class="bi bi-truck text-emerald" style="font-size: 2rem;"></i>
+            <p class="text-sm text-slate-600 mt-2">Fast Delivery</p>
+          </div>
+        </div>
+        <div class="col-6 col-sm-4">
+          <div class="text-center">
+            <i class="bi bi-award text-amber" style="font-size: 2rem;"></i>
+            <p class="text-sm text-slate-600 mt-2">Fresh Products</p>
+          </div>
+        </div>
+        <div class="col-6 col-sm-4">
+          <div class="text-center">
+            <i class="bi bi-percent text-emerald" style="font-size: 2rem;"></i>
+            <p class="text-sm text-slate-600 mt-2">Best Prices</p>
+          </div>
+        </div>
+      </div>
+
+      <a href="/shop" class="btn btn-emerald rounded-2 px-5 py-3 fw-semibold">
+        <i class="bi bi-shop"></i> Start Shopping
+      </a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

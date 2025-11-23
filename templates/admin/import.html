@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Bulk Import Products (CSV)</h3>
+<p class="text-muted">Upload a CSV with headers: <code>name,slug,price,category,image_url,stock</code></p>
+<form method="post" enctype="multipart/form-data" class="d-flex gap-2 align-items-center">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="file" name="file" accept=".csv" class="form-control" required style="max-width:420px">
+  <button class="btn btn-success">Upload</button>
+</form>
+{% endblock %}

@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% block title %}{{ category.name }} • {{ site_name }}{% endblock %}
+{% block meta %}
+  <meta name="description" content="Shop {{ category.name }} at {{ site_name }}.">
+  <meta property="og:title" content="{{ category.name }} — {{ site_name }}">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ category.name }} — {{ site_name }}">
+  <meta name="twitter:description" content="Browse {{ category.name }} at {{ site_name }}.">
+  {% set base = url_for('shop.category', slug=category.slug, _external=True) %}
+  <link rel="canonical" href="{{ base }}{% if request.args.get('page') %}?page={{ request.args.get('page') }}{% endif %}">
+  {% if pagination %}
+    {% if pagination.has_prev %}
+      <link rel="prev" href="{{ base }}?page={{ pagination.prev_num }}">
+    {% endif %}
+    {% if pagination.has_next %}
+      <link rel="next" href="{{ base }}?page={{ pagination.next_num }}">
+    {% endif %}
+  {% endif %}
+{% endblock %}
+{% block content %}
+<div class="container-fluid py-5">
+  <!-- Category Hero -->
+  <div class="row mb-5 animate-fadeInUp">
+    <div class="col-12">
+      <div style="background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 100%); border-radius: 20px; padding: 60px 40px; color: white; text-align: center;">
+        <h1 class="display-5 fw-bold mb-3">{{ category.name }}</h1>
+        <p class="lead fs-5 mb-0">Browse our premium selection of fresh {{ category.name | lower }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Navigation -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex gap-2 overflow-x-auto pb-2" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <a class="btn btn-sm btn-outline-emerald rounded-pill px-4" href="/shop">
+          <i class="bi bi-grid-3x3 me-1"></i>All Products
+        </a>
+        {% for c in categories %}
+        <a class="btn btn-sm {{ 'btn-emerald' if c.id == category.id else 'btn-outline-emerald' }} rounded-pill px-4" 
+           href="/category/{{ c.slug }}">
+          {{ c.name }}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Products Grid -->
+  <div class="row g-4 mb-5">
+    {% if products %}
+      {% for p in products %}
+      <div class="col-12 col-sm-6 col-lg-4 col-xl-3 animate-fadeInUp" style="animation-delay: {{ loop.index0 * 0.05 }}s">
+        <div class="card border-0 shadow-sm rounded-3 h-100 hover-shadow transition-all overflow-hidden">
+          <!-- Image Container -->
+          <div class="position-relative overflow-hidden" style="height: 240px;">
+            <img loading="lazy" 
+                 class="img-fluid w-100 h-100 object-fit-cover" 
+                 src="{{ cl_transform(p.image_url, 400, 300) or 'https://placehold.co/400x300' }}" 
+                 alt="{{ p.name }}">
+            
+            <!-- Badges -->
+            {% if p.old_price and p.price and p.old_price|float > p.price|float %}
+            {% set pct = ((1 - (p.price|float / p.old_price|float)) * 100) | round(0, 'floor') %}
+            <div class="position-absolute top-0 start-0 p-2">
+              <span class="badge bg-danger rounded-pill px-3 py-2">
+                <i class="bi bi-lightning-fill me-1"></i>-{{ pct|int }}%
+              </span>
+            </div>
+            {% endif %}
+
+            {% if p.created_at and (p.created_at.date() >= (datetime.utcnow().date() - timedelta(days=14))) %}
+            <div class="position-absolute top-0 end-0 p-2">
+              <span class="badge bg-success rounded-pill px-3 py-2">
+                <i class="bi bi-star-fill me-1"></i>New
+              </span>
+            </div>
+            {% endif %}
+
+            <!-- Wishlist Button -->
+            {% if current_user.is_authenticated %}
+            <div class="position-absolute bottom-0 end-0 p-2">
+              <button class="btn btn-sm btn-outline-danger rounded-circle btn-wishlist" 
+                      data-product-id="{{ p.id }}"
+                      title="Add to wishlist">
+                <i class="bi bi-heart"></i>
+              </button>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Product Info -->
+          <div class="card-body d-flex flex-column p-4">
+            <!-- Name -->
+            <a href="/product/{{ p.slug }}" class="text-decoration-none">
+              <h6 class="fw-bold text-slate-800 mb-2 text-truncate-2">{{ p.name }}</h6>
+            </a>
+
+            <!-- Rating -->
+            <div class="mb-2">
+              <span class="text-warning">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-half"></i>
+              </span>
+              <span class="text-slate-600 text-sm ms-1">(4.5)</span>
+            </div>
+
+            <!-- Price -->
+            <div class="mb-3">
+              {% if p.old_price and p.old_price|float > p.price|float %}
+              <div class="d-flex gap-2 align-items-center">
+                <span class="h5 fw-bold text-emerald mb-0">Ksh {{ '%.0f'|format(p.price) }}</span>
+                <span class="text-muted text-decoration-line-through small">Ksh {{ '%.0f'|format(p.old_price) }}</span>
+              </div>
+              {% else %}
+              <span class="h5 fw-bold text-emerald mb-0">Ksh {{ '%.0f'|format(p.price) }}</span>
+              {% endif %}
+            </div>
+
+            <!-- Stock -->
+            {% if p.stock is not none and p.stock|int <= 0 %}
+            <div class="mb-3">
+              <span class="badge bg-danger-light text-danger rounded-pill px-3 py-1">
+                <i class="bi bi-x-circle me-1"></i>Out of Stock
+              </span>
+            </div>
+            {% else %}
+            <div class="mb-3">
+              <span class="badge bg-success-light text-success rounded-pill px-3 py-1">
+                <i class="bi bi-check-circle me-1"></i>In Stock
+              </span>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="mt-auto d-flex gap-2">
+              <a class="btn btn-sm btn-outline-emerald rounded-2 flex-grow-1" href="/product/{{ p.slug }}">
+                <i class="bi bi-eye"></i> View
+              </a>
+              {% if current_user.is_authenticated %}
+                {% if p.stock is not none and p.stock|int <= 0 %}
+                <button class="btn btn-sm btn-secondary rounded-2 flex-grow-1" disabled title="Out of stock">
+                  <i class="bi bi-bag"></i> Out
+                </button>
+                {% else %}
+                <button class="btn btn-sm btn-emerald rounded-2 flex-grow-1 btn-add-to-cart" data-product-id="{{ p.id }}">
+                  <i class="bi bi-bag-plus"></i> Add
+                </button>
+                {% endif %}
+              {% else %}
+              <a class="btn btn-sm btn-emerald rounded-2 flex-grow-1" href="/auth/login">
+                <i class="bi bi-box-arrow-in-right"></i> Login
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+    <!-- Empty State -->
+    <div class="col-12 text-center py-5">
+      <div style="font-size: 3rem; color: #d1d5db; margin-bottom: 1rem;">
+        <i class="bi bi-inbox"></i>
+      </div>
+      <h4 class="fw-bold mb-2">No products in this category</h4>
+      <p class="text-slate-600 mb-4">Check back soon or browse other categories</p>
+      <a href="/shop" class="btn btn-emerald rounded-2 px-5 py-2">
+        <i class="bi bi-arrow-left"></i> Back to Shop
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Pagination -->
+  {% if pagination and pagination.pages > 1 %}
+  <nav aria-label="Page navigation" class="d-flex justify-content-center mb-5 animate-fadeInUp">
+    <ul class="pagination rounded-3 overflow-hidden border border-slate-200">
+      <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+        <a class="page-link" href="?page={{ pagination.prev_num if pagination.has_prev else 1 }}">
+          <i class="bi bi-chevron-left"></i> Previous
+        </a>
+      </li>
+      
+      {% for p in range(1, pagination.pages + 1) %}
+        {% if p == pagination.page %}
+        <li class="page-item active">
+          <span class="page-link bg-emerald border-emerald">{{ p }}</span>
+        </li>
+        {% elif p == 1 or p == pagination.pages or (p >= pagination.page - 1 and p <= pagination.page + 1) %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+        </li>
+        {% elif p == pagination.page - 2 or p == pagination.page + 2 %}
+        <li class="page-item disabled">
+          <span class="page-link">...</span>
+        </li>
+        {% endif %}
+      {% endfor %}
+      
+      <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+        <a class="page-link" href="?page={{ pagination.next_num if pagination.has_next else pagination.pages }}">
+          Next <i class="bi bi-chevron-right"></i>
+        </a>
+      </li>
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+
+<style>
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.bg-success-light { background-color: rgba(34, 197, 94, 0.1); }
+.bg-danger-light { background-color: rgba(239, 68, 68, 0.1); }
+.object-fit-cover {
+  object-fit: cover;
+}
+</style>
+{% endblock %}

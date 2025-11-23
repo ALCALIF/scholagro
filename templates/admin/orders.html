@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Manage Orders</h3>
+<table class="table">
+  <thead><tr><th>ID</th><th>User</th><th>Status</th><th>Total</th><th>Created</th><th>Action</th></tr></thead>
+  <tbody>
+    {% for o in orders %}
+    <tr>
+      <td>#{{o.id}}</td>
+      <td>{{o.user.email if o.user else ''}}</td>
+      <td>{{o.status}}</td>
+      <td>Ksh {{o.total_amount}}</td>
+      <td>{{o.created_at}}</td>
+      <td>
+        <form method="post" action="/admin/orders/{{o.id}}/status" class="d-flex gap-2 js-confirm" data-confirm="Update this order status?">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <select name="status" class="form-select form-select-sm" style="width:auto">
+            {% set statuses = ['pending','packed','on_the_way','delivered'] %}
+            {% for s in statuses %}
+              <option value="{{s}}" {% if s==o.status %}selected{% endif %}>{{s.replace('_',' ').title()}}</option>
+            {% endfor %}
+          </select>
+          <button class="btn btn-sm btn-success">Update</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

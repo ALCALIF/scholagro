@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Contact Us • {{ site_name }}{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-md-7">
+    <h1>Contact Us</h1>
+    <p class="lead">We’re here to help with orders, deliveries, and product questions.</p>
+    <form method="post" class="mt-4">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+      </div>
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email" required>
+      </div>
+      <div class="mb-3">
+        <label for="subject" class="form-label">Subject</label>
+        <input type="text" class="form-control" id="subject" name="subject" required>
+      </div>
+      <div class="mb-3">
+        <label for="message" class="form-label">Message</label>
+        <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-success">
+        <i class="bi bi-envelope"></i> Send Message
+      </button>
+    </form>
+  </div>
+  <div class="col-md-5">
+    {% set hours = {
+      'Monday':('07:00 AM','07:00 PM'),
+      'Tuesday':('07:00 AM','07:00 PM'),
+      'Wednesday':('07:00 AM','07:00 PM'),
+      'Thursday':('07:00 AM','07:00 PM'),
+      'Friday':('07:00 AM','07:00 PM'),
+      'Saturday':('08:00 AM','06:00 PM'),
+      'Sunday':('Closed','Closed')
+    } %}
+    {% set business_lat = -1.28333 %}
+    {% set business_lng = 36.81667 %}
+    {% set business_name = 'ScholaGro HQ' %}
+    {% include 'partials/hours_map.html' %}
+  </div>
+</div>
+{% endblock %}

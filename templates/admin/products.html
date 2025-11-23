@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Manage Products</h3>
+<form method="post" enctype="multipart/form-data" class="row g-2 mb-3">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="col-md-3"><input class="form-control" name="name" placeholder="Name" required></div>
+  <div class="col-md-2"><input class="form-control" name="price" placeholder="Price" required></div>
+  <div class="col-md-2">
+    <select class="form-select" name="category_id">
+      {% for c in categories %}<option value="{{c.id}}">{{c.name}}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2"><input class="form-control" name="stock" type="number" min="0" placeholder="Stock"></div>
+  <div class="col-md-3"><input class="form-control" name="image_url" placeholder="Image URL (or upload)"></div>
+  <div class="col-md-3"><input class="form-control" type="file" name="image_file" accept="image/*"></div>
+  <div class="col-md-2"><input class="form-control" name="slug" placeholder="Slug (optional)"></div>
+  <div class="col-md-12 d-flex gap-2 mt-2">
+    <button class="btn btn-success">Add</button>
+    <a class="btn btn-outline-secondary" href="/admin/categories">Categories</a>
+    <a class="btn btn-outline-secondary" href="/admin/banners">Banners</a>
+    <a class="btn btn-outline-secondary" href="/admin/import">Bulk Import</a>
+    <a class="btn btn-outline-secondary" href="/admin/reports/orders.csv">Export Orders CSV</a>
+  </div>
+</form>
+<table class="table table-sm align-middle">
+  <thead><tr><th>Name</th><th>Price</th><th>Category</th><th>Stock</th><th>Created</th><th>Actions</th></tr></thead>
+  <tbody>
+    {% for p in products %}
+    <tr>
+      <td>{{p.name}}</td><td>{{p.price}}</td><td>{{p.category.name if p.category else ''}}</td><td>{{p.stock}}</td><td>{{p.created_at}}</td>
+      <td class="d-flex gap-2">
+        <a class="btn btn-sm btn-outline-primary" href="/admin/products/{{p.id}}/edit">Edit</a>
+        <form method="post" action="/admin/products/{{p.id}}/delete" class="js-confirm" data-confirm="Delete this product?">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-sm btn-outline-danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
