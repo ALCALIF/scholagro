@@ -134,3 +134,15 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# dependencies
+node_modules/
+
+# environment variables
+.env
+
+# build outputs
+dist/
+build/
+coverage/
+
