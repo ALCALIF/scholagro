@@ -1,0 +1,81 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h3 class="mb-0">Orders Calendar</h3>
+    <div class="d-flex gap-2 align-items-end">
+      <div>
+        <label class="form-label small mb-1">Status</label>
+        <select id="calStatus" class="form-select form-select-sm">
+          <option value="">All</option>
+          <option value="pending">Pending</option>
+          <option value="packed">Packed</option>
+          <option value="on_the_way">On The Way</option>
+          <option value="delivered">Delivered</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label small mb-1">Zone</label>
+        <select id="calZone" class="form-select form-select-sm">
+          <option value="">All</option>
+          {% for z in DeliveryZone.query.order_by(DeliveryZone.name.asc()).all() %}
+          <option value="{{ z.id }}">{{ z.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button id="calRefresh" class="btn btn-sm btn-outline-secondary">Refresh</button>
+    </div>
+  </div>
+  <div id="calendar"></div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var statusSel = document.getElementById('calStatus');
+    var zoneSel = document.getElementById('calZone');
+    var refreshBtn = document.getElementById('calRefresh');
+
+    function buildUrl(info){
+      var p = new URLSearchParams();
+      if (info && info.start && info.end){
+        p.set('start', info.start.toISOString());
+        p.set('end', info.end.toISOString());
+      }
+      if (statusSel.value) p.set('status', statusSel.value);
+      if (zoneSel.value) p.set('zone_id', zoneSel.value);
+      return '/admin/calendar/events?' + p.toString();
+    }
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
+      navLinks: true,
+      weekNumbers: true,
+      height: 'auto',
+      events: function(info, success, failure){
+        fetch(buildUrl(info))
+          .then(r=>r.json())
+          .then(data=>success(data))
+          .catch(e=>failure(e));
+      },
+      eventClick: function(info){
+        if (info && info.event && info.event.url){
+          window.location.href = info.event.url;
+          info.jsEvent.preventDefault();
+        }
+      }
+    });
+    calendar.render();
+
+    function refetch(){ calendar.refetchEvents(); }
+    statusSel.addEventListener('change', refetch);
+    zoneSel.addEventListener('change', refetch);
+    refreshBtn.addEventListener('click', refetch);
+  });
+</script>
+{% endblock %}

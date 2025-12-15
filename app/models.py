@@ -284,6 +284,17 @@ class Notification(db.Model, TimestampMixin):
     is_read = db.Column(db.Boolean, default=False)
 
 
+class Post(db.Model, TimestampMixin):
+    __tablename__ = "posts"
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    slug = db.Column(db.String(220), unique=True, nullable=False)
+    body = db.Column(db.Text)
+    image_url = db.Column(db.String(500))
+    is_published = db.Column(db.Boolean, default=False)
+    published_at = db.Column(db.DateTime)
+
+
 class ProductImage(db.Model, TimestampMixin):
     __tablename__ = "product_images"
     id = db.Column(db.Integer, primary_key=True)

@@ -8,8 +8,9 @@ from flask_login import login_required, current_user
 from ...extensions import db, cache
 from werkzeug.security import generate_password_hash, check_password_hash
 from ...utils.media import upload_image
-from ...models import Product, Category, Order, HomePageBanner, Payment, User, Review, DeliveryZone, CategoryHeroImage, FlashSale
+from ...models import Product, Category, Order, HomePageBanner, Payment, User, Review, DeliveryZone, CategoryHeroImage, FlashSale, Coupon
 from ...models import ReviewPhoto
+from ...models import Post
 from ...utils.search import index_product
 from ...models import Notification
 from ...utils.email import send_email
@@ -53,6 +54,296 @@ def dashboard():
         .limit(5)
         .all()
     )
+
+@admin_bp.route("/calendar")
+@login_required
+@admin_required
+def calendar_view():
+    return render_template("admin/calendar.html")
+
+@admin_bp.route("/calendar/events")
+@login_required
+@admin_required
+def calendar_events():
+    from datetime import datetime
+    # Optional range filtering
+    start = request.args.get('start')
+    end = request.args.get('end')
+    status = (request.args.get('status') or '').strip()
+    zone_id = request.args.get('zone_id', type=int)
+    q = Order.query
+    try:
+        if start:
+            start_dt = datetime.fromisoformat(start.replace('Z',''))
+            q = q.filter(Order.created_at >= start_dt)
+        if end:
+            end_dt = datetime.fromisoformat(end.replace('Z',''))
+            q = q.filter(Order.created_at <= end_dt)
+    except Exception:
+        pass
+    try:
+        if status:
+            q = q.filter(Order.status == status)
+    except Exception:
+        pass
+    try:
+        if zone_id:
+            q = q.filter(Order.delivery_zone_id == zone_id)
+    except Exception:
+        pass
+    events = []
+    for o in q.order_by(Order.created_at.desc()).limit(1000).all():
+        title = f"Order #{o.id} — {o.status.title() if o.status else 'pending'}"
+        events.append({
+            'id': o.id,
+            'title': title,
+            'start': (o.created_at.isoformat() if o.created_at else None),
+            'url': url_for('admin.orders') + f"?q={o.id}",
+            'color': '#10b981' if (o.status or '').startswith('delivered') else '#3b82f6'
+        })
+    return Response(json.dumps(events), mimetype='application/json')
+
+# --- Coupons management ---
+@admin_bp.route("/coupons", methods=["GET", "POST"])
+@login_required
+@admin_required
+def coupons():
+    if request.method == 'POST':
+        code = (request.form.get('code') or '').strip().upper()
+        discount_percent = request.form.get('discount_percent', type=int)
+        discount_amount = request.form.get('discount_amount', type=float)
+        min_order_value = request.form.get('min_order_value', type=float)
+        is_active = (request.form.get('is_active') or '') in {'1','true','on','yes'}
+        if not code:
+            flash('Coupon code is required', 'warning')
+            return redirect(url_for('admin.coupons'))
+        if Coupon.query.filter_by(code=code).first():
+            flash('Coupon code already exists', 'warning')
+            return redirect(url_for('admin.coupons'))
+        c = Coupon(
+            code=code,
+            discount_percent=discount_percent or 0,
+            discount_amount=discount_amount or 0,
+            min_order_value=min_order_value or 0,
+            is_active=is_active
+        )
+        db.session.add(c)
+        db.session.commit()
+        flash('Coupon created', 'success')
+        return redirect(url_for('admin.coupons'))
+    q = (request.args.get('q') or '').strip()
+    query = Coupon.query
+    if q:
+        like = f"%{q}%"
+        query = query.filter(Coupon.code.ilike(like))
+    items = query.order_by(Coupon.created_at.desc()).all() if hasattr(Coupon, 'created_at') else query.all()
+    return render_template('admin/coupons.html', coupons=items, q=q)
+
+@admin_bp.route('/coupons/<int:coupon_id>/edit', methods=['GET','POST'])
+@login_required
+@admin_required
+def edit_coupon(coupon_id):
+    c = db.session.get(Coupon, coupon_id)
+    if not c:
+        abort(404)
+    if request.method == 'POST':
+        c.code = (request.form.get('code') or c.code).strip().upper()
+        c.discount_percent = request.form.get('discount_percent', type=int) or 0
+        c.discount_amount = request.form.get('discount_amount', type=float) or 0
+        c.min_order_value = request.form.get('min_order_value', type=float) or 0
+        c.is_active = (request.form.get('is_active') or '') in {'1','true','on','yes'}
+        db.session.commit()
+        flash('Coupon saved', 'success')
+        return redirect(url_for('admin.coupons'))
+    return render_template('admin/coupon_edit.html', coupon=c)
+
+@admin_bp.route('/coupons/<int:coupon_id>/toggle', methods=['POST'])
+@login_required
+@admin_required
+def toggle_coupon(coupon_id):
+    c = db.session.get(Coupon, coupon_id)
+    if not c:
+        abort(404)
+    c.is_active = not bool(c.is_active)
+    db.session.commit()
+    return redirect(url_for('admin.coupons'))
+
+@admin_bp.route('/coupons/<int:coupon_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def delete_coupon(coupon_id):
+    c = db.session.get(Coupon, coupon_id)
+    if not c:
+        abort(404)
+    db.session.delete(c)
+    db.session.commit()
+    flash('Coupon deleted', 'info')
+    return redirect(url_for('admin.coupons'))
+
+# --- Blog/CMS management ---
+@admin_bp.route('/posts', methods=['GET','POST'])
+@login_required
+@admin_required
+def posts():
+    if request.method == 'POST':
+        title = (request.form.get('title') or '').strip()
+        slug = (request.form.get('slug') or '').strip().lower()
+        body = request.form.get('body')
+        image_url = (request.form.get('image_url') or '').strip()
+        is_published = (request.form.get('is_published') or '') in {'1','true','on','yes'}
+        if not title:
+            flash('Title is required', 'warning')
+            return redirect(url_for('admin.posts'))
+
+@admin_bp.route('/settings', methods=['GET','POST'])
+@login_required
+@admin_required
+def settings():
+    inst = current_app.instance_path if hasattr(current_app, 'instance_path') else os.path.join(os.getcwd(), 'instance')
+    os.makedirs(inst, exist_ok=True)
+    path = os.path.join(inst, 'admin_settings.json')
+    data = {}
+    try:
+        if os.path.exists(path):
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f) or {}
+    except Exception:
+        data = {}
+    if request.method == 'POST':
+        try:
+            data['read_only'] = bool(request.form.get('read_only'))
+            passphrase = (request.form.get('passphrase') or '').strip()
+            if passphrase:
+                data['delete_pass_hash'] = generate_password_hash(passphrase)
+            # Site & contacts
+            data['site_name'] = request.form.get('site_name') or data.get('site_name')
+            data['contact_email'] = request.form.get('contact_email') or data.get('contact_email')
+            data['contact_phone'] = request.form.get('contact_phone') or data.get('contact_phone')
+            data['contact_address'] = request.form.get('contact_address') or data.get('contact_address')
+            data['whatsapp_number'] = request.form.get('whatsapp_number') or data.get('whatsapp_number')
+            # Checkout
+            data['allow_cod'] = bool(request.form.get('allow_cod'))
+            data['allow_pickup'] = bool(request.form.get('allow_pickup'))
+            data['pickup_location'] = request.form.get('pickup_location') or ''
+            try:
+                data['free_delivery_threshold'] = float(request.form.get('free_delivery_threshold') or 0)
+            except Exception:
+                data['free_delivery_threshold'] = 0
+            # Socials
+            for key in ['social_facebook_url','social_instagram_url','social_twitter_url','social_whatsapp_url','social_tiktok_handle']:
+                data[key] = request.form.get(key) or ''
+            # Analytics
+            data['google_tag_id'] = request.form.get('google_tag_id') or ''
+            data['sentry_dsn'] = request.form.get('sentry_dsn') or ''
+            # SMTP
+            for key in ['smtp_host','smtp_port','smtp_username','smtp_password','smtp_sender','contact_to']:
+                data[key] = request.form.get(key) or ''
+            # Stripe
+            for key in ['stripe_publishable_key','stripe_secret_key','stripe_webhook_secret']:
+                data[key] = request.form.get(key) or ''
+            # M-Pesa
+            for key in ['mpesa_consumer_key','mpesa_consumer_secret','mpesa_short_code','mpesa_passkey','mpesa_callback_url','mpesa_base_url','mpesa_till_number','mpesa_transaction_type']:
+                data[key] = request.form.get(key) or ''
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            try:
+                current_app.config.update({
+                    'SITE_NAME': data.get('site_name') or current_app.config.get('SITE_NAME'),
+                    'CONTACT_EMAIL': data.get('contact_email') or current_app.config.get('CONTACT_EMAIL'),
+                    'CONTACT_PHONE': data.get('contact_phone') or current_app.config.get('CONTACT_PHONE'),
+                    'CONTACT_ADDRESS': data.get('contact_address') or current_app.config.get('CONTACT_ADDRESS'),
+                    'WHATSAPP_NUMBER': data.get('whatsapp_number') or current_app.config.get('WHATSAPP_NUMBER'),
+                    'FREE_DELIVERY_THRESHOLD': data.get('free_delivery_threshold') or 0,
+                    'SOCIAL_FACEBOOK_URL': data.get('social_facebook_url'),
+                    'SOCIAL_INSTAGRAM_URL': data.get('social_instagram_url'),
+                    'SOCIAL_TWITTER_URL': data.get('social_twitter_url'),
+                    'SOCIAL_WHATSAPP_URL': data.get('social_whatsapp_url'),
+                    'SOCIAL_TIKTOK_HANDLE': data.get('social_tiktok_handle'),
+                    'GOOGLE_TAG_ID': data.get('google_tag_id'),
+                })
+            except Exception:
+                pass
+            flash('Settings saved', 'success')
+            return redirect(url_for('admin.settings'))
+        except Exception:
+            flash('Failed to save settings', 'danger')
+            return redirect(url_for('admin.settings'))
+    class Obj:
+        def __init__(self, d):
+            self.__dict__.update(d)
+        def get(self, k, default=None):
+            return getattr(self, k, default)
+    settings_obj = Obj(data)
+    return render_template('admin/settings.html', settings=settings_obj)
+        if not slug:
+            import re
+            slug = re.sub(r"[^a-z0-9\-]+","-", title.lower()).strip('-')
+        if Post.query.filter_by(slug=slug).first():
+            flash('Slug already exists', 'warning')
+            return redirect(url_for('admin.posts'))
+        p = Post(title=title, slug=slug, body=body, image_url=image_url, is_published=is_published)
+        if is_published:
+            from datetime import datetime
+            p.published_at = datetime.utcnow()
+        db.session.add(p)
+        db.session.commit()
+        flash('Post created', 'success')
+        return redirect(url_for('admin.posts'))
+    q = (request.args.get('q') or '').strip()
+    query = Post.query
+    if q:
+        like = f"%{q}%"
+        query = query.filter(db.or_(Post.title.ilike(like), Post.slug.ilike(like)))
+    items = query.order_by(Post.created_at.desc()).all() if hasattr(Post, 'created_at') else query.all()
+    return render_template('admin/posts.html', posts=items, q=q)
+
+@admin_bp.route('/posts/<int:post_id>/edit', methods=['GET','POST'])
+@login_required
+@admin_required
+def edit_post(post_id):
+    p = db.session.get(Post, post_id)
+    if not p:
+        abort(404)
+    if request.method == 'POST':
+        p.title = request.form.get('title') or p.title
+        p.slug = (request.form.get('slug') or p.slug).lower()
+        p.body = request.form.get('body')
+        p.image_url = request.form.get('image_url')
+        was_published = bool(p.is_published)
+        p.is_published = (request.form.get('is_published') or '') in {'1','true','on','yes'}
+        if p.is_published and not was_published:
+            from datetime import datetime
+            p.published_at = datetime.utcnow()
+        db.session.commit()
+        flash('Post saved', 'success')
+        return redirect(url_for('admin.posts'))
+    return render_template('admin/post_edit.html', post=p)
+
+@admin_bp.route('/posts/<int:post_id>/toggle', methods=['POST'])
+@login_required
+@admin_required
+def toggle_post(post_id):
+    p = db.session.get(Post, post_id)
+    if not p:
+        abort(404)
+    p.is_published = not bool(p.is_published)
+    if p.is_published and not p.published_at:
+        from datetime import datetime
+        p.published_at = datetime.utcnow()
+    db.session.commit()
+    return redirect(url_for('admin.posts'))
+
+@admin_bp.route('/posts/<int:post_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def delete_post(post_id):
+    p = db.session.get(Post, post_id)
+    if not p:
+        abort(404)
+    db.session.delete(p)
+    db.session.commit()
+    flash('Post deleted', 'info')
+    return redirect(url_for('admin.posts'))
     # Build last 12 months buckets (oldest -> newest)
     def month_range(d: date):
         start = d.replace(day=1)
