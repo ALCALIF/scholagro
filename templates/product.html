@@ -61,6 +61,22 @@
 {% endblock %}
 {% block content %}
 
+<script type="application/json" id="current-product-json">{
+  "id": {{ product.id|tojson }},
+  "slug": {{ product.slug|tojson }},
+  "name": {{ product.name|tojson }},
+  "image": {{ (product.image_url and cl_transform(product.image_url, 400, 300) or 'https://placehold.co/400x300')|tojson }},
+  "price": {{ (product.price|string)|tojson }}
+}</script>
+<script>
+  (function(){
+    try{
+      var el = document.getElementById('current-product-json');
+      if (el){ window.CURRENT_PRODUCT = JSON.parse(el.textContent || '{}'); }
+    }catch(e){ /* ignore */ }
+  })();
+  </script>
+
 <!-- Breadcrumb Navigation -->
 <nav aria-label="breadcrumb" class="mb-4 animate-slideInUp">
   <ol class="breadcrumb bg-light p-3 rounded">
@@ -75,10 +91,20 @@
 
 <div class="row g-5 align-items-start mb-5 animate-fadeInUp">
   <div class="col-md-6">
-    <!-- Product Image with Premium styling -->
+    <!-- Product Gallery -->
+    {% set main_img = (product_images and product_images[0].image_url) or product.image_url %}
     <div class="ratio ratio-4x3 bg-light rounded-3 overflow-hidden shadow-lg hover-lift mb-3">
-      <img class="w-100 h-100 object-fit-cover" src="{{ cl_transform(product.image_url, 800, 600) or 'https://placehold.co/800x600' }}" alt="{{product.name}}" loading="lazy">
+      <img id="p-main" class="w-100 h-100 object-fit-cover" src="{{ cl_transform(main_img, 800, 600) or 'https://placehold.co/800x600' }}" alt="{{product.name}}" loading="lazy">
     </div>
+    {% if product_images and product_images|length > 1 %}
+    <div class="d-flex flex-wrap gap-2">
+      {% for img in product_images %}
+      <button type="button" class="btn p-0 border-0" onclick="document.getElementById('p-main').src='{{ cl_transform(img.image_url, 800, 600) }}'">
+        <img class="rounded object-fit-cover" src="{{ cl_transform(img.image_url, 160, 120) }}" alt="thumb" style="width:96px;height:72px;">
+      </button>
+      {% endfor %}
+    </div>
+    {% endif %}
 
     <!-- Product Badges on image -->
     <div class="mt-2 d-flex gap-2 flex-wrap">
@@ -120,7 +146,7 @@
       {% if avg_rating %}
       <div class="mb-3 d-flex align-items-center gap-2">
         <div class="text-warning" style="font-size: 1.3rem;">
-          {% for i in range(int(avg_rating)) %}⭐{% endfor %}
+          {% for i in range(avg_rating|int) %}⭐{% endfor %}
           {% if avg_rating % 1 != 0 %}✨{% endif %}
         </div>
         <span class="text-muted"><strong>{{ avg_rating }}/5</strong> ({{reviews|length}} reviews)</span>
@@ -143,15 +169,15 @@
         </div>
       </div>
 
-      <!-- Stock Status -->
-      <div class="mb-4">
+      <!-- Stock Status / ETA -->
+      <div class="mb-4 d-flex flex-column gap-2">
         {% if product.stock is not none and product.stock|int <= 0 %}
           <div class="alert alert-warning mb-3" role="alert">
             <i class="bi bi-exclamation-triangle me-2"></i>Currently out of stock. <a href="#" class="alert-link">Notify me when available</a>
           </div>
         {% else %}
           <div class="alert alert-success mb-3" role="alert">
-            <i class="bi bi-check-circle me-2"></i><strong>In Stock</strong> - Order now for same-day delivery
+            <i class="bi bi-check-circle me-2"></i><strong>In Stock</strong>{% if eta_text %} • ETA: {{ eta_text }}{% else %} - Order now for fast delivery{% endif %}
           </div>
         {% endif %}
       </div>
@@ -177,12 +203,42 @@
           <button class="btn btn-outline-danger btn-lg px-5 btn-wishlist fw-600" data-product-id="{{product.id}}">
             <i class="bi bi-heart me-2"></i>Save
           </button>
+          <a class="wa-order-btn btn btn-outline-success btn-lg px-5 fw-600" target="_blank" rel="noopener">
+            <i class="bi bi-whatsapp me-2"></i>Order on WhatsApp
+          </a>
         {% else %}
           <a class="btn btn-success btn-lg px-5 fw-600" href="/auth/login">
             <i class="bi bi-box-arrow-in-right me-2"></i>Login to Buy
           </a>
+          <a class="wa-order-btn btn btn-outline-success btn-lg px-5 fw-600" target="_blank" rel="noopener">
+            <i class="bi bi-whatsapp me-2"></i>Order on WhatsApp
+          </a>
         {% endif %}
       </div>
+      <script>
+        (function(){
+          try{
+            var wa = {{ (config.get('WHATSAPP_NUMBER') or '')|tojson }};
+            wa = (wa || '').replace(/\D/g,'');
+            if (wa && wa.charAt(0) === '0' && wa.length >= 9) wa = '254' + wa.slice(1);
+            if (wa && /^7\d{8}$/.test(wa)) wa = '254' + wa;
+            var p = (window.CURRENT_PRODUCT || {});
+            var name = p.name || '';
+            var price = p.price || '';
+            var url = (window.location && window.location.href) || '';
+            var imgEl = document.getElementById('p-main');
+            var img = imgEl ? (imgEl.getAttribute('src')||'') : '';
+            var lines = [];
+            lines.push(({{ (site_name or 'ScholaGro')|tojson }}) + ' Order Request');
+            lines.push(name + (price?(' — Ksh ' + price):''));
+            if (img) lines.push(img);
+            lines.push(url);
+            var msg = encodeURIComponent(lines.join('\n'));
+            var href = wa ? ('https://wa.me/' + wa + '?text=' + msg) : ('https://wa.me/?text=' + msg);
+            document.querySelectorAll('.wa-order-btn').forEach(function(a){ a.href = href; });
+          }catch(e){}
+        })();
+      </script>
 
       <!-- Share Options -->
       <div class="border-top pt-3">
@@ -211,9 +267,15 @@
             <div class="d-flex justify-content-between align-items-start mb-2">
               <div>
                 <div class="text-warning mb-1" style="font-size: 0.9rem;">
-                  {% for i in range(r.rating) %}⭐{% endfor %}{% for i in range(5 - r.rating) %}☆{% endfor %}
+                  {% for _ in range(r.rating) %}<i class="bi bi-star-fill"></i>{% endfor %}
+                  {% for _ in range(5 - r.rating) %}<i class="bi bi-star"></i>{% endfor %}
                 </div>
-                <div class="fw-600 small text-muted">{{ r.user.name or r.user.email if r.user else 'Anonymous' }}</div>
+                <div class="fw-600 small text-muted">
+                  {{ r.user.name or r.user.email if r.user else 'Anonymous' }}
+                  {% if r.user_id in (verified_buyer_ids or []) %}
+                    <span class="badge bg-success-light text-success ms-2"><i class="bi bi-patch-check-fill"></i> Verified Purchase</span>
+                  {% endif %}
+                </div>
               </div>
               <small class="text-muted">{{ r.created_at.strftime('%d %b %Y') if r.created_at else 'Recently' }}</small>
             </div>
@@ -232,7 +294,7 @@
     <h4 class="fw-bold mb-4 heading-accent"><i class="bi bi-pencil-square me-2"></i>Write a Review</h4>
     
     {% if current_user.is_authenticated %}
-      <form method="post" action="/product/{{product.slug}}/review" data-product-id="{{ product.id }}" class="card border-0 shadow-sm p-4">
+      <form method="post" action="/product/{{product.slug}}/review" data-product-id="{{ product.id }}" class="card border-0 shadow-sm p-4" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         
         <div class="mb-3">
@@ -249,6 +311,11 @@
           <label class="form-label fw-600">Your Review (Optional)</label>
           <textarea class="form-control form-control-lg" name="comment" rows="4" placeholder="Share your thoughts about this product. What did you like? Any suggestions?" maxlength="500"></textarea>
           <small class="text-muted d-block mt-1"><span id="char-count">0</span>/500 characters</small>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-600">Photos (optional)</label>
+          <input type="file" name="photos" accept="image/*" multiple class="form-control">
+          <small class="text-muted">You can upload up to 5 photos. JPG/PNG preferred.</small>
         </div>
         
         <button type="submit" class="btn btn-success btn-lg w-100 fw-600">
@@ -298,6 +365,15 @@
     {% endif %}
   </div>
 </div>
+
+<!-- Recently Viewed -->
+<hr class="my-5">
+<div class="mt-4 animate-fadeInUp" data-recently-section>
+  <h4 class="fw-bold mb-4 heading-accent"><i class="bi bi-clock-history me-2"></i>Recently Viewed</h4>
+  <div id="recentlyViewedProduct">
+    <div class="row g-4"></div>
+  </div>
+  </div>
 
 <!-- Related Products -->
 {% if related_products %}

@@ -55,6 +55,15 @@
                   <a href="/orders/{{ o.id }}" class="btn btn-sm btn-outline-emerald rounded-2">
                     <i class="bi bi-eye"></i> View Details
                   </a>
+                  <a href="/orders/{{ o.id }}/track" class="btn btn-sm btn-outline-secondary rounded-2">
+                    <i class="bi bi-geo-alt"></i> Track
+                  </a>
+                  <form method="post" action="/orders/{{ o.id }}/reorder" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm btn-emerald rounded-2">
+                      <i class="bi bi-arrow-repeat"></i> Reorder
+                    </button>
+                  </form>
                   {% if not o.payment or o.payment.status != 'paid' %}
                   <a href="/payments/mpesa/start/{{ o.id }}" class="btn btn-sm btn-success rounded-2">
                     <i class="bi bi-phone"></i> Pay with M-Pesa

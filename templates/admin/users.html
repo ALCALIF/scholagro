@@ -1,0 +1,87 @@
+{% extends 'admin/base.html' %}
+{% block breadcrumbs %}
+  <nav class="px-4 pb-3 text-sm text-slate-200" aria-label="breadcrumb">
+    <ol class="breadcrumb m-0">
+      <li class="breadcrumb-item"><a class="text-white text-decoration-none" href="/admin">Admin</a></li>
+      <li class="breadcrumb-item active text-white-50" aria-current="page">Users</li>
+    </ol>
+  </nav>
+{% endblock %}
+{% block content %}
+<div class="container-fluid">
+  <div class="d-flex align-items-center mb-3">
+    <h3 class="mb-0 fw-bold">Users</h3>
+    <form class="ms-auto d-flex gap-2" method="get" action="/admin/users">
+      <input class="form-control form-control-sm" name="q" value="{{ q or '' }}" placeholder="Search name or email">
+      <button class="btn btn-sm btn-brand">Search</button>
+    </form>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm card-premium">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-2">Add User</h6>
+          <form method="post" class="row g-2">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="col-md-4"><input class="form-control form-control-sm" name="name" placeholder="Name"></div>
+            <div class="col-md-4"><input class="form-control form-control-sm" name="email" type="email" placeholder="Email" required></div>
+            <div class="col-md-3"><input class="form-control form-control-sm" name="password" type="password" placeholder="Password" required></div>
+            <div class="col-md-3"><input class="form-control form-control-sm" name="confirm_password" type="password" placeholder="Confirm Password" required></div>
+            <div class="col-md-3 d-flex align-items-center">
+              <div class="form-check">
+                <input class="form-check-input js-show-pass" type="checkbox" id="adminAddUserShowPass">
+                <label class="form-check-label small" for="adminAddUserShowPass">Show password</label>
+              </div>
+            </div>
+            <div class="col-md-1 d-flex align-items-center gap-2">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="is_admin" id="is_admin">
+                <label class="form-check-label small" for="is_admin">Admin</label>
+              </div>
+            </div>
+            <div class="col-12 d-grid"><button class="btn btn-brand">Create</button></div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="alert alert-info mb-0 small">Use the search to filter. You can remove users below. For safety, you cannot delete your own account here.</div>
+    </div>
+  </div>
+
+  <div class="small text-muted mb-2">Total: {{ total }} • Page {{ page }} of {{ (total // per_page) + (1 if total % per_page else 0) }}</div>
+  <div class="card border-0 shadow-sm card-premium">
+    <div class="table-responsive">
+      <table class="table table-sm table-hover align-middle mb-0 table-premium">
+        <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Admin</th><th>Joined</th><th></th></tr></thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td>#{{ u.id }}</td>
+            <td>{{ u.name or '—' }}</td>
+            <td>{{ u.email }}</td>
+            <td>{% if u.is_admin %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}</td>
+            <td>{{ u.created_at.strftime('%Y-%m-%d') if u.created_at else '' }}</td>
+            <td class="text-end">
+              <form method="post" action="/admin/users/{{ u.id }}/delete" class="d-inline js-confirm" data-confirm="Delete this user?">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <nav class="mt-3">
+    {% set pages = (total // per_page) + (1 if total % per_page else 0) %}
+    <ul class="pagination pagination-sm">
+      <li class="page-item {% if page <= 1 %}disabled{% endif %}"><a class="page-link" href="?page={{ page-1 }}&per_page={{ per_page }}&q={{ q|urlencode }}">Prev</a></li>
+      <li class="page-item disabled"><span class="page-link">{{ page }}/{{ pages }}</span></li>
+      <li class="page-item {% if page >= pages %}disabled{% endif %}"><a class="page-link" href="?page={{ page+1 }}&per_page={{ per_page }}&q={{ q|urlencode }}">Next</a></li>
+    </ul>
+  </nav>
+</div>
+{% endblock %}

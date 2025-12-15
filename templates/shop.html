@@ -62,83 +62,51 @@
           </div>
         </div>
       </div>
-
-      <!-- Store Hours & Location -->
-      {% include 'partials/hours_map_compact.html' %}
-    </div>
-  </div>
-
-  <!-- Main Content -->
-  <div class="col-lg-9">
-    <!-- Filter Bar -->
-    <div class="card border-0 shadow-sm mb-4 animate-slideInUp sticky-top" style="top: 64px; z-index: 1019;">
-      <div class="card-body">
-        <form class="row g-3 align-items-end" action="/shop" method="get">
-          <!-- Search Input -->
-          <div class="col-12 col-md-5">
-            <label class="form-label fw-600 small">
-              <i class="bi bi-search me-1"></i>Search Products
-            </label>
-            <input class="form-control form-control-lg" type="text" name="q" value="{{ request.args.q or '' }}" placeholder="Search by name, category..." autocomplete="off">
-          </div>
-
-          <!-- Sort Dropdown -->
-          <div class="col-6 col-md-3">
-            <label class="form-label fw-600 small" for="sortSelect">
-              <i class="bi bi-arrow-down-up me-1"></i>Sort By
-            </label>
-            <select class="form-select form-select-lg" name="sort" id="sortSelect" title="Sort products by selected option">
+      <!-- Filters -->
+      <div class="card border-0 shadow-sm mb-3 hover-lift">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3 heading-accent"><i class="bi bi-funnel-fill me-2"></i>Filters</h6>
+          <form class="row g-3" action="/shop" method="get">
+            {% if request.args.category %}<input type="hidden" name="category" value="{{ request.args.category }}">{% endif %}
+            <div class="col-12">
+              <label class="form-label fw-600 small"><i class="bi bi-search me-1"></i>Search</label>
+              <input class="form-control form-control-sm" type="text" name="q" value="{{ request.args.q or '' }}" placeholder="Search products...">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-600 small">Sort By</label>
               {% set s = request.args.get('sort','newest') %}
-              <option value="newest" {% if s=='newest' %}selected{% endif %}>Newest First</option>
-              <option value="price_asc" {% if s=='price_asc' %}selected{% endif %}>Price: Low to High</option>
-              <option value="price_desc" {% if s=='price_desc' %}selected{% endif %}>Price: High to Low</option>
-              <option value="rating" {% if s=='rating' %}selected{% endif %}>Best Rated</option>
-            </select>
-          </div>
-
-          <!-- Price Range -->
-          <div class="col-6 col-md-2">
-            <label class="form-label fw-600 small">Min (KES)</label>
-            <input class="form-control form-control-lg" type="number" step="10" name="min" value="{{ request.args.min or '' }}" placeholder="0">
-          </div>
-
-          <div class="col-6 col-md-2">
-            <label class="form-label fw-600 small">Max (KES)</label>
-            <input class="form-control form-control-lg" type="number" step="10" name="max" value="{{ request.args.max or '' }}" placeholder="50000" id="maxInput">
-          </div>
-
-          <!-- Price Slider (syncs with Max) -->
-          <div class="col-12 col-md-4">
-            <label class="form-label fw-600 small">Max Slider</label>
-            <input type="range" min="0" max="100000" step="100" class="form-range" id="maxRange">
-          </div>
-
-          <!-- Checkboxes Row -->
-          <div class="col-12">
-            <div class="d-flex flex-wrap gap-3">
+              <select class="form-select form-select-sm" name="sort">
+                <option value="newest" {% if s=='newest' %}selected{% endif %}>Newest First</option>
+                <option value="price_asc" {% if s=='price_asc' %}selected{% endif %}>Price: Low to High</option>
+                <option value="price_desc" {% if s=='price_desc' %}selected{% endif %}>Price: High to Low</option>
+                <option value="rating" {% if s=='rating' %}selected{% endif %}>Best Rated</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-600 small">Min (KES)</label>
+              <input class="form-control form-control-sm" type="number" step="10" name="min" value="{{ request.args.min or '' }}" placeholder="0">
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-600 small">Max (KES)</label>
+              <input class="form-control form-control-sm" type="number" step="10" name="max" value="{{ request.args.max or '' }}" placeholder="50000">
+            </div>
+            <div class="col-12 d-flex flex-column gap-2">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="deals" value="1" id="fDeals" {% if request.args.get('deals')=='1' %}checked{% endif %}>
-                <label class="form-check-label fw-500 small" for="fDeals">
-                  <i class="bi bi-lightning-fill text-warning me-1"></i>Hot Deals Only
-                </label>
+                <input class="form-check-input" type="checkbox" name="deals" value="1" id="fDealsSide" {% if request.args.get('deals')=='1' %}checked{% endif %}>
+                <label class="form-check-label small" for="fDealsSide"><i class="bi bi-lightning-fill text-warning me-1"></i>Hot Deals Only</label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="new" value="1" id="fNew" {% if request.args.get('new')=='1' %}checked{% endif %}>
-                <label class="form-check-label fw-500 small" for="fNew">
-                  <i class="bi bi-star-fill text-warning me-1"></i>New Products
-                </label>
+                <input class="form-check-input" type="checkbox" name="new" value="1" id="fNewSide" {% if request.args.get('new')=='1' %}checked{% endif %}>
+                <label class="form-check-label small" for="fNewSide"><i class="bi bi-star-fill text-warning me-1"></i>New Products</label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="in_stock" value="1" id="fStock" {% if request.args.get('in_stock')=='1' %}checked{% endif %}>
-                <label class="form-check-label fw-500 small" for="fStock">
-                  <i class="bi bi-check-circle-fill text-success me-1"></i>In Stock Only
-                </label>
+                <input class="form-check-input" type="checkbox" name="in_stock" value="1" id="fStockSide" {% if request.args.get('in_stock')=='1' %}checked{% endif %}>
+                <label class="form-check-label small" for="fStockSide"><i class="bi bi-check-circle-fill text-success me-1"></i>In Stock Only</label>
               </div>
-              <!-- Rating Filter -->
-              <div class="ms-auto d-flex align-items-center gap-2">
-                <label class="form-label fw-600 small mb-0">Min Rating</label>
-                <select class="form-select form-select-sm" name="rating" style="width: auto;">
-                  {% set r = request.args.get('rating')|int if request.args.get('rating') else 0 %}
+              <div>
+                <label class="form-label fw-600 small mb-1">Min Rating</label>
+                {% set r = request.args.get('rating')|int if request.args.get('rating') else 0 %}
+                <select class="form-select form-select-sm" name="rating">
                   <option value="">Any</option>
                   <option value="5" {% if r==5 %}selected{% endif %}>5★</option>
                   <option value="4" {% if r==4 %}selected{% endif %}>4★+</option>
@@ -148,37 +116,21 @@
                 </select>
               </div>
             </div>
-          </div>
-
-          {% if request.args.category %}<input type="hidden" name="category" value="{{ request.args.category }}">{% endif %}
-
-          <!-- Action Buttons -->
-          <div class="col-12 d-flex gap-2 flex-wrap align-items-center">
-            <button type="submit" class="btn btn-success fw-600">
-              <i class="bi bi-funnel-fill me-1"></i>Apply Filters
-            </button>
-            <a href="/shop" class="btn btn-outline-secondary fw-600">
-              <i class="bi bi-arrow-clockwise me-1"></i>Reset All
-            </a>
-
-            {% set args_dict = request.args.to_dict() %}
-            {% if 'page' in args_dict %}{% set _ = args_dict.pop('page') %}{% endif %}
-            {% set filters_count = args_dict|length %}
-            {% if filters_count > 0 %}
-            <div class="ms-auto d-flex flex-wrap gap-2 align-items-center small text-muted">
-              <span>
-                <i class="bi bi-info-circle me-1"></i>
-                {{ filters_count }} filter{{ 's' if filters_count != 1 else '' }} applied
-              </span>
-              <a href="/shop" class="link-secondary text-decoration-none fw-600">
-                <i class="bi bi-x-circle me-1"></i>Clear all
-              </a>
+            <div class="col-12 d-grid gap-2 mt-2">
+              <button type="submit" class="btn btn-success btn-sm fw-600"><i class="bi bi-funnel-fill me-1"></i>Apply Filters</button>
+              <a href="/shop" class="btn btn-outline-secondary btn-sm fw-600"><i class="bi bi-arrow-clockwise me-1"></i>Reset All</a>
             </div>
-            {% endif %}
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
+
+      <!-- Store Hours & Location -->
+      {% include 'partials/hours_map_compact.html' %}
     </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="col-lg-9">
 
     <!-- Quick Category Chips -->
     <div class="mb-4 animate-stagger pb-3">
@@ -222,9 +174,9 @@
           </small>
         </div>
 
-        <div class="row g-3" id="productsGrid">
+        <div class="row row-cols-2 row-cols-md-4 g-3" id="productsGrid">
           {% for p in products %}
-          <div class="col-12 col-sm-6 col-lg-4 animate-stagger product-item">
+          <div class="col animate-stagger product-item">
             <div class="card h-100 product-card position-relative shadow-sm hover-lift">
               <!-- Product Badges -->
               <div class="product-badges">
@@ -259,16 +211,6 @@
                   <a class="btn btn-sm btn-outline-success fw-600 flex-grow-1" href="/product/{{p.slug}}" aria-label="View {{p.name}}" data-bs-toggle="tooltip" title="View Full Details">
                     <i class="bi bi-eye me-1"></i>View
                   </a>
-                  <button class="btn btn-sm btn-warning fw-600 btn-quick-view" aria-label="Quick view {{p.name}}"
-                    data-product-id="{{p.id}}" 
-                    data-name="{{p.name}}" 
-                    data-price="{{p.price}}" 
-                    data-oldprice="{{p.old_price or ''}}" 
-                    data-image="{{ cl_transform(p.image_url, 800, 600) or 'https://placehold.co/800x600' }}" 
-                    data-url="/product/{{p.slug}}" 
-                    data-bs-toggle="tooltip" title="Quick Preview">
-                    <i class="bi bi-zoom-in"></i>
-                  </button>
                   {% if current_user.is_authenticated %}
                     <button class="btn btn-sm btn-success fw-600 btn-add-to-cart btn-async flex-grow-1" data-product-id="{{p.id}}" aria-label="Add {{p.name}} to cart" data-bs-toggle="tooltip" title="Add to Cart">
                       <i class="bi bi-bag-plus me-1"></i>Add
@@ -276,10 +218,15 @@
                     <button class="btn btn-sm btn-outline-danger fw-600 btn-wishlist btn-async" data-product-id="{{p.id}}" aria-label="Add {{p.name}} to wishlist" data-bs-toggle="tooltip" title="Save for Later">
                       <i class="bi bi-heart"></i>
                     </button>
+                    <a class="btn btn-sm btn-outline-success fw-600 wa-order-card" target="_blank" rel="noopener"
+                       data-site="{{ site_name or 'Scholagro' }}" data-wa="{{ config.get('WHATSAPP_NUMBER') or '' }}"
+                       data-name="{{ p.name }}" data-price="{{ p.price }}" data-url="{{ url_for('shop.product', slug=p.slug, _external=False) }}"
+                       title="Order on WhatsApp"><i class="bi bi-whatsapp"></i></a>
                   {% else %}
-                    <a class="btn btn-sm btn-success fw-600 flex-grow-1" href="/auth/login" data-bs-toggle="tooltip" title="Login to shop">
-                      <i class="bi bi-box-arrow-in-right me-1"></i>Login
-                    </a>
+                    <a class="btn btn-sm btn-outline-success fw-600 wa-order-card" target="_blank" rel="noopener"
+                       data-site="{{ site_name or 'Scholagro' }}" data-wa="{{ config.get('WHATSAPP_NUMBER') or '' }}"
+                       data-name="{{ p.name }}" data-price="{{ p.price }}" data-url="{{ url_for('shop.product', slug=p.slug, _external=False) }}"
+                       title="Order on WhatsApp"><i class="bi bi-whatsapp"></i></a>
                   {% endif %}
                 </div>
               </div>
@@ -383,6 +330,31 @@
       if (!isNaN(v)) maxRange.value = Math.min(Math.max(v, 0), parseInt(maxRange.max, 10));
     });
   }
+
+  // Build WhatsApp links for product cards
+  (function(){
+    try{
+      document.querySelectorAll('.wa-order-card').forEach(function(a){
+        var site = (a.getAttribute('data-site') || 'Scholagro');
+        var wa = (a.getAttribute('data-wa') || '').replace(/\s+/g,'');
+        var name = a.getAttribute('data-name') || '';
+        var price = a.getAttribute('data-price') || '';
+        var url = a.getAttribute('data-url') || '';
+        var lines = [site + ' Order Request', name + ' — KES ' + price, (url && url[0]=='/' ? (window.location.origin + url) : url)];
+        var msg = encodeURIComponent(lines.join('\n'));
+        a.href = wa ? ('https://wa.me/' + wa + '?text=' + msg) : ('https://wa.me/?text=' + msg);
+      });
+    }catch(e){}
+  })();
 </script>
+
+<style>
+  .product-card a[href="/auth/login"],
+  .product-card a[href="/auth/login"]:visited {
+    display: none !important;
+  }
+  #productsGrid .card a[href="/auth/login"]{ display:none !important; }
+  #productsGrid .btn[href="/auth/login"]{ display:none !important; }
+</style>
 
 {% endblock %}

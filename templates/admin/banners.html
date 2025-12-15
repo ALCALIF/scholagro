@@ -1,37 +1,119 @@
-{% extends 'base.html' %}
+{% extends 'admin/base.html' %}
+{% block breadcrumbs %}
+  <nav class="px-4 pb-3 text-sm text-slate-500 dark:text-slate-400" aria-label="breadcrumb">
+    <ol class="breadcrumb m-0">
+      <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Banners</li>
+    </ol>
+  </nav>
+{% endblock %}
 {% block content %}
-<h3>Homepage Banners</h3>
-<form method="post" enctype="multipart/form-data" class="row g-2 mb-3">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <div class="col-md-3"><input class="form-control" name="title" placeholder="Title (optional)"></div>
-  <div class="col-md-5"><input class="form-control" name="image_url" placeholder="Image URL (or upload)"></div>
-  <div class="col-md-3"><input class="form-control" type="file" name="image_file" accept="image/*"></div>
-  <div class="col-md-3"><input class="form-control" name="link_url" placeholder="Link URL (optional)"></div>
-  <div class="col-md-1 d-grid"><button class="btn btn-success">Add</button></div>
-</form>
-<table class="table table-sm align-middle">
-  <thead><tr><th>Preview</th><th>Title</th><th>Link</th><th>Status</th><th>Actions</th></tr></thead>
-  <tbody>
-    {% for b in banners %}
-    <tr>
-      <td style="width:220px"><img src="{{b.image_url}}" class="img-fluid rounded" alt="{{b.title}}"></td>
-      <td>{{b.title}}</td>
-      <td class="text-truncate" style="max-width:240px">{{b.link_url}}</td>
-      <td>
-        {% if b.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}
-      </td>
-      <td class="d-flex gap-2">
-        <form method="post" action="/admin/banners/{{b.id}}/toggle" class="js-confirm" data-confirm="Toggle banner status?">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <button class="btn btn-sm btn-outline-primary">Toggle</button>
-        </form>
-        <form method="post" action="/admin/banners/{{b.id}}/delete" class="js-confirm" data-confirm="Delete banner?">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <button class="btn btn-sm btn-outline-danger">Delete</button>
-        </form>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="container-fluid">
+  <h3 class="mb-3 fw-bold">Homepage Banners</h3>
+  {% block head %}
+    <link rel="stylesheet" href="https://unpkg.com/cropperjs@1.5.12/dist/cropper.min.css">
+  {% endblock %}
+  <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+    <form id="bannerForm" method="post" enctype="multipart/form-data" class="row g-2">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="col-12 mb-2">
+        <small class="text-muted">Active banners: <strong>{{ active_count or 0 }}</strong> (maximum 10 active banners)</small>
+      </div>
+      <div class="col-md-3"><input class="form-control" name="title" placeholder="Title (optional)"></div>
+      <div class="col-md-5"><input class="form-control" name="image_url" placeholder="Image URL (or upload)"></div>
+      <div class="col-md-3"><input id="image_file_input" class="form-control" type="file" name="image_file" accept="image/*"></div>
+      <div class="col-md-3"><input class="form-control" name="link_url" placeholder="Link URL (optional)"></div>
+      <div class="col-md-1 d-grid"><button type="submit" class="btn btn-success" {% if active_count and active_count >= 10 %}disabled{% endif %}>Add</button></div>
+      {% if active_count and active_count >= 10 %}
+      <div class="col-12 mt-2"><small class="text-warning">You have 10 active banners. Please toggle or delete a banner to add a new active banner.</small></div>
+      {% endif %}
+    </form>
+  </div></div>
+  <div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-sm table-hover align-middle mb-0" data-search="banners">
+        <thead><tr><th>Preview</th><th>Title</th><th>Link</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="bannersList">
+          {% for b in banners %}
+          <tr draggable="true" data-id="{{b.id}}">
+            <td style="width:220px"><img src="{{b.image_url}}" class="img-fluid rounded" alt="{{b.title}}"></td>
+            <td>{{b.title}}</td>
+            <td class="text-truncate" style="max-width:240px">{{b.link_url}}</td>
+            <td>
+              {% if b.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}
+            </td>
+            <td class="d-flex gap-2 align-items-center">
+              <form method="post" action="/admin/banners/{{b.id}}/toggle" class="js-confirm" data-confirm="Toggle banner status?">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-outline-primary">Toggle</button>
+              </form>
+              <form method="post" action="/admin/banners/{{b.id}}/delete" class="js-confirm" data-confirm="Delete banner?">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+              <button type="button" class="btn btn-sm btn-outline-secondary btn-save-order ms-auto" title="Save order">Save Order</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Cropper modal -->
+  <div class="modal fade" id="cropperModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content card-premium">
+        <div class="modal-header"><h5 class="modal-title">Crop Banner Image</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+        <div class="modal-body">
+          <div style="max-height:60vh; overflow:hidden; display:flex; justify-content:center; align-items:center;">
+            <img id="cropperPreview" style="max-width:100%;" alt="Crop preview" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button id="cropperConfirm" type="button" class="btn btn-success">Crop & Upload</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+  <script src="https://unpkg.com/cropperjs@1.5.12/dist/cropper.min.js"></script>
+  <script>
+    // Drag & Drop reorder
+    (function(){
+      const tbody = document.getElementById('bannersList');
+      if (!tbody) return;
+      let dragSrc = null;
+      function handleDragStart(e){ dragSrc = e.currentTarget; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', e.currentTarget.dataset.id); e.currentTarget.classList.add('dragging'); }
+      function handleDragOver(e){ e.preventDefault(); e.dataTransfer.dropEffect = 'move'; return false; }
+      function handleDragEnter(e){ e.currentTarget.classList.add('over'); }
+      function handleDragLeave(e){ e.currentTarget.classList.remove('over'); }
+      function handleDrop(e){ e.stopPropagation(); const id = e.dataTransfer.getData('text/plain'); if (dragSrc !== e.currentTarget){ const src = dragSrc; const tgt = e.currentTarget; // swap nodes
+          if (src && tgt){ if (src.rowIndex < tgt.rowIndex) { tgt.parentNode.insertBefore(src, tgt.nextSibling); } else { tgt.parentNode.insertBefore(src, tgt); } }
+      } return false; }
+      function handleDragEnd(e){ document.querySelectorAll('#bannersList tr').forEach(function(r){ r.classList.remove('over'); r.classList.remove('dragging'); }); }
+      document.querySelectorAll('#bannersList tr[draggable]')?.forEach(function(r){ r.addEventListener('dragstart', handleDragStart); r.addEventListener('dragover', handleDragOver); r.addEventListener('dragenter', handleDragEnter); r.addEventListener('dragleave', handleDragLeave); r.addEventListener('drop', handleDrop); r.addEventListener('dragend', handleDragEnd); });
+      // Save order
+      function saveOrder(){ const ids = Array.from(document.querySelectorAll('#bannersList tr')).map(r => r.dataset.id); fetch("{{ url_for('admin.banners_reorder') }}", {method:'POST', headers:{'Content-Type':'application/json', 'X-CSRFToken': '{{ csrf_token() }}' }, body: JSON.stringify({order: ids})}).then(r=>{ if (r.ok){ alert('Order saved'); } else { alert('Could not save order'); } }); }
+      document.querySelectorAll('.btn-save-order').forEach(function(b){ b.addEventListener('click', saveOrder); });
+    })();
+
+    // Cropper: init and bind to file input
+    (function(){
+      let cropper = null; const fileInput = document.getElementById('image_file_input'); const cropModal = document.getElementById('cropperModal'); const cropPreview = document.getElementById('cropperPreview'); const confirmBtn = document.getElementById('cropperConfirm'); if (!fileInput || !cropPreview || !cropModal) return;
+      const bsModal = new bootstrap.Modal(cropModal);
+      fileInput.addEventListener('change', function(e){ const f = (e.target.files || [])[0]; if (!f) return; const url = URL.createObjectURL(f); cropPreview.src = url; bsModal.show(); if (cropper) { cropper.destroy(); cropper = null; } cropper = new Cropper(cropPreview, { aspectRatio: 16/5, viewMode: 1, autoCropArea: 1 }); });
+      confirmBtn.addEventListener('click', async function(){ if (!cropper) { bsModal.hide(); return; } try{ const canvas = cropper.getCroppedCanvas({ width: 1600, height: 500, imageSmoothingQuality: 'high' }); canvas.toBlob(function(blob){ // Replace file input with blob and submit via fetch
+            const fd = new FormData(document.getElementById('bannerForm'));
+            fd.set('image_file', blob, 'banner.jpg');
+            // Submit via fetch to bypass native form if cropping applied
+            fetch("{{ url_for('admin.banners') }}", { method: 'POST', body: fd }).then(r => { if (r.ok) location.reload(); else { alert('Could not upload banner'); } });
+          }, 'image/jpeg', 0.9);
+        } catch(e){ console.error(e); alert('Error processing image'); }
+        bsModal.hide();
+      });
+    })();
+  </script>
 {% endblock %}

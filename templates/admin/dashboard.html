@@ -1,11 +1,355 @@
-{% extends 'base.html' %}
+{% extends 'admin/base.html' %}
+{% block breadcrumbs %}
+  <nav class="px-4 pb-3 text-sm text-slate-500 dark:text-slate-400" aria-label="breadcrumb">
+    <ol class="breadcrumb m-0">
+      <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+    </ol>
+  </nav>
+{% endblock %}
 {% block content %}
-<h3>Admin Dashboard</h3>
-<div class="row">
-  <div class="col-md-4"><div class="border rounded p-3">Products: <strong>{{product_count}}</strong></div></div>
-  <div class="col-md-4"><div class="border rounded p-3">Orders: <strong>{{order_count}}</strong></div></div>
+<div class="space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-2">
+    <h2 class="text-lg font-semibold">Quick Actions</h2>
+    <div class="flex flex-wrap gap-2">
+      <a href="/admin/products#addForm" class="btn btn-brand btn-sm rounded-pill d-inline-flex align-items-center"><i class="bi bi-plus-lg me-1"></i>Add Product</a>
+      <a href="/admin/products" class="btn btn-outline-brand btn-sm rounded-pill d-inline-flex align-items-center"><i class="bi bi-bag me-1"></i>Manage Products</a>
+      <a href="/admin/categories" class="btn btn-outline-brand btn-sm rounded-pill d-inline-flex align-items-center"><i class="bi bi-grid-3x3-gap me-1"></i>Categories</a>
+      <a href="/admin/import" class="btn btn-outline-brand btn-sm rounded-pill d-inline-flex align-items-center"><i class="bi bi-file-earmark-arrow-up me-1"></i>Bulk Import</a>
+    </div>
+
+  <!-- Announcement Bar (Top Marquee) Preview -->
+  <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+    <div class="flex items-center justify-between">
+      <h3 class="font-semibold">Announcement Bar</h3>
+      <a href="/admin/announcements" class="btn btn-sm btn-outline-success rounded-pill">Manage Announcements</a>
+    </div>
+    <div class="mt-3">
+      <div class="top-banner py-1" style="position:static">
+        <div class="container d-flex align-items-center justify-content-between">
+          <div class="marquee-viewport" style="overflow:hidden;white-space:nowrap;width:100%">
+            <div id="promo-marquee" class="marquee-track"></div>
+          </div>
+        </div>
+      </div>
+      <div class="mt-2 text-sm text-slate-500">
+        {% for m in (promo_messages or []) %}
+          <div>• {{ m }}</div>
+        {% endfor %}
+      </div>
+    </div>
+    <script type="application/json" id="promoMessagesData">{{ (promo_messages or [])|tojson }}</script>
+    <script>(function(){ try{ window.dispatchEvent(new Event('DOMContentLoaded')); }catch(e){} })();</script>
+  </div>
+
+  <!-- Homepage Hero Banners Preview -->
+  <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+    <div class="flex items-center justify-between">
+      <h3 class="font-semibold">Homepage Hero Banners</h3>
+      <a href="/admin/banners" class="btn btn-sm btn-outline-success rounded-pill">Manage Banners</a>
+    </div>
+    <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      {% for b in active_banners or [] %}
+      <div class="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+        <div class="aspect-[16/9] bg-slate-100 dark:bg-slate-700/40">
+          <img src="{{ b.image_url }}" alt="{{ b.title or 'Banner' }}" class="w-full h-full object-cover" loading="lazy">
+        </div>
+        <div class="p-2 text-sm flex items-center justify-between">
+          <div class="truncate mr-2">{{ b.title or 'Untitled' }}</div>
+          <a href="/admin/banners" class="btn btn-sm btn-outline-success rounded-pill whitespace-nowrap">Edit</a>
+        </div>
+      </div>
+      {% else %}
+      <div class="col-span-full text-sm text-slate-500">No active banners. <a href="/admin/banners" class="text-brand">Add one</a>.</div>
+      {% endfor %}
+    </div>
+  </div>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 flex items-center gap-3">
+      <div class="h-9 w-9 rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 flex items-center justify-center">🛒</div>
+      <div>
+        <div class="text-xs text-slate-500">New orders</div>
+        <div class="text-lg font-semibold">{{ order_count }}</div>
+        <canvas id="spark-orders" height="24"></canvas>
+      </div>
+    </div>
+    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 flex items-center gap-3">
+      <div class="h-9 w-9 rounded-md bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 flex items-center justify-center">👥</div>
+      <div>
+        <div class="text-xs text-slate-500">Customers</div>
+        <div class="text-lg font-semibold">{{ user_count }}</div>
+        <canvas id="spark-users" height="24"></canvas>
+      </div>
+    </div>
+    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 flex items-center gap-3">
+      <div class="h-9 w-9 rounded-md bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 flex items-center justify-center">📦</div>
+      <div>
+        <div class="text-xs text-slate-500">Products</div>
+        <div class="text-lg font-semibold">{{ product_count }}</div>
+        <canvas id="spark-products" height="24"></canvas>
+      </div>
+    </div>
+    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 flex items-center gap-3">
+      <div class="h-9 w-9 rounded-md bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300 flex items-center justify-center">💸</div>
+      <div>
+        <div class="text-xs text-slate-500">Revenue</div>
+        <div class="text-lg font-semibold">Ksh {{ '%.2f'|format(total_sales or 0) }}</div>
+        <canvas id="spark-revenue" height="24"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+      <div class="text-sm text-slate-500">Products</div>
+      <div class="mt-1 text-2xl font-semibold">{{ product_count }}</div>
+    </div>
+
+  <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+    <div class="flex items-center justify-between">
+      <h3 class="font-semibold">Top regions by revenue</h3>
+    </div>
+    <div id="worldMap" class="mt-4 h-80 w-full"></div>
+  </div>
+    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+      <div class="text-sm text-slate-500">Orders</div>
+      <div class="mt-1 text-2xl font-semibold">{{ order_count }}</div>
+    </div>
+    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+      <div class="text-sm text-slate-500">Users</div>
+      <div class="mt-1 text-2xl font-semibold">{{ user_count }}</div>
+    </div>
+    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+      <div class="text-sm text-slate-500">Total Sales</div>
+      <div class="mt-1 text-2xl font-semibold">Ksh {{ '%.2f'|format(total_sales or 0) }}</div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="lg:col-span-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-semibold">Total sales</h3>
+        <div class="flex items-center gap-2 text-sm">
+          <label class="text-slate-500">Period</label>
+          <select id="salesPeriod" class="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1">
+            <option value="m">Last 12 months</option>
+            <option value="w">Last 12 weeks</option>
+            <option value="d">Last 30 days</option>
+          </select>
+        </div>
+      </div>
+      <canvas id="salesChart" class="mt-4 h-64"></canvas>
+    </div>
+    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+      <h3 class="font-semibold">Monthly Target</h3>
+      <canvas id="targetGauge" class="mt-4 h-64"></canvas>
+    </div>
+  </div>
+
+  <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+    <div class="flex items-center justify-between">
+      <h3 class="font-semibold">Recent Orders</h3>
+      <a href="/admin/orders" class="btn btn-sm btn-outline-brand rounded-pill">View all</a>
+    </div>
+    <div class="mt-3 overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead class="text-left text-slate-500">
+          <tr>
+            <th class="py-2 pr-4">#</th>
+            <th class="py-2 pr-4">User</th>
+            <th class="py-2 pr-4">Status</th>
+            <th class="py-2 pr-4">Total</th>
+            <th class="py-2 pr-4">Created</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+          {% for o in recent_orders %}
+          <tr>
+            <td class="py-2 pr-4">{{ o.id }}</td>
+            <td class="py-2 pr-4">{{ o.user.email if o.user else 'Guest' }}</td>
+            <td class="py-2 pr-4">
+              {% set s = o.status %}
+              {% if s == 'paid' or s == 'delivered' or s == 'confirmed' %}
+                <span class="badge-pill pill-success">{{ s }}</span>
+              {% elif s == 'pending' or s == 'packed' or s == 'on_the_way' %}
+                <span class="badge-pill pill-warning">{{ s }}</span>
+              {% else %}
+                <span class="badge-pill pill-danger">{{ s }}</span>
+              {% endif %}
+            </td>
+            <td class="py-2 pr-4">Ksh {{ '%.2f'|format(o.total_amount or 0) }}</td>
+            <td class="py-2 pr-4">{{ o.created_at.strftime('%Y-%m-%d') if o.created_at else '' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Earnings & Revenue by channel -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+    <div class="lg:col-span-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+      <div class="flex items-center justify-between"><h3 class="font-semibold">Earnings</h3>
+        <select id="earningsPeriod" class="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1 text-sm">
+          <option>Week</option><option selected>Month</option><option>Year</option>
+        </select>
+      </div>
+      <canvas id="earningsChart" class="mt-4 h-64"></canvas>
+    </div>
+    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+      <div class="flex items-center justify-between"><h3 class="font-semibold">Revenue by Channel</h3></div>
+      <div class="grid grid-cols-1 place-items-center">
+        <canvas id="channelDonut" class="mt-4 h-56 w-full"></canvas>
+      </div>
+      <div class="mt-3 text-sm text-slate-500">
+        <div class="flex items-center justify-between"><span>Website</span><span class="font-medium text-slate-700 dark:text-slate-200">48%</span></div>
+        <div class="flex items-center justify-between"><span>Mobile</span><span class="font-medium text-slate-700 dark:text-slate-200">32%</span></div>
+        <div class="flex items-center justify-between"><span>Marketplace</span><span class="font-medium text-slate-700 dark:text-slate-200">20%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Latest Transactions & Reviews -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+    <div class="lg:col-span-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+      <div class="flex items-center justify-between"><h3 class="font-semibold">Latest Transactions</h3><a href="/admin/payments" class="btn btn-sm btn-outline-brand rounded-pill">View all</a></div>
+      <div class="mt-3 overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="text-left text-slate-500">
+            <tr><th class="py-2 pr-4">#</th><th class="py-2 pr-4">Order</th><th class="py-2 pr-4">Method</th><th class="py-2 pr-4">Amount</th><th class="py-2 pr-4">Status</th></tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+            {% for p in recent_payments or [] %}
+            <tr>
+              <td class="py-2 pr-4">{{ p.id }}</td>
+              <td class="py-2 pr-4">#{{ p.order_id }}</td>
+              <td class="py-2 pr-4">{{ p.method or '—' }}</td>
+              <td class="py-2 pr-4">Ksh {{ '%.2f'|format(p.amount or 0) }}</td>
+              <td class="py-2 pr-4"><span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-700/60">{{ p.status or 'pending' }}</span></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="py-3 text-slate-500">No transactions yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+      <div class="flex items-center justify-between"><h3 class="font-semibold">Latest Reviews</h3><a href="/admin/reviews" class="btn btn-sm btn-outline-brand rounded-pill">Manage</a></div>
+      <div class="mt-3 space-y-3">
+        {% for r in latest_reviews or [] %}
+        <div class="border border-slate-200 dark:border-slate-700 rounded-lg p-3">
+          <div class="flex items-center justify-between text-sm">
+            <div class="font-medium">{{ (r.user.email if r.user else 'Anonymous') }}</div>
+            <div class="text-amber-500">{{ '★' * (r.rating|int) }}{{ '☆' * (5 - (r.rating|int)) }}</div>
+          </div>
+          <div class="mt-1 text-sm text-slate-600 dark:text-slate-300 line-clamp-2">{{ r.comment or '' }}</div>
+        </div>
+        {% else %}
+        <div class="text-sm text-slate-500">No reviews yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <!-- Revenue by Country -->
+  <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 mt-4">
+    <div class="flex items-center justify-between"><h3 class="font-semibold">Revenue by Country</h3></div>
+    <div class="mt-3 overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead class="text-left text-slate-500"><tr><th class="py-2 pr-4">Country</th><th class="py-2 pr-4">Revenue (KES)</th><th class="py-2 pr-4">Share</th></tr></thead>
+        <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+          {% set total_rev = (revenue_by_zone|map(attribute=1)|sum)|default(0, true) %}
+          {% for name, amount in revenue_by_zone %}
+          {% set share = (100 * (amount or 0) / (total_rev or 1))|round(1) %}
+          <tr><td class="py-2 pr-4">{{ name }}</td><td class="py-2 pr-4">{{ '%.2f'|format(amount or 0) }}</td><td class="py-2 pr-4">{{ share }}%</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap gap-2 mt-4">
+    <a href="/admin/products#addForm" class="btn btn-brand btn-sm rounded-pill d-inline-flex align-items-center"><i class="bi bi-plus-lg me-1"></i>Add Product</a>
+    <a href="/admin/products" class="btn btn-outline-brand btn-sm rounded-pill d-inline-flex align-items-center"><i class="bi bi-bag me-1"></i>Manage Products</a>
+    <a href="/admin/orders" class="btn btn-outline-brand btn-sm rounded-pill d-inline-flex align-items-center"><i class="bi bi-list-check me-1"></i>Manage Orders</a>
+    <a href="/admin/import" class="btn btn-outline-brand btn-sm rounded-pill d-inline-flex align-items-center"><i class="bi bi-file-earmark-arrow-up me-1"></i>Import CSV</a>
+    <a href="/admin/reports/advanced" class="btn btn-outline-brand btn-sm rounded-pill d-inline-flex align-items-center"><i class="bi bi-graph-up-arrow me-1"></i>Advanced Reports</a>
+  </div>
 </div>
-<hr>
-<a class="btn btn-outline-success" href="/admin/products">Manage Products</a>
-<a class="btn btn-outline-primary" href="/admin/orders">Manage Orders</a>
+
+<script>
+  (function(){
+    try {
+      const ctx = document.getElementById('salesChart');
+      const periodSel = document.getElementById('salesPeriod');
+      // Real data injected from backend (last 12 months)
+      const L = {{ (chart_labels or [])|tojson }};
+      const SALES = {{ (chart_sales or [])|tojson }};
+      const ORDERS = {{ (chart_orders or [])|tojson }};
+      const USERS = {{ (chart_users or [])|tojson }};
+      const PRODUCTS = {{ (chart_products or [])|tojson }};
+      function salesData(mode){
+        // For now, always return monthly aggregates from backend
+        return { labels: L, data: SALES };
+      }
+      if (ctx){
+        let mode = 'm';
+        let d = salesData(mode);
+        const chart = new Chart(ctx, {
+          type: 'line',
+          data: { labels: d.labels, datasets: [{ label: 'Sales', data: d.data, borderColor:'#16a34a', backgroundColor:'rgba(22,163,74,.15)', fill:true, tension:.35 }] },
+          options: { responsive: true, plugins: { legend: { display: false } }, scales:{ y:{ beginAtZero:true } } }
+        });
+        // Period selector currently maps to the same monthly series
+        if (periodSel){ periodSel.addEventListener('change', function(){ d = salesData(periodSel.value); chart.data.labels = d.labels; chart.data.datasets[0].data = d.data; chart.update(); }); }
+      }
+      const g = document.getElementById('targetGauge');
+      if (g) new Chart(g, { type: 'doughnut', data: { labels:['Achieved','Remaining'], datasets:[{ data:[75,25], backgroundColor:['#16a34a','#e5e7eb'], borderWidth:0 }] }, options:{ cutout:'70%', plugins:{ legend:{ display:false } } } });
+      // World map
+      const mapEl = document.getElementById('worldMap');
+      if (mapEl && window.jsVectorMap){
+        new jsVectorMap({
+          selector: '#worldMap',
+          map: 'world',
+          markers: [
+            {name: 'Kenya', coords: [-1.286389, 36.817223]},
+            {name: 'Uganda', coords: [0.347596, 32.582520]},
+            {name: 'Tanzania', coords: [-6.792354, 39.208328]}
+          ],
+          zoomButtons: true,
+          markerStyle: { initial: { fill: '#16a34a' } }
+        });
+      }
+
+      // Earnings bar chart with period toggle
+      const eC = document.getElementById('earningsChart');
+      const eSel = document.getElementById('earningsPeriod');
+      function earningsData(period){ return { labels: L, data: SALES }; }
+      if (eC){
+        let ed = earningsData((eSel && eSel.value) || 'Month');
+        const eChart = new Chart(eC, { type:'bar', data:{ labels: ed.labels, datasets:[{ label:'KES (x1k)', data: ed.data, backgroundColor:'#16a34a' }] }, options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } } });
+        if (eSel){ eSel.addEventListener('change', function(){ ed = earningsData(eSel.value); eChart.data.labels = ed.labels; eChart.data.datasets[0].data = ed.data; eChart.update(); }); }
+      }
+
+      // Revenue by channel donut
+      const chD = document.getElementById('channelDonut');
+      if (chD){
+        new Chart(chD, { type:'doughnut', data:{ labels:['Website','Mobile','Marketplace'], datasets:[{ data:[48,32,20], backgroundColor:['#16a34a','#0ea5e9','#f59e0b'], borderWidth:0 }] }, options:{ cutout:'65%', plugins:{ legend:{ display:false } } } });
+      }
+
+      // KPI micro sparklines
+      function spark(el, data, color){
+        if (!el) return;
+        const ctx = el.getContext('2d');
+        new Chart(ctx, { type:'line', data:{ labels: data.map((_,i)=>i+1), datasets:[{ data, borderColor:color, backgroundColor:'transparent', borderWidth:1, pointRadius:0, tension:.35 }] }, options:{ responsive:true, plugins:{ legend:{ display:false }, tooltip:{ enabled:false } }, scales:{ x:{ display:false }, y:{ display:false } }, elements:{ line:{ borderJoinStyle:'round' } } });
+      }
+      spark(document.getElementById('spark-orders'), ORDERS, '#16a34a');
+      spark(document.getElementById('spark-users'), USERS, '#0ea5e9');
+      spark(document.getElementById('spark-products'), PRODUCTS, '#f59e0b');
+      spark(document.getElementById('spark-revenue'), SALES, '#a21caf');
+    } catch(e){}
+  })();
+</script>
 {% endblock %}

@@ -1,10 +1,25 @@
-{% extends 'base.html' %}
+{% extends 'admin/base.html' %}
+{% block breadcrumbs %}
+  <nav class="px-4 pb-3 text-sm text-slate-500 dark:text-slate-400" aria-label="breadcrumb">
+    <ol class="breadcrumb m-0">
+      <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Import</li>
+    </ol>
+  </nav>
+{% endblock %}
 {% block content %}
-<h3>Bulk Import Products (CSV)</h3>
-<p class="text-muted">Upload a CSV with headers: <code>name,slug,price,category,image_url,stock</code></p>
-<form method="post" enctype="multipart/form-data" class="d-flex gap-2 align-items-center">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <input type="file" name="file" accept=".csv" class="form-control" required style="max-width:420px">
-  <button class="btn btn-success">Upload</button>
-</form>
+<div class="container-fluid">
+  <h3 class="mb-3 fw-bold">Bulk Import Products (CSV)</h3>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <p class="text-muted">Upload a CSV/JSON with headers: <code>name,slug,price,category,image_url,stock,images</code>. Images may be pipe-separated or JSON array.</p>
+      <form method="post" enctype="multipart/form-data" class="d-flex gap-2 align-items-center">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="file" name="file" accept=".csv,.json" class="form-control" required style="max-width:420px">
+        <label class="form-check-label ms-2"><input type="checkbox" name="download_images" value="1" class="form-check-input me-1"> Download remote images</label>
+        <button class="btn btn-success">Upload</button>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}

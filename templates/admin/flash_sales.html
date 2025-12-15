@@ -1,0 +1,73 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<div class="container-fluid p-4 p-md-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0 fw-bold">Flash Sales</h3>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="admin-card">
+        <form method="post" class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Product</label>
+            <select name="product_id" class="form-select" required>
+              <option value="">-- select product --</option>
+              {% for p in products %}
+                <option value="{{ p.id }}">{{ p.name }} (Ksh {{ p.price }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Discount %</label>
+            <input type="number" name="discount_percent" class="form-control" min="1" max="99" placeholder="e.g. 20">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Sale Price (optional)</label>
+            <input type="text" name="sale_price" class="form-control" placeholder="Leave empty to calculate from discount">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Starts At</label>
+            <input type="datetime-local" name="starts_at" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Ends At</label>
+            <input type="datetime-local" name="ends_at" class="form-control" required>
+          </div>
+          <div class="col-12 d-flex gap-2">
+            <button class="btn btn-success" type="submit">Create Flash Sale</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="admin-card">
+        <h5 class="mb-3">Active / Scheduled Flash Sales</h5>
+        <table class="table table-sm">
+          <thead>
+            <tr><th>Product</th><th>Discount</th><th>Sale Price</th><th>Ends</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            {% for fs in flash_sales %}
+            <tr>
+              <td>{{ fs.product.name }}</td>
+              <td>{{ fs.discount_percent }}%</td>
+              <td>Ksh {{ fs.product.price }}{% if fs.product.old_price %} <small class="text-muted text-decoration-line-through ms-2">{{ fs.product.old_price }}</small>{% endif %}</td>
+              <td><span data-sale-ends="{{ fs.ends_at.isoformat() }}"></span></td>
+              <td>
+                <a href="/admin/flash-sales/{{ fs.id }}/edit" class="btn btn-sm btn-outline-primary">Edit</a>
+                <form method="post" action="/admin/flash-sales/{{ fs.id }}/delete" style="display:inline-block" onsubmit="return confirm('Delete this flash sale?');">
+                  <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="text-muted">No flash sales created yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends 'admin/base.html' %}
+{% block breadcrumbs %}
+  <nav class="px-4 pb-3 text-sm text-slate-500 dark:text-slate-400" aria-label="breadcrumb">
+    <ol class="breadcrumb m-0">
+      <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+      <li class="breadcrumb-item"><a href="/admin/reports/advanced">Reports</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Advanced</li>
+    </ol>
+  </nav>
+{% endblock %}
+{% block content %}
+<div class="container-fluid">
+  <div class="d-flex align-items-center mb-3">
+    <h3 class="mb-0 fw-bold">Advanced Reports</h3>
+    <div class="ms-auto small text-muted">Generated at {{ datetime.utcnow().strftime('%Y-%m-%d %H:%M') }}</div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <h5 class="card-title mb-0">Sales by Category</h5>
+          </div>
+          <div class="mt-3">
+            <canvas id="catSalesChart" height="220"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <h5 class="card-title mb-0">Top Products by Quantity</h5>
+          </div>
+          <div class="mt-3">
+            <canvas id="topProductsChart" height="220"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="fw-bold mb-2">Sales by Category (Table)</h6>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead class="table-light"><tr><th>Category</th><th class="text-end">Sales (KES)</th></tr></thead>
+              <tbody>
+                {% for name, total in sales_by_category %}
+                <tr>
+                  <td>{{ name or 'Uncategorized' }}</td>
+                  <td class="text-end">{{ '%.2f'|format((total or 0)|float) }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="fw-bold mb-2">Top Products (Table)</h6>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead class="table-light"><tr><th>Product</th><th class="text-end">Qty</th></tr></thead>
+              <tbody>
+                {% for name, qty in top_products %}
+                <tr>
+                  <td>{{ name }}</td>
+                  <td class="text-end">{{ qty }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    try {
+      const catCtx = document.getElementById('catSalesChart');
+      if (catCtx){
+        const labels = [{% for name, total in sales_by_category %}{{ (name or 'Uncategorized')|tojson }},{% endfor %}];
+        const data = [{% for name, total in sales_by_category %}{{ (total or 0)|float }},{% endfor %}];
+        new Chart(catCtx, { type:'bar', data:{ labels, datasets:[{ label:'Sales (KES)', data, backgroundColor:'#16a34a' }] }, options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } });
+      }
+      const prodCtx = document.getElementById('topProductsChart');
+      if (prodCtx){
+        const labels = [{% for name, qty in top_products %}{{ name|tojson }},{% endfor %}];
+        const data = [{% for name, qty in top_products %}{{ qty }},{% endfor %}];
+        new Chart(prodCtx, { type:'line', data:{ labels, datasets:[{ label:'Qty', data, borderColor:'#0ea5e9', backgroundColor:'rgba(14,165,233,.15)', fill:true, tension:.35 }] }, options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } });
+      }
+    } catch(e){}
+  })();
+</script>
+{% endblock %}

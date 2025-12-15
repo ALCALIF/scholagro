@@ -27,24 +27,170 @@
     <link href="{{ url_for('static', filename='css/theme.css') }}?v={{ datetime.utcnow().timestamp()|int }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/style.css') }}?v={{ datetime.utcnow().timestamp()|int }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/animations.css') }}?v={{ datetime.utcnow().timestamp()|int }}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" sizes="any">
+    <link rel="icon" href="{{ url_for('static', filename='favicon') }}" sizes="any">
     <style>
-      body { background-color: #ffffff; color: #0f172a; }
+      :root{
+        --sg-text: #0f172a;          /* slate-900 */
+        --sg-muted: #475569;         /* slate-600 */
+        --sg-card: #ffffff;          /* white */
+        --sg-surface: #f8fafc;       /* slate-50 */
+        /* layout heights */
+        --banner-h: 36px;            /* visible on small */
+        --nav-h: 72px;               /* compact navbar height to reduce overall header size */
+        --overlap: 1px;              /* slight overlap to hide seam */
+      }
+      html, body { margin: 0; }
+      [data-theme="dark"]{
+        --sg-text: #e5e7eb;          /* slate-200 */
+        --sg-muted: #cbd5e1;         /* slate-300 */
+        --sg-card: #111827;          /* slate-900 */
+        --sg-surface: #0b1220;       /* deep surface */
+      }
+      body { background-color: #ffffff; color: var(--sg-text); padding-top: calc(var(--banner-h) + var(--nav-h) - 1px); }
       .container { max-width: 1200px; margin: 0 auto; }
+
+      /* Ensure readable muted text in dark mode */
+      [data-theme="dark"] .text-muted { color: var(--sg-muted) !important; opacity: 0.9; }
+      [data-theme="dark"] .lead { color: var(--sg-text); opacity: 0.9; }
+      [data-theme="dark"] p, [data-theme="dark"] small, [data-theme="dark"] li { color: var(--sg-text); }
+
+      /* Cards/sections surfaces in dark mode */
+      [data-theme="dark"] .card,
+      [data-theme="dark"] .offcanvas,
+      [data-theme="dark"] .modal-content { background-color: var(--sg-card); color: var(--sg-text); }
+      [data-theme="dark"] .bg-light { background-color: #1f2937 !important; color: var(--sg-text) !important; }
+      [data-theme="dark"] .section-alt { background-color: #0f172a; color: var(--sg-text); }
+      [data-theme="dark"] .navbar.bg-white { background-color: #111827 !important; }
+      [data-theme="dark"] .dropdown-menu { background-color: var(--sg-card); color: var(--sg-text); }
+      [data-theme="dark"] .list-group-item { background-color: transparent; color: var(--sg-text); }
+      /* Dark-mode dropdown readability */
+      [data-theme="dark"] .dropdown-menu .dropdown-item,
+      [data-theme="dark"] .dropdown-menu .dropdown-item .bi { color: var(--sg-text) !important; }
+      [data-theme="dark"] .dropdown-menu .dropdown-item:hover,
+      [data-theme="dark"] .dropdown-menu .dropdown-item:focus { background-color: rgba(255,255,255,0.08); color: #ffffff !important; }
+      [data-theme="dark"] .dropdown-menu .dropdown-item.active,
+      [data-theme="dark"] .dropdown-menu .dropdown-item:active { background-color: #10b981 !important; color: #052e2b !important; }
+      [data-theme="dark"] .dropdown-menu .dropdown-header { color: var(--sg-muted); }
+      [data-theme="dark"] .dropdown-menu .dropdown-divider { border-color: #243447; }
+      [data-theme="dark"] .dropdown-menu .dropdown-item.disabled,
+      [data-theme="dark"] .dropdown-menu .dropdown-item:disabled { color: #94a3b8 !important; opacity: 1; }
+      /* Header gradient (applies to navbar only) */
+      .header-gradient {
+        background: linear-gradient(90deg, #0f2336 0%, #314250 30%, #a7b4bf 60%, #0f2336 100%);
+        color: #e5e7eb;
+      }
+      .header-gradient .navbar-nav .nav-link,
+      .header-gradient .navbar-brand,
+      .header-gradient .form-control,
+      .header-gradient .btn,
+      .header-gradient .dropdown-toggle,
+      .header-gradient .bi { color: #e5e7eb !important; }
+      .header-gradient .form-control { background-color: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.35); color: #f8fafc; }
+      .header-gradient .form-control::placeholder { color: rgba(248,250,252,0.85); }
+      .header-gradient .btn-outline-success { color: #10b981 !important; border-color: #10b981 !important; }
+      .header-gradient .btn-outline-success:hover { background-color: #10b981 !important; color: #052e2b !important; }
+      .header-gradient .btn-outline-light { border-color: rgba(255,255,255,0.6); color: #f8fafc; }
+      .header-gradient .btn-outline-light:hover { background-color: rgba(255,255,255,0.15); }
+
+      /* Thin top accent line */
+      /* Make navbar fixed below the banner */
+      #mainNavbar.header-gradient { position: fixed; top: calc(var(--banner-h) - 1px); left: 0; right: 0; z-index: 1040; margin-top: 0; border: 0 !important; box-shadow: none !important; outline: none; backface-visibility: hidden; transform: translateZ(0); height: var(--nav-h); padding: 0 1rem !important; display: flex; align-items: center; }
+      #mainNavbar.header-gradient, .top-banner { backface-visibility: hidden; transform: translateZ(0); }
+      /* Remove overlay masks; JS sets exact top */
+      /* Top banner fixed at very top */
+      .top-banner { position: fixed; top: 0; left: 0; right: 0; z-index: 1999; border: 0 !important; border-bottom: 0 !important; box-shadow: none !important; }
+      /* No banner overlay */
+      /* Mini cart offcanvas sits above navbar and backdrop */
+      .offcanvas { z-index: 9999 !important; }
+      .offcanvas-backdrop { z-index: 9998 !important; }
+      /* Slightly taller banner on md+ */
+      @media (min-width: 768px) {
+        :root { --banner-h: 40px; }
+      }
+      /* Compact banner text and zero external gap to header */
+      .top-banner { font-size: .6rem; line-height: 1; padding-top: 0 !important; padding-bottom: 0 !important; margin: 0; border: 0; border-bottom: 0; }
+      /* Remove inner vertical paddings to avoid any visual seam */
+      .top-banner .container { padding-top: 0; padding-bottom: 0; }
+      @media (max-width: 575.98px){
+        .top-banner { padding-top: .15rem !important; padding-bottom: .15rem !important; }
+      }
+      .header-gradient::before { height: 0; content: none; }
+
+      /* Ensure same look in dark mode */
+      [data-theme="dark"] .header-gradient { background: linear-gradient(90deg, #0b1a2a 0%, #2a3946 30%, #9eacb7 60%, #0b1a2a 100%); color: #e5e7eb; }
+      [data-theme="dark"] .header-gradient .form-control { background-color: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.3); color: #f8fafc; }
+
+      /* Force visibility for elements that use white/dark utility classes */
+      [data-theme="dark"] .bg-white { background-color: var(--sg-card) !important; color: var(--sg-text) !important; }
+      [data-theme="dark"] .text-dark, [data-theme="dark"] .text-black { color: var(--sg-text) !important; }
+      [data-theme="dark"] .border { border-color: #1f2937 !important; }
+
+      /* Footer gradient */
+      .footer-gradient {
+        background: linear-gradient(90deg, #0f2336 0%, #314250 30%, #a7b4bf 60%, #0f2336 100%);
+        color: #e5e7eb;
+      }
+      .footer-gradient .bi,
+      .footer-gradient p,
+      .footer-gradient small,
+      .footer-gradient .nav-link,
+      .footer-gradient a { color: #e5e7eb !important; }
+      .footer-gradient a:hover { color: #10b981 !important; }
+      .footer-gradient .form-control { background-color: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.3); color: #f8fafc; }
+      .footer-gradient .form-control::placeholder { color: rgba(248,250,252,0.8); }
+      [data-theme="dark"] .footer-gradient { background: linear-gradient(90deg, #0b1a2a 0%, #2a3946 30%, #9eacb7 60%, #0b1a2a 100%); }
+      /* Ken Burns light for carousel images */
+      .carousel-img { transform-origin: center center; animation: kenburns 12s ease-in-out both; }
+      @keyframes kenburns { 0%{ transform: scale(1) translate3d(0,0,0); filter: blur(0px);} 50%{ transform: scale(1.06) translate3d(0, -1%, 0); filter: blur(0.5px);} 100%{ transform: scale(1.1) translate3d(0, 1%, 0); filter: blur(0px);} }
     </style>
+    {% if config and config.get('GOOGLE_TAG_ID') %}
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config.get('GOOGLE_TAG_ID') }}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);} gtag('js', new Date());
+      gtag('config', "{{ config.get('GOOGLE_TAG_ID') }}");
+    </script>
+    {% endif %}
     {% block head %}{% endblock %}
   </head>
-  <body class="page-fade" style="background: white; color: #000;">
-    <div class="top-banner py-2 d-none d-md-block">
+  <body class="page-fade">
+    <div class="top-banner py-0">
       <div class="container d-flex align-items-center justify-content-between">
         <div class="marquee-viewport">
           <div id="promo-marquee" class="marquee-track" role="status" aria-live="polite"></div>
         </div>
       </div>
     </div>
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top" id="mainNavbar">
-      <div class="container py-2">
-        <a class="navbar-brand fw-bold brand" href="/">
-          <i class="bi bi-leaf-fill me-2"></i>ScholaGro
+    <!-- Mini Cart Offcanvas -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasCart" aria-labelledby="offcanvasCartLabel" data-wa="{{ config.get('WHATSAPP_NUMBER') or '' }}" data-site="{{ site_name or 'ScholaGro' }}" data-free="{{ config.get('FREE_DELIVERY_THRESHOLD') or '' }}">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasCartLabel"><i class="bi bi-bag me-2"></i>Your Cart</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body d-flex flex-column">
+        <div id="mini-cart-items" class="mb-3"></div>
+        <div class="mt-auto">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="fw-600">Subtotal</span>
+            <span class="fw-bold" id="mini-cart-subtotal">Ksh 0</span>
+          </div>
+          <div id="mini-cart-promo" class="small mb-2 text-muted"></div>
+          <div class="d-grid gap-2">
+            <a href="/cart/" class="btn btn-outline-success">View Cart</a>
+            <a href="/orders/checkout" class="btn btn-success">Checkout</a>
+            <a id="wa-mini-cart-order" class="btn btn-outline-success" target="_blank" rel="noopener"><i class="bi bi-whatsapp"></i> Order on WhatsApp</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <nav class="navbar navbar-expand-lg navbar-dark header-gradient" id="mainNavbar">
+      <div class="container py-1">
+        <a class="navbar-brand fw-bold brand d-flex align-items-center" href="/">
+          <img src="{{ url_for('static', filename='brand/logo-mark.png') }}" alt="{{ site_name }}" height="64" loading="eager" class="me-2" onerror="this.onerror=null; this.src='{{ url_for('static', filename='brand/logo-mark') }}';">
+          <span>{{ site_name }}</span>
         </a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -71,13 +217,13 @@
             </div>
           </form>
           <ul class="navbar-nav ms-3">
-            <li class="nav-item d-none d-lg-flex align-items-center me-2">
+            <li class="nav-item d-inline-flex align-items-center me-2">
               <button id="themeToggle" class="btn btn-outline-secondary btn-sm" aria-label="Toggle dark mode" data-bs-toggle="tooltip" title="Toggle dark mode">
                 <i class="bi bi-moon-stars" id="themeIcon"></i>
               </button>
             </li>
             <li class="nav-item">
-              <a class="nav-link position-relative" href="/cart/" aria-label="Shopping cart">
+              <a class="nav-link position-relative" href="/cart/" aria-label="Shopping cart" data-cart-icon data-mini-cart-toggle>
                 <i class="bi bi-bag-fill"></i>
                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success" id="cart-count-badge">{{ cart_count }}</span>
               </a>
@@ -103,16 +249,18 @@
               </ul>
             </li>
             {% else %}
-            <div class="d-flex align-items-center">
-                <a href="/auth/login" class="btn btn-success me-2"><i class="bi bi-box-arrow-in-right"></i> Login</a>
-            </div>
+            <li class="nav-item">
+              <a class="nav-link" href="/auth/login">
+                <button class="btn btn-success me-2" type="button"><i class="bi bi-box-arrow-in-right"></i> Login</button>
+              </a>
+            </li>
             {% endif %}
           </ul>
         </div>
       </div>
     </nav>
 
-    <div class="container py-4">
+    <div class="container py-4" id="swup">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           <div class="my-2" id="flash-container">
@@ -125,19 +273,21 @@
       {% endwith %}
       {% block content %}{% endblock %}
     </div>
-    <footer class="border-top py-5 bg-white">
+    <footer class="border-top py-5 footer-gradient">
       <div class="container">
         <div class="row g-4 align-items-start">
           <div class="col-12 col-md-4">
             <a href="/" class="navbar-brand fw-bold brand d-inline-flex align-items-center mb-2">
-              <i class="bi bi-leaf-fill me-2"></i>{{ site_name or 'ScholaGro' }}
+              <img src="{{ url_for('static', filename='brand/logo-mark.png') }}" alt="{{ site_name or 'ScholaGro' }}" height="28" loading="lazy" class="me-2" onerror="this.onerror=null; this.src='{{ url_for('static', filename='brand/logo-mark') }}';">
+              {{ site_name or 'ScholaGro' }}
             </a>
             <p class="text-muted mb-2">Fresh groceries delivered fast across Nairobi & nearby areas.</p>
             <div class="d-flex gap-2">
-              <a class="btn btn-sm btn-outline-secondary" href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-              <a class="btn btn-sm btn-outline-secondary" href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-              <a class="btn btn-sm btn-outline-secondary" href="https://twitter.com" target="_blank" rel="noopener" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
-              <a class="btn btn-sm btn-outline-secondary" href="https://wa.me/254757391071" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+              <a class="btn btn-sm btn-outline-secondary" href="{{ socials.facebook_url }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+              <a class="btn btn-sm btn-outline-secondary" href="{{ socials.instagram_url or 'https://instagram.com/scholah_meeme' }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+              <a class="btn btn-sm btn-outline-secondary" href="{{ socials.twitter_url }}" target="_blank" rel="noopener" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+              <a class="btn btn-sm btn-outline-secondary" href="{{ socials.whatsapp_url }}" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+              <a class="btn btn-sm btn-outline-secondary" href="https://www.tiktok.com/@{{ socials.tiktok_handle }}" target="_blank" rel="noopener" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
             </div>
           </div>
           <div class="col-6 col-md-2">
@@ -154,14 +304,15 @@
             <ul class="list-unstyled small">
               <li><a class="text-decoration-none text-muted" href="/pages/privacy">Privacy Policy</a></li>
               <li><a class="text-decoration-none text-muted" href="/pages/terms">Terms & Conditions</a></li>
+              <li><a class="text-decoration-none text-muted" href="/pages/refund">Refund Policy</a></li>
             </ul>
           </div>
           <div class="col-12 col-md-4">
             <h6 class="fw-bold mb-2">Contact</h6>
-            <ul class="list-unstyled small text-muted mb-3">
-              <li><i class="bi bi-envelope me-2"></i>support@scholagro.com</li>
-              <li><i class="bi bi-telephone me-2"></i>0757391071</li>
-              <li><i class="bi bi-geo-alt me-2"></i>Nairobi, Kenya</li>
+            <ul class="list-unstyled small mb-3">
+              <li><i class="bi bi-envelope me-2"></i>{{ config.get('CONTACT_EMAIL') or 'support@scholagro.com' }}</li>
+              <li><i class="bi bi-telephone me-2"></i>{{ config.get('CONTACT_PHONE') or '0757391071' }}</li>
+              <li><i class="bi bi-geo-alt me-2"></i>{{ config.get('CONTACT_ADDRESS') or 'Nairobi, Kenya' }}</li>
             </ul>
             {% include 'partials/hours_map_compact.html' %}
           </div>
@@ -172,6 +323,14 @@
         </div>
       </div>
     </footer>
+
+    {% set wa_number = (config.get('WHATSAPP_NUMBER_WA') or config.get('WHATSAPP_NUMBER') or '')|string %}
+    {% if wa_number %}
+    <a href="https://wa.me/{{ wa_number|replace(' ','') }}" class="position-fixed" target="_blank" rel="noopener" aria-label="Chat on WhatsApp"
+       style="right:16px; bottom:16px; z-index:1050; display:inline-flex; align-items:center; justify-content:center; width:56px; height:56px; border-radius:50%; background:#25D366; color:#fff; box-shadow:0 8px 20px rgba(0,0,0,0.25);">
+      <i class="bi bi-whatsapp" style="font-size:1.6rem;"></i>
+    </a>
+    {% endif %}
 
     <div class="position-fixed top-0 end-0 p-3 toast-container" role="region" aria-live="polite" aria-atomic="true">
       <div id="toast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
@@ -197,6 +356,52 @@
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.0/socket.io.min.js" integrity="sha384-/6impleXcDza3wE2lW0lV3Z6zY4f2p3j7p/1xWk" crossorigin="anonymous"></script>
+    <script type="application/json" id="promoMessagesData">{{ (promo_messages or [])|tojson }}</script>
     <script src="{{ url_for('static', filename='js/app.js') }}?v={{ datetime.utcnow().timestamp()|int }}"></script>
+    <!-- Motion libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swup@4.6.1/dist/swup.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@swup/fade-theme@2.0.1/dist/SwupFadeTheme.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lottie-web@5.12.2/build/player/lottie.min.js"></script>
+    <script>
+      try { AOS.init({ duration: 650, easing: 'ease-out-quart', once: true, offset: 40 }); } catch(e){}
+    </script>
+    <script>
+      (function(){
+        function updateOffsets(){
+          try {
+            var b = document.querySelector('.top-banner');
+            var bh = 0;
+            if (b){
+              var brect = b.getBoundingClientRect();
+              bh = Math.round(brect.height || b.clientHeight || b.offsetHeight || 0);
+              // Clamp to avoid accidental huge values due to layout/paint
+              if (!bh || bh < 16) bh = 20;
+              if (bh > 72) bh = 36; // fallback to a sane default
+            }
+            document.documentElement.style.setProperty('--banner-h', bh + 'px');
+          } catch(e){}
+        }
+        document.addEventListener('DOMContentLoaded', updateOffsets);
+        window.addEventListener('load', updateOffsets);
+        window.addEventListener('resize', updateOffsets);
+        var bEl = document.querySelector('.top-banner');
+        if (window.MutationObserver && bEl){
+          var mo = new MutationObserver(updateOffsets);
+          mo.observe(bEl, {childList:true, subtree:true, attributes:true});
+        }
+        if (document.fonts && document.fonts.ready){
+          document.fonts.ready.then(updateOffsets).catch(function(){});
+        }
+        // Recompute shortly after load to catch late reflows/animations
+        setTimeout(updateOffsets, 250);
+        setTimeout(updateOffsets, 1000);
+      })();
+    </script>
   </body>
 </html>

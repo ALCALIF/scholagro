@@ -6,6 +6,7 @@ from ...models import User
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from ...utils.email import send_email_html
 import time
+from ...extensions import limiter
 
 _forgot_attempts = {}
 
@@ -13,6 +14,7 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
+@limiter.limit("10 per minute")
 def login():
     if request.method == "POST":
         email = request.form.get("email")
@@ -20,6 +22,35 @@ def login():
         user = User.query.filter_by(email=email).first()
         if user and check_password_hash(user.password_hash, password):
             login_user(user)
+            # Merge guest cart into user cart
+            try:
+                from flask import session
+                from ...extensions import db
+                from ...models import CartItem, Product
+                cart = session.get('cart', {}) or {}
+                if cart:
+                    for pid_str, qty in cart.items():
+                        try:
+                            pid = int(pid_str)
+                            qty = int(qty)
+                        except Exception:
+                            continue
+                        if qty <= 0:
+                            continue
+                        item = CartItem.query.filter_by(user_id=user.id, product_id=pid).first()
+                        if item:
+                            item.quantity = min(99, (item.quantity or 0) + qty)
+                        else:
+                            # ensure product exists
+                            if db.session.get(Product, pid):
+                                db.session.add(CartItem(user_id=user.id, product_id=pid, quantity=min(99, qty)))
+                    db.session.commit()
+                    session.pop('cart', None)
+            except Exception:
+                pass
+            # Redirect admins to dashboard, others to the shop home
+            if getattr(user, 'is_admin', False):
+                return redirect(url_for("admin.dashboard"))
             return redirect(url_for("shop.home"))
         flash("Invalid credentials", "danger")
     return render_template("auth/login.html")
@@ -28,9 +59,18 @@ def login():
 @auth_bp.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
-        name = request.form.get("name")
-        email = request.form.get("email")
+        name = (request.form.get("name") or "").strip()
+        email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password")
+        # Strict email format validation
+        try:
+            import re
+            email_ok = re.fullmatch(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$", email) is not None
+        except Exception:
+            email_ok = bool(email)
+        if not email_ok:
+            flash("Please enter a valid email address.", "warning")
+            return render_template("auth/signup.html")
         if User.query.filter_by(email=email).first():
             flash("Email already registered", "warning")
             return render_template("auth/signup.html")
@@ -54,6 +94,7 @@ def _get_serializer():
 
 
 @auth_bp.route('/forgot', methods=['GET', 'POST'])
+@limiter.limit("5 per 10 minutes")
 def forgot_password():
     if request.method == 'POST':
         email = request.form.get('email')

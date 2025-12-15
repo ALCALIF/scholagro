@@ -1,0 +1,111 @@
+{% extends 'admin/base.html' %}
+{% block breadcrumbs %}
+  <nav class="px-4 pb-3 text-sm text-slate-500 dark:text-slate-400" aria-label="breadcrumb">
+    <ol class="breadcrumb m-0">
+      <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Settings</li>
+    </ol>
+  </nav>
+{% endblock %}
+{% block content %}
+<h3>Admin Settings</h3>
+<form method="post" class="mt-3">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="mb-2">
+    <label class="inline-flex items-center gap-2"><input type="checkbox" name="read_only" {% if settings.read_only %}checked{% endif %} /> Enable Admin Read-Only Mode</label>
+  </div>
+  <div class="mb-2">
+    <label class="block">Delete passphrase (enter to set/replace)</label>
+    <input type="password" name="passphrase" class="form-control" placeholder="Type new passphrase">
+  </div>
+  <hr>
+  <h5>Site & Contact</h5>
+  <div class="row g-2">
+    <div class="col-md-4"><label class="form-label">Site Name</label><input class="form-control" name="site_name" value="{{ settings.site_name }}" placeholder="ScholaGro"></div>
+    <div class="col-md-4"><label class="form-label">Contact Email</label><input class="form-control" name="contact_email" value="{{ settings.contact_email }}" placeholder="support@scholagro.com"></div>
+    <div class="col-md-4"><label class="form-label">Contact Phone</label><input class="form-control" name="contact_phone" value="{{ settings.contact_phone }}" placeholder="0757..."></div>
+    <div class="col-md-4"><label class="form-label">WhatsApp Number (e.g. 2547XXXXXXXX)</label><input class="form-control" name="whatsapp_number" value="{{ settings.whatsapp_number }}" placeholder="2547XXXXXXXX"></div>
+    <div class="col-12"><label class="form-label">Contact Address</label><input class="form-control" name="contact_address" value="{{ settings.contact_address }}" placeholder="Nairobi, Kenya"></div>
+  </div>
+  <hr>
+  <h5>Checkout Options</h5>
+  <div class="row g-2">
+    <div class="col-md-3 d-flex align-items-center">
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="allow_cod" name="allow_cod" {% if settings.allow_cod %}checked{% endif %}>
+        <label class="form-check-label" for="allow_cod">Allow Cash on Delivery (COD)</label>
+      </div>
+    </div>
+    <div class="col-md-3 d-flex align-items-center">
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="allow_pickup" name="allow_pickup" {% if settings.allow_pickup %}checked{% endif %}>
+        <label class="form-check-label" for="allow_pickup">Allow Pickup</label>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Pickup Location (instructions shown at checkout)</label>
+      <input class="form-control" name="pickup_location" value="{{ settings.pickup_location }}" placeholder="e.g. Kimbo Stage shop, opposite XYZ">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Free Delivery Threshold (KES)</label>
+      <input class="form-control" type="number" step="0.01" name="free_delivery_threshold" value="{{ settings.free_delivery_threshold }}" placeholder="e.g. 1500">
+      <div class="form-text">If subtotal meets or exceeds this amount, delivery fee is waived.</div>
+    </div>
+  </div>
+  <hr>
+  <h5>Social Links</h5>
+  <div class="row g-2">
+    <div class="col-md-6"><label class="form-label">Facebook URL</label><input class="form-control" name="social_facebook_url" value="{{ settings.social_facebook_url }}" placeholder="https://facebook.com/..."></div>
+    <div class="col-md-6"><label class="form-label">Instagram URL</label><input class="form-control" name="social_instagram_url" value="{{ settings.social_instagram_url }}" placeholder="https://instagram.com/..."></div>
+    <div class="col-md-6"><label class="form-label">Twitter/X URL</label><input class="form-control" name="social_twitter_url" value="{{ settings.social_twitter_url }}" placeholder="https://twitter.com/... or https://x.com/... "></div>
+    <div class="col-md-6"><label class="form-label">WhatsApp URL</label><input class="form-control" name="social_whatsapp_url" value="{{ settings.social_whatsapp_url }}" placeholder="https://wa.me/2547XXXXXXXX"></div>
+    <div class="col-md-6"><label class="form-label">TikTok Handle (without @)</label><input class="form-control" name="social_tiktok_handle" value="{{ settings.social_tiktok_handle }}" placeholder="scholah_meemeYT5"></div>
+  </div>
+  <hr>
+  <h5>Analytics & Monitoring</h5>
+  <div class="row g-2">
+    <div class="col-md-6"><label class="form-label">Google Tag ID</label><input class="form-control" name="google_tag_id" value="{{ settings.google_tag_id }}" placeholder="G-XXXXXXX"></div>
+    <div class="col-md-6"><label class="form-label">Sentry DSN</label><input class="form-control" name="sentry_dsn" value="{{ settings.sentry_dsn }}" placeholder="https://...@sentry.io/... "></div>
+  </div>
+  <hr>
+  <h5>SMTP Email</h5>
+  <div class="row g-2">
+    <div class="col-md-4"><label class="form-label">SMTP Host</label><input class="form-control" name="smtp_host" value="{{ settings.smtp_host }}"></div>
+    <div class="col-md-2"><label class="form-label">SMTP Port</label><input class="form-control" name="smtp_port" value="{{ settings.smtp_port }}"></div>
+    <div class="col-md-3"><label class="form-label">SMTP Username</label><input class="form-control" name="smtp_username" value="{{ settings.smtp_username }}"></div>
+    <div class="col-md-3"><label class="form-label">SMTP Password</label><input class="form-control" name="smtp_password" value="{{ settings.smtp_password }}"></div>
+    <div class="col-md-6"><label class="form-label">SMTP Sender</label><input class="form-control" name="smtp_sender" value="{{ settings.smtp_sender }}" placeholder="no-reply@scholagro.com"></div>
+    <div class="col-md-6"><label class="form-label">Contact To (fallback)</label><input class="form-control" name="contact_to" value="{{ settings.contact_to }}" placeholder="scholagro@gmail.com"></div>
+  </div>
+  <hr>
+  <h5>Payments: Stripe</h5>
+  <div class="row g-2">
+    <div class="col-md-6"><label class="form-label">Publishable Key</label><input class="form-control" name="stripe_publishable_key" value="{{ settings.stripe_publishable_key }}"></div>
+    <div class="col-md-6"><label class="form-label">Secret Key</label><input class="form-control" name="stripe_secret_key" value="{{ settings.stripe_secret_key }}"></div>
+    <div class="col-md-6"><label class="form-label">Webhook Secret</label><input class="form-control" name="stripe_webhook_secret" value="{{ settings.stripe_webhook_secret }}"></div>
+  </div>
+  <hr>
+  <h5>Payments: M-Pesa (Daraja)</h5>
+  <div class="row g-2">
+    <div class="col-md-6"><label class="form-label">Consumer Key</label><input class="form-control" name="mpesa_consumer_key" value="{{ settings.mpesa_consumer_key }}"></div>
+    <div class="col-md-6"><label class="form-label">Consumer Secret</label><input class="form-control" name="mpesa_consumer_secret" value="{{ settings.mpesa_consumer_secret }}"></div>
+    <div class="col-md-4"><label class="form-label">Business Short Code</label><input class="form-control" name="mpesa_short_code" value="{{ settings.mpesa_short_code }}"></div>
+    <div class="col-md-8"><label class="form-label">Passkey</label><input class="form-control" name="mpesa_passkey" value="{{ settings.mpesa_passkey }}"></div>
+    <div class="col-md-8"><label class="form-label">Callback URL</label><input class="form-control" name="mpesa_callback_url" value="{{ settings.mpesa_callback_url }}" placeholder="https://your-domain.com/payments/mpesa/callback"></div>
+    <div class="col-md-4"><label class="form-label">Base URL</label><input class="form-control" name="mpesa_base_url" value="{{ settings.mpesa_base_url }}" placeholder="https://sandbox.safaricom.co.ke"></div>
+  </div>
+  <div class="row g-2 mt-2">
+    <div class="col-md-6"><label class="form-label">Till Number (Lipa Na Till)</label><input class="form-control" name="mpesa_till_number" value="{{ settings.mpesa_till_number }}" placeholder="XXXXXXX"></div>
+    <div class="col-md-6"><label class="form-label">Transaction Type</label>
+      <select class="form-select" name="mpesa_transaction_type">
+        <option value="CustomerPayBillOnline" {% if settings.mpesa_transaction_type == 'CustomerPayBillOnline' %}selected{% endif %}>CustomerPayBillOnline (PayBill)</option>
+        <option value="CustomerBuyGoodsOnline" {% if settings.mpesa_transaction_type == 'CustomerBuyGoodsOnline' %}selected{% endif %}>CustomerBuyGoodsOnline (Till)</option>
+      </select>
+    </div>
+  </div>
+  <div class="mb-2">
+    <button class="btn btn-brand">Save settings</button>
+  </div>
+  <div class="text-muted">When <strong>Admin Read-Only Mode</strong> is enabled, deletions require the passphrase to proceed.</div>
+</form>
+{% endblock %}

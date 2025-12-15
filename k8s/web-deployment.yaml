@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scholagro-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scholagro-web
+  template:
+    metadata:
+      labels:
+        app: scholagro-web
+    spec:
+      containers:
+      - name: web
+        image: scholagro:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: FLASK_ENV
+          value: production
+        - name: REDIS_URL
+          value: redis://redis:6379/0

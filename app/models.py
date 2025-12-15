@@ -41,22 +41,7 @@ class SocialLink(db.Model, TimestampMixin):
     icon = db.Column(db.String(64))
     is_active = db.Column(db.Boolean, default=True)
 
-from datetime import datetime
-from flask_login import UserMixin
-from .extensions import db, login_manager
-
-class TimestampMixin:
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-__all__ = []
-
-
-class TimestampMixin:
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-
+ 
 
 class User(UserMixin, db.Model, TimestampMixin):
     __tablename__ = "users"
@@ -66,6 +51,7 @@ class User(UserMixin, db.Model, TimestampMixin):
     name = db.Column(db.String(120))
     phone = db.Column(db.String(32))
     is_admin = db.Column(db.Boolean, default=False)
+    stripe_customer_id = db.Column(db.String(255), nullable=True)
 
     addresses = db.relationship("DeliveryAddress", backref="user", lazy=True)
     orders = db.relationship("Order", backref="user", lazy=True)
@@ -111,7 +97,8 @@ class Recommendation(db.Model, TimestampMixin):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    # Use session.get which is the modern API in SQLAlchemy 2.x
+    return db.session.get(User, int(user_id))
 
 
 class Category(db.Model, TimestampMixin):
@@ -136,6 +123,9 @@ class Product(db.Model, TimestampMixin):
     image_url = db.Column(db.String(500))
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
     is_active = db.Column(db.Boolean, default=True)
+    # Admin flags: allow admin to highlight products in homepage sections
+    is_top_pick = db.Column(db.Boolean, default=False)
+    is_new_arrival_featured = db.Column(db.Boolean, default=False)
 
     reviews = db.relationship("Review", backref="product", lazy=True)
 
@@ -147,6 +137,7 @@ class Review(db.Model, TimestampMixin):
     comment = db.Column(db.Text)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey("products.id"), nullable=False)
+    is_approved = db.Column(db.Boolean, default=True)
 
 
 class DeliveryAddress(db.Model, TimestampMixin):
@@ -178,7 +169,7 @@ class Order(db.Model, TimestampMixin):
     total_amount = db.Column(db.Numeric(10, 2), default=0)
     delivery_fee = db.Column(db.Numeric(10, 2), default=0)
     address_id = db.Column(db.Integer, db.ForeignKey("delivery_addresses.id"))
-    delivery_time_slot = db.Column(db.String(32))  # morning/afternoon/evening
+    delivery_time_slot = db.Column(db.String(128))  # morning/afternoon/evening (expanded length)
     delivery_zone_id = db.Column(db.Integer, db.ForeignKey("delivery_zones.id"))
     coupon_code = db.Column(db.String(50))
     discount_amount = db.Column(db.Numeric(10, 2), default=0)
@@ -244,6 +235,7 @@ class HomePageBanner(db.Model, TimestampMixin):
     title = db.Column(db.String(200))
     image_url = db.Column(db.String(500))
     link_url = db.Column(db.String(500))
+    sort_order = db.Column(db.Integer, default=0)
     is_active = db.Column(db.Boolean, default=True)
 
 
@@ -300,11 +292,30 @@ class ProductImage(db.Model, TimestampMixin):
     is_primary = db.Column(db.Boolean, default=False)
 
 
+class ReviewPhoto(db.Model, TimestampMixin):
+    __tablename__ = "review_photos"
+    id = db.Column(db.Integer, primary_key=True)
+    review_id = db.Column(db.Integer, db.ForeignKey("reviews.id"), nullable=False)
+    image_url = db.Column(db.String(500), nullable=False)
+
+
+class CategoryHeroImage(db.Model, TimestampMixin):
+    __tablename__ = "category_hero_images"
+    id = db.Column(db.Integer, primary_key=True)
+    category_id = db.Column(db.Integer, db.ForeignKey("categories.id"), nullable=False)
+    image_url = db.Column(db.String(500), nullable=False)
+    sort_order = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    starts_at = db.Column(db.DateTime)
+    ends_at = db.Column(db.DateTime)
+
+
 class FlashSale(db.Model, TimestampMixin):
     __tablename__ = "flash_sales"
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey("products.id"), nullable=False)
     discount_percent = db.Column(db.Integer, default=0)
+    original_price = db.Column(db.Numeric(10, 2), nullable=True)  # Store original price for safe reversion
     starts_at = db.Column(db.DateTime, nullable=False)
     ends_at = db.Column(db.DateTime, nullable=False)
     quantity_available = db.Column(db.Integer)

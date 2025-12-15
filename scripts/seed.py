@@ -26,10 +26,15 @@ sample_products = [
 
 with app.app_context():
     # Admin user
-    if not User.query.filter_by(email="admin@scholagro.com").first():
-        admin = User(name="Admin", email="admin@scholagro.com", password_hash=generate_password_hash("admin123", method='pbkdf2:sha256'), is_admin=True)
+    if not User.query.filter_by(email="adminscholagro@gmail.com").first():
+        admin = User(
+            name="Admin",
+            email="adminscholagro@gmail.com",
+            password_hash=generate_password_hash("@scholalcalif2030", method='pbkdf2:sha256'),
+            is_admin=True
+        )
         db.session.add(admin)
-        print("Created admin user: admin@scholagro.com / admin123")
+        print("Created admin user: adminscholagro@gmail.com / @scholalcalif2030")
 
     # Categories
     cat_map = {}
@@ -45,7 +50,12 @@ with app.app_context():
     # Products
     for name, slug, price, cat_name, img in sample_products:
         if not Product.query.filter_by(slug=slug).first():
+            # For development, mark every 3rd product as a top pick and every 4th as a featured new arrival
             p = Product(name=name, slug=slug, price=price, category=cat_map[cat_name], image_url=img, stock=50)
+            if len(Product.query.all()) % 3 == 0:
+                p.is_top_pick = True
+            if len(Product.query.all()) % 4 == 0:
+                p.is_new_arrival_featured = True
             db.session.add(p)
 
     # Delivery zones

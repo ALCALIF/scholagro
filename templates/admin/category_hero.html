@@ -1,0 +1,106 @@
+{% extends 'admin/base.html' %}
+{% block title %}Category Hero Images{% endblock %}
+{% block content %}
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <h2 class="text-lg font-semibold">Category Hero Images</h2>
+    <a href="/admin" class="inline-flex items-center px-3 py-1.5 rounded-md border border-slate-300 dark:border-slate-700">Back</a>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-6 gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 rounded-xl">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="md:col-span-2">
+      <label class="block text-sm mb-1">Category</label>
+      <select name="category_id" class="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2" required>
+        <option value="" disabled selected>Select category</option>
+        {% for c in categories %}
+        <option value="{{c.id}}">{{c.name}}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="md:col-span-2">
+      <label class="block text-sm mb-1">Image URL</label>
+      <input name="image_url" class="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2" placeholder="https://...">
+    </div>
+    <div>
+      <label class="block text-sm mb-1">Upload</label>
+      <input type="file" accept="image/*" name="image_file" class="w-full text-sm">
+    </div>
+    <div>
+      <label class="block text-sm mb-1">Sort</label>
+      <input type="number" name="sort_order" class="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2" value="0">
+    </div>
+    <div class="md:col-span-2">
+      <label class="block text-sm mb-1">Start (optional, ISO e.g. 2025-11-26 10:00)</label>
+      <input name="starts_at" class="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2">
+    </div>
+    <div class="md:col-span-2">
+      <label class="block text-sm mb-1">End (optional)</label>
+      <input name="ends_at" class="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2">
+    </div>
+    <div class="flex items-center gap-2">
+      <input id="is_active" type="checkbox" name="is_active" value="1" checked class="rounded border-slate-300 dark:border-slate-700">
+      <label for="is_active" class="text-sm">Active</label>
+    </div>
+    <div class="md:col-span-6">
+      <button class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-brand text-white hover:bg-emerald-600">Add Hero</button>
+    </div>
+  </form>
+
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 dark:bg-slate-900/40">
+        <tr>
+          <th class="text-left p-3">Preview</th>
+          <th class="text-left p-3">Category</th>
+          <th class="text-left p-3">Sort</th>
+          <th class="text-left p-3">Active</th>
+          <th class="text-left p-3">Start</th>
+          <th class="text-left p-3">End</th>
+          <th class="text-left p-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for it in items %}
+        <tr class="border-t border-slate-100 dark:border-slate-700/60">
+          <td class="p-3"><img src="{{ it.image_url }}" alt="" class="h-16 w-28 object-cover rounded"></td>
+          <td class="p-3">{{ it.category_id }} — {{ (categories|selectattr('id','equalto', it.category_id)|first).name if categories else it.category_id }}</td>
+          <td class="p-3">
+            <form method="post" action="/admin/category-heroes/{{it.id}}/update" enctype="multipart/form-data" class="flex items-center gap-2">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="number" name="sort_order" value="{{ it.sort_order }}" class="w-20 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1">
+              <select name="category_id" class="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1">
+                {% for c in categories %}
+                <option value="{{c.id}}" {% if c.id==it.category_id %}selected{% endif %}>{{c.name}}</option>
+                {% endfor %}
+              </select>
+              <label class="inline-flex items-center gap-1 text-xs">
+                <input type="checkbox" name="is_active" value="1" {% if it.is_active %}checked{% endif %}> Active
+              </label>
+              <input name="starts_at" value="{{ it.starts_at or '' }}" placeholder="start" class="w-36 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1">
+              <input name="ends_at" value="{{ it.ends_at or '' }}" placeholder="end" class="w-36 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1">
+              <input type="file" name="image_file" accept="image/*" class="text-xs">
+              <button class="px-3 py-1 rounded-md bg-emerald-600 text-white">Save</button>
+            </form>
+          </td>
+          <td class="p-3">
+            <form method="post" action="/admin/category-heroes/{{it.id}}/toggle">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="px-3 py-1 rounded-md border border-slate-300 dark:border-slate-700">{% if it.is_active %}Disable{% else %}Enable{% endif %}</button>
+            </form>
+          </td>
+          <td class="p-3 text-xs">{{ it.starts_at or '—' }}</td>
+          <td class="p-3 text-xs">{{ it.ends_at or '—' }}</td>
+          <td class="p-3">
+            <form method="post" action="/admin/category-heroes/{{it.id}}/delete" onsubmit="return confirm('Delete this hero image?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="px-3 py-1 rounded-md border border-red-300 text-red-600">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

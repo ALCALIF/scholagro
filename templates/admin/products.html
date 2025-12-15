@@ -1,42 +1,381 @@
-{% extends 'base.html' %}
+{% extends 'admin/base.html' %}
+{% block breadcrumbs %}
+  <nav class="px-4 pb-3 text-sm text-slate-500 dark:text-slate-400" aria-label="breadcrumb">
+    <ol class="breadcrumb m-0">
+      <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Products</li>
+    </ol>
+  </nav>
+{% endblock %}
 {% block content %}
-<h3>Manage Products</h3>
-<form method="post" enctype="multipart/form-data" class="row g-2 mb-3">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <div class="col-md-3"><input class="form-control" name="name" placeholder="Name" required></div>
-  <div class="col-md-2"><input class="form-control" name="price" placeholder="Price" required></div>
-  <div class="col-md-2">
-    <select class="form-select" name="category_id">
-      {% for c in categories %}<option value="{{c.id}}">{{c.name}}</option>{% endfor %}
-    </select>
+<div class="flex items-center justify-between mb-3">
+  <h3 class="text-xl font-semibold">Manage Products</h3>
+  <div class="flex items-center gap-2">
+    <form method="get" class="flex items-center gap-2">
+      <input class="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1 text-sm" name="q" value="{{ q or '' }}" placeholder="Search name or slug">
+      <button type="submit" class="inline-flex items-center px-3 py-1 rounded-md border border-slate-300 dark:border-slate-700">Search</button>
+    </form>
   </div>
-  <div class="col-md-2"><input class="form-control" name="stock" type="number" min="0" placeholder="Stock"></div>
-  <div class="col-md-3"><input class="form-control" name="image_url" placeholder="Image URL (or upload)"></div>
-  <div class="col-md-3"><input class="form-control" type="file" name="image_file" accept="image/*"></div>
-  <div class="col-md-2"><input class="form-control" name="slug" placeholder="Slug (optional)"></div>
-  <div class="col-md-12 d-flex gap-2 mt-2">
-    <button class="btn btn-success">Add</button>
-    <a class="btn btn-outline-secondary" href="/admin/categories">Categories</a>
-    <a class="btn btn-outline-secondary" href="/admin/banners">Banners</a>
-    <a class="btn btn-outline-secondary" href="/admin/import">Bulk Import</a>
-    <a class="btn btn-outline-secondary" href="/admin/reports/orders.csv">Export Orders CSV</a>
+  </div>
+<div class="text-sm text-slate-500 mb-2">Total: {{ total }} • Page {{ page }} of {{ (total // per_page) + (1 if total % per_page else 0) }}</div>
+<form id="addForm" method="post" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-6 gap-3 mb-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 rounded-xl">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input class="md:col-span-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2" name="name" placeholder="Name" required>
+  <input class="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2" name="price" placeholder="Price" required>
+  <select class="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2" name="category_id" required>
+    <option value="" disabled selected>Select category</option>
+    {% for c in categories %}<option value="{{c.id}}">{{c.name}}</option>{% endfor %}
+  </select>
+  <input class="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2" name="stock" type="number" min="0" placeholder="Stock">
+  <input class="md:col-span-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2" name="image_url" placeholder="Image URL (or upload)">
+  <div class="md:col-span-1 flex items-center gap-2">
+    <label class="inline-flex items-center gap-2 text-slate-700 dark:text-slate-200"><input type="checkbox" name="is_top_pick" class="form-check-input"> Top pick</label>
+  </div>
+  <div class="md:col-span-1 flex items-center gap-2">
+    <label class="inline-flex items-center gap-2 text-slate-700 dark:text-slate-200"><input type="checkbox" name="is_new_arrival_featured" class="form-check-input"> New arrival</label>
+  </div>
+  <input class="md:col-span-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2" type="file" name="image_file" accept="image/*">
+  <input class="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2" name="slug" placeholder="Slug (optional)">
+  <div class="md:col-span-6">
+    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 shadow w-full md:w-auto focus:outline-none focus:ring-2 focus:ring-green-500">
+      <i class="bi bi-plus-lg me-1"></i> Add Product
+    </button>
+  </div>
+  <div class="md:col-span-6 flex flex-wrap gap-2 mt-1">
+    <a class="inline-flex items-center px-4 py-2 rounded-md border border-slate-300 dark:border-slate-700" href="/admin/categories">Categories</a>
+    <a class="inline-flex items-center px-4 py-2 rounded-md border border-slate-300 dark:border-slate-700" href="/admin/banners">Banners</a>
+    <a class="inline-flex items-center px-4 py-2 rounded-md border border-slate-300 dark:border-slate-700" href="/admin/import">Bulk Import</a>
+    <a class="inline-flex items-center px-4 py-2 rounded-md border border-slate-300 dark:border-slate-700" href="/admin/reports/orders.csv">Export Orders CSV</a>
   </div>
 </form>
-<table class="table table-sm align-middle">
-  <thead><tr><th>Name</th><th>Price</th><th>Category</th><th>Stock</th><th>Created</th><th>Actions</th></tr></thead>
-  <tbody>
-    {% for p in products %}
-    <tr>
-      <td>{{p.name}}</td><td>{{p.price}}</td><td>{{p.category.name if p.category else ''}}</td><td>{{p.stock}}</td><td>{{p.created_at}}</td>
-      <td class="d-flex gap-2">
-        <a class="btn btn-sm btn-outline-primary" href="/admin/products/{{p.id}}/edit">Edit</a>
-        <form method="post" action="/admin/products/{{p.id}}/delete" class="js-confirm" data-confirm="Delete this product?">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <button class="btn btn-sm btn-outline-danger">Delete</button>
-        </form>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<form id="deleteAllForm" method="post" action="/admin/products/delete-all" class="hidden">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="confirm" value="1">
+</form>
+
+<form id="bulkForm" method="post" action="/admin/products/bulk-delete" class="mb-3">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="flex items-center gap-3 mb-2">
+    <a class="inline-flex items-center px-3 py-1 rounded-md border border-slate-300 dark:border-slate-700" href="/admin/products/export">Export CSV</a>
+    <a class="inline-flex items-center px-3 py-1 rounded-md border border-slate-300 dark:border-slate-700" href="/admin/products/export.json">Export JSON</a>
+    <a class="inline-flex items-center px-3 py-1 rounded-md border border-slate-300 dark:border-slate-700" href="/admin/products/print" target="_blank">Print</a>
+    <button id="btnSelectAll" type="button" class="inline-flex items-center px-3 py-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 shadow">Select All</button>
+    <button id="btnDeselectAll" type="button" class="inline-flex items-center px-3 py-1 rounded-md bg-gray-600 text-white hover:bg-gray-700 shadow">Deselect All</button>
+    <button id="btnDeleteSelected" type="submit" class="inline-flex items-center px-3 py-1 rounded-md bg-red-600 text-white hover:bg-red-700 shadow disabled:opacity-50" disabled>Delete selected</button>
+    <button id="btnBulkTopPick" type="button" class="inline-flex items-center px-3 py-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 shadow disabled:opacity-50" disabled>Toggle Top picks</button>
+    <button id="btnBulkNewArrival" type="button" class="inline-flex items-center px-3 py-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 shadow disabled:opacity-50" disabled>Toggle New arrivals</button>
+    <button id="btnDeleteAll" type="button" data-action="delete-all" class="inline-flex items-center px-3 py-1 rounded-md bg-red-600 text-white hover:bg-red-700 shadow">Delete all</button>
+    <!-- passphrase input shown when admin readonly is enabled (hidden by default) -->
+    <input type="password" id="confirmPassphrase" name="confirm_passphrase" placeholder="Passphrase (if required)" class="rounded-md border border-slate-300 px-2 py-1 ml-2 hidden" />
+  </div>
+  <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-0 overflow-x-auto">
+  <table class="min-w-full text-sm text-slate-800 dark:text-slate-200" data-search="products">
+    <thead class="text-left text-slate-600 dark:text-slate-300">
+      <tr>
+        <th class="py-2 px-3 w-10">
+          <input type="checkbox" id="selectAllHead" class="h-4 w-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-red-600 focus:ring-2 focus:ring-offset-0 focus:ring-red-500">
+        </th>
+        <th class="py-2 px-3">Name</th>
+        <th class="py-2 px-3">Top pick</th>
+        <th class="py-2 px-3">New arrival</th>
+        <th class="py-2 px-3">Price</th>
+        <th class="py-2 px-3">Category</th>
+        <th class="py-2 px-3">Stock</th>
+        <th class="py-2 px-3">Created</th>
+        <th class="py-2 px-3">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+      {% for p in products %}
+      <tr data-id="{{p.id}}">
+        <td class="py-2 px-3">
+          <input type="checkbox" name="ids[]" value="{{p.id}}" class="row-check h-4 w-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-red-600 focus:ring-2 focus:ring-offset-0 focus:ring-red-500">
+        </td>
+        <td class="py-2 px-3">{{p.name}}</td>
+        <td class="py-2 px-3">
+          <input class="js-top-pick h-4 w-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-red-600 focus:ring-2 focus:ring-offset-0 focus:ring-red-500" type="checkbox" {% if p.is_top_pick %}checked{% endif %} />
+        </td>
+        <td class="py-2 px-3">
+          <input class="js-new-arrival h-4 w-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-red-600 focus:ring-2 focus:ring-offset-0 focus:ring-red-500" type="checkbox" {% if p.is_new_arrival_featured %}checked{% endif %} />
+        </td>
+        <td class="py-2 px-3">{{p.price}}</td>
+        <td class="py-2 px-3">{{p.category.name if p.category else ''}}</td>
+        <td class="py-2 px-3">{{p.stock}}</td>
+        <td class="py-2 px-3">{{p.created_at}}</td>
+        <td class="py-2 px-3">
+          <div class="flex items-center gap-2">
+            <a class="inline-flex items-center px-3 py-1 rounded-md border border-slate-300 dark:border-slate-700" href="/admin/products/{{p.id}}/edit">Edit</a>
+            <form method="post" action="/admin/products/{{p.id}}/delete" class="js-confirm" data-confirm="Delete this product?">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="inline-flex items-center px-3 py-1 rounded-md bg-red-600 text-white hover:bg-red-700 shadow">Delete</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+</form>
+<nav class="mt-3">
+  {% set pages = (total // per_page) + (1 if total % per_page else 0) %}
+  <ul class="pagination pagination-sm">
+    <li class="page-item {% if page <= 1 %}disabled{% endif %}"><a class="page-link" href="?page={{ page-1 }}&per_page={{ per_page }}&q={{ q|urlencode }}">Prev</a></li>
+    <li class="page-item disabled"><span class="page-link">{{ page }}/{{ pages }}</span></li>
+    <li class="page-item {% if page >= pages %}disabled{% endif %}"><a class="page-link" href="?page={{ page+1 }}&per_page={{ per_page }}&q={{ q|urlencode }}">Next</a></li>
+  </ul>
+  </nav>
+<script>
+  // Provide a global fallback for Delete All in case the main script fails to initialize
+  function deleteAllProductsFallback(){
+    try{
+      const formAll = document.getElementById('deleteAllForm');
+      if(!formAll) return false;
+      if(!confirm('Delete ALL products? This cannot be undone.')) return false;
+      const fd = new FormData();
+      const csrf = formAll.querySelector('input[name="csrf_token"]');
+      if(csrf) fd.append('csrf_token', csrf.value);
+      fd.append('confirm', '1');
+      const pass = document.getElementById('confirmPassphrase');
+      if(pass && pass.value) fd.append('confirm_passphrase', pass.value);
+      fetch(formAll.action, { method: 'POST', headers:{'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': (csrf?csrf.value:'')}, body: fd })
+        .then(r=>{ if(r.ok){ try{ alert('All products deleted'); }catch(_){ } setTimeout(()=>window.location.reload(),300); } else { r.text().then(t=>console.error('Delete all failed', r.status, t)); alert('Failed to delete all products'); } })
+        .catch(e=>{ console.error(e); alert('Network error deleting all products'); });
+      return false;
+    }catch(e){ console.error(e); return false; }
+  }
+  (function(){
+    const bulkForm = document.getElementById('bulkForm');
+    const selectAllHead = document.getElementById('selectAllHead');
+    const btnSelectAll = document.getElementById('btnSelectAll');
+    const btnDeselectAll = document.getElementById('btnDeselectAll');
+    const btnDeleteSelected = document.getElementById('btnDeleteSelected');
+    const btnBulkTopPick = document.getElementById('btnBulkTopPick');
+    const btnBulkNewArrival = document.getElementById('btnBulkNewArrival');
+    const btnAll = document.getElementById('btnDeleteAll');
+    const formAll = document.getElementById('deleteAllForm');
+    if(!bulkForm) return;
+
+    // Cache row checkboxes for better performance
+    let rowChecks = Array.from(bulkForm.querySelectorAll('input.row-check'));
+    let totalChecks = rowChecks.length;
+
+    function updateBtn(){
+      const any = rowChecks.some(ch => ch.checked);
+      if(btnDeleteSelected) btnDeleteSelected.disabled = !any;
+      if(btnBulkTopPick) btnBulkTopPick.disabled = !any;
+      if(btnBulkNewArrival) btnBulkNewArrival.disabled = !any;
+    }
+
+    // If admin readonly is enabled return true - we'll fetch via endpoint to show passphrase input
+    var adminReadOnly = false;
+    (function(){
+      fetch('/admin/settings/readonly_status', { method: 'GET' }).then(r => r.json()).then(d => { adminReadOnly = !!d.read_only; var passField = document.getElementById('confirmPassphrase'); if(adminReadOnly && passField){ passField.classList.remove('hidden'); } });
+    })();
+
+    function updateSelectAllState(){
+      let checkedCount = 0;
+      for(let i = 0; i < totalChecks; i++){
+        if(rowChecks[i].checked) checkedCount++;
+      }
+      const allChecked = totalChecks > 0 && checkedCount === totalChecks;
+      const anyChecked = checkedCount > 0;
+      if(selectAllHead) {
+        selectAllHead.checked = allChecked;
+        selectAllHead.indeterminate = anyChecked && !allChecked;
+      }
+    }
+
+    function toggleAll(state){
+      // Use requestAnimationFrame for better performance with large lists
+      requestAnimationFrame(() => {
+        for(let i = 0; i < totalChecks; i++){
+          rowChecks[i].checked = state;
+        }
+        updateBtn();
+        updateSelectAllState();
+      });
+    }
+
+    // Select All button
+    if(btnSelectAll) btnSelectAll.addEventListener('click', () => {
+      toggleAll(true);
+    });
+
+    // Deselect All button
+    if(btnDeselectAll) btnDeselectAll.addEventListener('click', () => {
+      toggleAll(false);
+    });
+
+    // Header checkbox for select all/deselect all
+    if(selectAllHead) selectAllHead.addEventListener('change', e => {
+      toggleAll(e.target.checked);
+      selectAllHead.indeterminate = false;
+    });
+
+    bulkForm.addEventListener('change', function(e){
+      // Only update if it's a row checkbox that changed
+      if(e.target.classList.contains('row-check')){
+        updateBtn();
+        updateSelectAllState();
+      }
+    });
+    bulkForm.addEventListener('submit', function(e){
+      if(!rowChecks.some(ch => ch.checked)){
+        e.preventDefault();
+        alert('Select at least one product to delete.');
+      } else if(!confirm('Delete selected products?')){
+        e.preventDefault();
+      }
+      // append passphrase if admin read-only and provided
+      if(adminReadOnly){
+        const pass = document.getElementById('confirmPassphrase');
+        if(pass && pass.value){
+          let ip = bulkForm.querySelector('input[name="confirm_passphrase"]');
+          if(!ip){ ip = document.createElement('input'); ip.type = 'hidden'; ip.name = 'confirm_passphrase'; bulkForm.appendChild(ip); }
+          ip.value = pass.value;
+        }
+      }
+    });
+    if(btnAll && formAll){
+      btnAll.addEventListener('click', function(){
+        if(!confirm('Delete ALL products? This cannot be undone.')) return;
+        // Build form data
+        const fd = new FormData();
+        const csrf = formAll.querySelector('input[name="csrf_token"]');
+        if(csrf) fd.append('csrf_token', csrf.value);
+        fd.append('confirm', '1');
+        const pass = document.getElementById('confirmPassphrase');
+        if(pass && pass.value) fd.append('confirm_passphrase', pass.value);
+        btnAll.disabled = true;
+        fetch(formAll.action, {
+          method: 'POST',
+          headers: {'X-CSRFToken': (csrf?csrf.value:''), 'X-Requested-With': 'XMLHttpRequest'},
+          body: fd
+        }).then(async (res) => {
+          if(res.ok){
+            try{ showToast('All products deleted', true); }catch(_){ }
+            // give server a moment then reload
+            setTimeout(()=> window.location.reload(), 600);
+          } else {
+            const txt = await res.text().catch(()=>null);
+            try{ showToast('Failed to delete all products', false); }catch(_){ alert('Failed to delete all products'); }
+            console.error('Delete all failed', res.status, txt);
+          }
+        }).catch(e => {
+          console.error(e);
+          try{ showToast('Network error deleting all products', false); }catch(_){ alert('Network error deleting all products'); }
+        }).finally(()=>{ btnAll.disabled = false; });
+      });
+    }
+    // Admin toggles for top picks & new arrivals
+    const csrfToken = bulkForm.querySelector('input[name="csrf_token"]').value;
+    function toggleProductFlag(productId, path, value, checkbox, successMessage){
+      checkbox.disabled = true;
+      fetch(path, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+        body: JSON.stringify({value: value})
+      }).then(r => r.json()).then(data => {
+        if(!data.ok){
+          try{ showToast('Failed to update flag', false); }catch(e){ alert('Failed to update flag'); }
+          checkbox.checked = !value; // revert
+        } else {
+          try { if(successMessage) showToast(successMessage, true); } catch(e) {}
+        }
+      }).catch(e => {
+        console.error(e);
+        try{ showToast('Network error updating flag', false); }catch(err){ alert('Network error updating flag'); }
+        checkbox.checked = !value; // revert
+      }).finally(() => { checkbox.disabled = false; });
+    }
+    document.querySelectorAll('.js-top-pick').forEach(function(cb){
+      cb.addEventListener('change', function(e){
+        const tr = cb.closest('tr');
+        const id = tr && tr.dataset && tr.dataset.id;
+        if(!id) return;
+        toggleProductFlag(id, '/admin/products/'+id+'/toggle-top-pick', cb.checked, cb, 'Top pick updated');
+      });
+    });
+    document.querySelectorAll('.js-new-arrival').forEach(function(cb){
+      cb.addEventListener('change', function(e){
+        const tr = cb.closest('tr');
+        const id = tr && tr.dataset && tr.dataset.id;
+        if(!id) return;
+        toggleProductFlag(id, '/admin/products/'+id+'/toggle-new-arrival', cb.checked, cb, 'New arrival updated');
+      });
+    });
+    // Bulk toggle top pick for selected rows
+    if(btnBulkTopPick){
+      btnBulkTopPick.addEventListener('click', function(){
+        const selected = rowChecks.filter(c => c.checked).map(c => c.value);
+        if(selected.length === 0){
+          alert('Select at least one product to toggle Top Picks.');
+          return;
+        }
+        if(!confirm('Toggle Top Pick for selected products?')) return;
+        btnBulkTopPick.disabled = true;
+        fetch('/admin/products/bulk-toggle-top-pick', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+          body: JSON.stringify({ids: selected})
+        }).then(r => r.json()).then(data => {
+          if(!data.ok){
+            try{ showToast('Failed to toggle Top picks', false); }catch(e){ alert('Failed to toggle Top picks'); }
+            return;
+          }
+          // Update checkboxes for each row
+          Object.keys(data.results || {}).forEach(function(id){
+            const val = !!data.results[id];
+            const row = bulkForm.querySelector('tr[data-id="'+id+'"]');
+            if(row){
+              const cb = row.querySelector('.js-top-pick');
+              if(cb) cb.checked = val;
+            }
+          });
+          try{ showToast('Top picks toggled', true); }catch(_){ }
+        }).catch(e => { console.error(e); try{ showToast('Network error toggling Top picks', false); }catch(_){ alert('Network error toggling Top picks'); } })
+        .finally(() => { btnBulkTopPick.disabled = false; });
+      });
+    }
+    // Bulk toggle new arrival
+    if(btnBulkNewArrival){
+      btnBulkNewArrival.addEventListener('click', function(){
+        const selected = rowChecks.filter(c => c.checked).map(c => c.value);
+        if(selected.length === 0){ alert('Select at least one product to toggle New arrivals.'); return; }
+        if(!confirm('Toggle New Arrival for selected products?')) return;
+        btnBulkNewArrival.disabled = true;
+        fetch('/admin/products/bulk-toggle-new-arrival', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+          body: JSON.stringify({ids: selected})
+        }).then(r => r.json()).then(data => {
+          if(!data.ok){ try{ showToast('Failed to toggle New arrivals', false); }catch(_){ alert('Failed to toggle New arrivals'); } return; }
+          Object.keys(data.results || {}).forEach(function(id){
+            const val = !!data.results[id];
+            const row = bulkForm.querySelector('tr[data-id="'+id+'"]');
+            if(row){ const cb = row.querySelector('.js-new-arrival'); if(cb) cb.checked = val; }
+          });
+          try{ showToast('New Arrival toggled', true); }catch(_){ /* no-op */ }
+        }).catch(e => { console.error(e); alert('Network error toggling New arrivals'); })
+        .finally(()=>{ btnBulkNewArrival.disabled = false; });
+      });
+    }
+    // initialize state
+    updateBtn();
+    updateSelectAllState();
+    
+    // Delegate data-action handlers to avoid inline onclick (CSP compliance)
+    document.addEventListener('click', function(e){
+      const btn = e.target.closest('[data-action]');
+      if(!btn) return;
+      const action = btn.getAttribute('data-action');
+      if(action === 'delete-all'){
+        deleteAllProductsFallback();
+        e.preventDefault();
+      }
+    });
+  })();
+</script>
 {% endblock %}
+

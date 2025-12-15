@@ -28,7 +28,7 @@
 - **Compact Map**: Reduced from 16:9 to fixed 200px height
 - **Opening Hours**: Clear daily schedule
 - **Call Button**: Direct phone contact
-- **Location Display**: Shows Nairobi location
+- **Location Display**: Shows kahawa location
 
 ---
 

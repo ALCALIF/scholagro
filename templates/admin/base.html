@@ -1,0 +1,293 @@
+e{% set admin_title = admin_title or 'Admin' %}
+<!doctype html>
+<html lang="en" class="h-full" data-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ admin_title }} • {{ site_name }}</title>
+    <meta name="description" content="Admin dashboard">
+    <script>
+      // Tailwind v4 config (inline for CDN)
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                DEFAULT: '#16a34a',
+                50: '#ecfdf5',
+                100: '#d1fae5',
+                600: '#16a34a',
+                700: '#15803d'
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <!-- Tailwind: primary (JS CDN) and CSS fallback -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.12/dist/tailwind.min.css">
+    <!-- Last-resort fallback to v2 (has dist file) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <script>
+      // Fallbacks if Tailwind CDN script is blocked
+      (function(){
+        function injectCSS(href){ var l = document.createElement('link'); l.rel='stylesheet'; l.href=href; document.head.appendChild(l); }
+        function tryLocalJS(){
+          if (!window.tailwind){
+            var s = document.createElement('script'); s.src = '/static/vendor/tailwindcdn.js';
+            s.onload = function(){ if (!window.tailwind){ injectCSS('https://unpkg.com/tailwindcss@3.4.12/dist/tailwind.min.css'); } };
+            s.onerror = function(){ injectCSS('https://unpkg.com/tailwindcss@3.4.12/dist/tailwind.min.css'); };
+            document.head.appendChild(s);
+          }
+        }
+        if (!window.tailwind){ setTimeout(tryLocalJS, 200); }
+        // Twind last-resort runtime shim (covers most Tailwind utilities)
+        setTimeout(function(){
+          if (!window.tailwind){
+            var tw = document.createElement('script');
+            tw.src = 'https://cdn.jsdelivr.net/npm/twind@0.16.19/shim.min.js';
+            document.head.appendChild(tw);
+          }
+        }, 400);
+        // Mark load status for quick visual debug (no persistent UI)
+        window.addEventListener('load', function(){
+          document.documentElement.setAttribute('data-tw', window.tailwind ? 'ok' : 'missing');
+        });
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap for consistency with user-facing pages -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+      // Fallback if Chart.js failed to load from the first CDN
+      (function(){
+        function ensure(src){ var s=document.createElement('script'); s.src=src; document.head.appendChild(s); }
+        setTimeout(function(){ if (typeof Chart === 'undefined'){ ensure('https://unpkg.com/chart.js@4.4.1/dist/chart.umd.min.js'); } }, 300);
+      })();
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/css/jsvectormap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/maps/world.js"></script>
+    <script>
+      // Fallback for jsVectorMap
+      (function(){
+        function ensure(src){ var s=document.createElement('script'); s.src=src; document.head.appendChild(s); }
+        setTimeout(function(){ if (typeof window.jsVectorMap === 'undefined'){ ensure('https://unpkg.com/jsvectormap/dist/js/jsvectormap.min.js'); ensure('https://unpkg.com/jsvectormap/dist/maps/world.js'); } }, 300);
+      })();
+    </script>
+    <style>
+      :root { --sidebar-w: 280px; --brand:#16a34a; --brand-dark:#15803d; --brand-contrast:#ffffff; }
+      html, body { height: 100%; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+      html.sidebar-collapsed { --sidebar-w: 72px; }
+      html.sidebar-collapsed .nav-label { display: none; }
+      html.sidebar-collapsed .nav-group-chevron { display: none; }
+      .nav-group > button { width: 100%; }
+      .nav-badge { font-size: 10px; padding: 0 6px; border-radius: 999px; background: #fde68a; color: #92400e; }
+      /* Fallback layout if Tailwind utilities are unavailable */
+      #sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); overflow-y: auto; background: var(--brand); color: var(--brand-contrast); border-right: 0; }
+      #sidebar a { color: var(--brand-contrast); text-decoration: none; }
+      #sidebar .hover\:bg-slate-100:hover, #sidebar .dark\:hover\:bg-slate-700\/60:hover { background: rgba(255,255,255,.12) !important; }
+      [data-theme="dark"] #sidebar, .dark #sidebar { background: var(--brand-dark); color: var(--brand-contrast); }
+      .admin-main { margin-left: var(--sidebar-w); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; width: 100%; }
+      .admin-topbar { position: sticky; top: 0; z-index: 20; background: var(--brand); color: var(--brand-contrast); border-bottom: none; height: 64px; }
+      .admin-topbar a { color: var(--brand-contrast); }
+      .admin-topbar .form-control { background: rgba(255,255,255,.95); color:#0f172a; }
+      [data-theme="dark"] .admin-topbar, .dark .admin-topbar { background: var(--brand-dark); color: var(--brand-contrast); }
+      .admin-content { padding: 1rem; overflow-x: hidden; flex: 1 1 auto; min-height: calc(100vh - 64px); }
+      /* Prevent content from shrinking or collapsing even if empty */
+      .admin-content:before { content: ""; display: block; min-height: 0.01px; }
+      .admin-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1rem; }
+      [data-theme="dark"] .admin-card, .dark .admin-card { background: #0f172a; border-color: #1f2937; color: #e5e7eb; }
+
+      /* Premium palette */
+      .btn-brand { background:#16a34a; color:#fff; border:1px solid #15803d; box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+      .btn-brand:hover { background:#15803d; color:#fff; }
+      .btn-outline-brand { color:#15803d; border:1px solid #16a34a; }
+      .btn-outline-brand:hover { background:#ecfdf5; color:#15803d; }
+      .card-premium { border:1px solid #e5e7eb; border-radius: 14px; box-shadow: 0 6px 18px rgba(2,6,23,.06); }
+      .table-premium thead th { color:#64748b; font-weight:600; }
+      .badge-pill { border-radius:999px; padding:.25rem .5rem; font-weight:600; font-size:.75rem; }
+      .pill-success { background:#dcfce7; color:#166534; }
+      .pill-warning { background:#fef9c3; color:#92400e; }
+      .pill-danger { background:#fee2e2; color:#991b1b; }
+      /* Make user dropdown text visible (override topbar link color) */
+      #userMenu { color: #0f172a; }
+      #userMenu a { color: #0f172a !important; }
+      [data-theme="dark"] #userMenu, .dark #userMenu { color: #e5e7eb; background-color: #1f2937; border-color: #374151; }
+      [data-theme="dark"] #userMenu a { color: #e5e7eb !important; }
+      [data-theme="dark"] #userMenu a:hover { background-color: rgba(55,65,81,0.6) !important; }
+      /* Ensure admin content text is always readable even if Tailwind utilities are blocked
+         or CSP prevents external styles — force a strong contrasting color for body content */
+      .admin-content, .admin-content * {
+        color: var(--sg-text-primary, #0f172a) !important;
+      }
+      [data-theme="dark"] .admin-content, .dark .admin-content * {
+        color: var(--sg-text-primary, #e5e7eb) !important;
+      }
+    </style>
+    {% block head %}{% endblock %}
+  </head>
+  <body class="h-full bg-gray-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100">
+    <div class="flex h-full">
+      <!-- Sidebar -->
+      <aside id="sidebar" class="fixed z-30 inset-y-0 left-0 w-[var(--sidebar-w)] transform transition-transform duration-200 ease-out bg-white/90 backdrop-blur border-r border-slate-200 dark:bg-slate-800/70 dark:border-slate-700 translate-x-0 will-change-transform">
+        <div class="h-16 flex items-center px-4 border-b border-slate-200 dark:border-slate-700">
+          <a href="/admin/" class="flex items-center gap-2 font-semibold text-slate-800 dark:text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-brand" viewBox="0 0 24 24" fill="currentColor"><path d="M11 3a1 1 0 0 1 2 0v2h6a1 1 0 0 1 1 1v6h2a1 1 0 1 1 0 2h-2v6a1 1 0 0 1-1 1h-6v2a1 1 0 1 1-2 0v-2H5a1 1 0 0 1-1-1v-6H2a1 1 0 1 1 0-2h2V6a1 1 0 0 1 1-1h6V3Z"/></svg>
+            <span>Admin • {{ site_name }}</span>
+          </a>
+        </div>
+        <nav class="px-3 pb-3 overflow-y-auto h-[calc(100%-4rem)]">
+          <div class="text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 mb-2">Home</div>
+          <div class="space-y-1">
+            <a href="/admin/" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60">
+              <span class="text-brand">🏠</span><span class="nav-label">Dashboard</span>
+            </a>
+            <div class="nav-group">
+              <button data-group-toggle class="flex items-center justify-between px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60">
+                <span class="flex items-center gap-3"><span>🛍️</span><span class="nav-label">E commerce</span></span>
+                <span class="nav-group-chevron">▾</span>
+              </button>
+              <div class="pl-9 space-y-1 hidden" data-group-content>
+                <a href="/admin/products" class="block px-3 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700/60"><span class="nav-label">Products</span></a>
+                <a href="/admin/products/top-picks" class="block px-3 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700/60"><span class="nav-label">Top Picks</span></a>
+                <a href="/admin/categories" class="block px-3 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700/60"><span class="nav-label">Categories</span></a>
+                <a href="/admin/orders" class="block px-3 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700/60"><span class="nav-label">Orders</span></a>
+                <a href="/admin/payments" class="block px-3 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700/60"><span class="nav-label">Payments</span></a>
+                <a href="/admin/delivery-zones" class="block px-3 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700/60"><span class="nav-label">Delivery Zones</span></a>
+                <a href="/admin/products/export" class="block px-3 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700/60"><span class="nav-label">Export Products</span></a>
+              </div>
+            </div>
+
+            <a href="/admin/banners" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60">
+              <span>🖼️</span><span class="nav-label">Banners</span>
+            </a>
+            <a href="/admin/import" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60">
+              <span>📤</span><span class="nav-label">Import</span>
+            </a>
+          </div>
+
+          <div class="pt-3 text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 mb-2">Apps</div>
+          <ul class="space-y-1">
+            <li><a href="/admin/analytics" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>📈</span><span class="nav-label">Analytics</span></a></li>
+            <li><a href="/admin/reports/advanced" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>📊</span><span class="nav-label">Advanced Reports</span></a></li>
+            <li><a href="/admin/reviews/moderation" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>⭐</span><span class="nav-label">Reviews</span></a></li>
+            <li><a href="#" data-open="chat" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>💬</span><span class="nav-label">Chat</span><span class="nav-badge ml-auto">NEW</span></a></li>
+            <li><a href="#" data-open="calendar" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>📆</span><span class="nav-label">Calendar</span></a></li>
+          </ul>
+
+          <div class="pt-3 text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 mb-2">Pages</div>
+          <ul class="space-y-1">
+            <li><a href="/admin/users" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>👤</span><span class="nav-label">Users</span></a></li>
+            <li><a href="/auth/login" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>🔐</span><span class="nav-label">Authentication</span></a></li>
+            <li><a href="/pages/faqs" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>❓</span><span class="nav-label">FAQ</span></a></li>
+            <li><a href="/pages/contact" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>📨</span><span class="nav-label">Contact</span></a></li>
+          </ul>
+
+          <div class="pt-3 text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 mb-2">Documentation</div>
+          <ul class="space-y-1 mb-3">
+            <li><a href="/README" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>📘</span><span class="nav-label">Getting started</span></a></li>
+            <li><a href="#" data-open="customize" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>⚙️</span><span class="nav-label">Customization</span></a></li>
+          </ul>
+
+          <button id="collapseToggle" class="w-full mt-2 inline-flex items-center justify-center px-3 py-2 rounded-md border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60">
+            <span class="nav-label">Collapsed View</span> ↔
+          </button>
+        </nav>
+      </aside>
+
+      <!-- Main -->
+      <div class="admin-main">
+        <!-- Topbar -->
+        <header class="admin-topbar">
+          <div class="d-flex align-items-center gap-2" style="height:64px; padding: 0 1rem;">
+            <button id="burger" class="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60" aria-label="Toggle sidebar">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+            </button>
+            <form action="/admin/" class="flex-1" style="max-width: 720px;">
+              <div class="relative">
+                <input name="q" placeholder="Search or type command..." class="form-control" />
+                <svg class="absolute left-3 top-2.5 h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21 21 15.8 15.8m0 0A7 7 0 1 0 4 4a7 7 0 0 0 11.8 11.8Z"/></svg>
+              </div>
+            </form>
+            <a href="/admin/category-heroes" class="btn btn-outline-light btn-sm d-none d-md-inline-flex" title="Manage Category Heroes"><i class="bi bi-images me-1"></i>Manage Hero</a>
+            <div class="ms-auto d-flex align-items-center gap-2">
+              <button id="themeToggle" class="h-9 w-9 rounded-md border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60" aria-label="Toggle theme">
+                <span id="themeIcon">🌙</span>
+              </button>
+              <div class="relative">
+                <button id="userMenuBtn" class="h-9 px-3 rounded-md border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60">Menu</button>
+                <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg">
+                  <a href="/" class="block px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700/60">Go to site</a>
+                  <a href="/account/profile" class="block px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700/60">Profile</a>
+                  <a href="/auth/logout" class="block px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700/60">Logout</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% block breadcrumbs %}
+            {% if breadcrumbs %}
+            <div class="px-4 pb-3 text-sm text-slate-500 dark:text-slate-400">{{ breadcrumbs|safe }}</div>
+            {% endif %}
+          {% endblock %}
+        </header>
+
+        <!-- Page content -->
+        <main class="admin-content container-fluid">
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal fade" id="chatModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content card-premium">
+          <div class="modal-header"><h5 class="modal-title">Chat</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+          <div class="modal-body">
+            <div class="alert alert-info">This is a lightweight inbox stub. Connect your provider to enable live chat.</div>
+            <div class="d-flex gap-2">
+              <input class="form-control" placeholder="Type a message...">
+              <button class="btn btn-brand">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="calendarModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content card-premium">
+          <div class="modal-header"><h5 class="modal-title">Calendar</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+          <div class="modal-body">
+            <div class="text-muted mb-2">Upcoming schedule (sample)</div>
+            <ul class="list-group">
+              <li class="list-group-item d-flex justify-content-between"><span>Team standup</span><span class="text-muted">09:30</span></li>
+              <li class="list-group-item d-flex justify-content-between"><span>Supplier call</span><span class="text-muted">11:00</span></li>
+              <li class="list-group-item d-flex justify-content-between"><span>Review sprint</span><span class="text-muted">15:00</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="customizeModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content card-premium">
+          <div class="modal-header"><h5 class="modal-title">Customization</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+          <div class="modal-body">
+            <p class="mb-2">Looking to customize the admin?</p>
+            <a class="btn btn-outline-brand" href="/README">Open README</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin.js') }}?v={{ datetime.utcnow().timestamp()|int }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

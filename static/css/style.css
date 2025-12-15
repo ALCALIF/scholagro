@@ -25,6 +25,10 @@ body {
   letter-spacing: 0.3px;
 }
 
+/* Light mode visibility tweaks */
+.text-muted { color: #6b7280 !important; }
+.card { border-color: #e5e7eb !important; }
+
 /* Brand styling */
 .brand {
   letter-spacing: 0.5px;
@@ -210,6 +214,27 @@ a:hover {
   border-radius: 0.5rem;
 }
 
+/* Order detail helpers to replace inline styles */
+.order-summary {
+  min-width: 280px;
+}
+.mpesa-phone {
+  width: 200px;
+}
+.timeline-dot {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  border-radius: 50%;
+}
+
+/* Auth page background and container stacking moved from inline styles */
+.auth-bg {
+  background: url('https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1600&q=60') center/cover no-repeat;
+  filter: brightness(.75);
+}
+.auth-container-z { z-index: 1; }
+
 /* Carousel Enhancements */
 #bannerCarousel {
   border-radius: 1rem;
@@ -252,6 +277,40 @@ a:hover {
   font-size: 0.875rem;
   opacity: 0.95;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Hero background carousel (use carousel as background for the hero section) */
+.hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 420px; /* keep hero tall enough */
+  background: none !important; /* remove default solid background so hero carousel shows */
+}
+.hero .hero-carousel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* behind hero content */
+}
+.hero .hero-carousel .carousel-inner,
+.hero .hero-carousel .carousel-item,
+.hero .hero-carousel .carousel-img {
+  height: 100%;
+}
+.hero .hero-carousel .carousel-img {
+  object-fit: cover;
+}
+.hero > *:not(.hero-carousel) {
+  position: relative;
+  z-index: 1; /* keep content above images */
+}
+.hero .carousel-caption-custom { display: none; }
+
+@media (max-width: 768px) {
+  .hero { min-height: 300px; }
+  .hero .carousel-img { height: 300px; }
 }
 
 .carousel-control-prev,
@@ -341,3 +400,76 @@ a:hover {
 .rating-radio:checked ~ .rating-star {
   color: #f59e0b;
 }
+
+/* Buttons style consistency */
+.btn:disabled, .btn.disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Wishlist button specific */
+.btn-wishlist.btn-outline-danger i.bi-heart {
+  color: #dc3545;
+}
+
+.btn-wishlist.btn-danger i.bi-heart-fill {
+  color: #dc3545;
+}
+
+/* Cart count badge fixes */
+#cart-count-badge {
+  background: var(--sg-primary);
+  color: white;
+  font-weight: 700;
+  border-radius: 50%;
+  padding: 0.15rem 0.5rem;
+  min-width: 24px;
+  text-align: center;
+  display: inline-block;
+  line-height: 1.2;
+}
+
+/* Disabled state for add to cart button */
+.btn-add-to-cart.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+  filter: grayscale(60%);
+  transition: opacity 0.3s ease;
+}
+
+/* Spinner inside buttons adjustments */
+.btn .spinner-border {
+  vertical-align: middle;
+  margin-right: 0.3rem;
+}
+
+/* Hover effect refinement */
+.btn:hover:not(:disabled):not(.disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+/* Disabled wishlist button during loading */
+.btn-wishlist.disabled, .btn-wishlist[disabled] {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+/* Smooth transition for btn color changes */
+.btn-wishlist {
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+/* Dark mode contrast improvements */
+[data-theme="dark"] .card {
+  background-color: #111827 !important;
+  border-color: #374151 !important;
+}
+[data-theme="dark"] .card .text-muted,
+[data-theme="dark"] .text-muted { color: #cbd5e1 !important; }
+[data-theme="dark"] .list-group-item { border-color: #374151 !important; }
+[data-theme="dark"] .badge.bg-success-light { background-color: rgba(34,197,94,0.22) !important; color: #22c55e !important; }
+[data-theme="dark"] .badge.bg-danger-light { background-color: rgba(239,68,68,0.22) !important; color: #ef4444 !important; }
+[data-theme="dark"] .navbar.bg-white { background-color: #111827 !important; }

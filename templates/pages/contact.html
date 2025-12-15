@@ -5,15 +5,22 @@
   <div class="col-md-7">
     <h1>Contact Us</h1>
     <p class="lead">We’re here to help with orders, deliveries, and product questions.</p>
-    <form method="post" class="mt-4">
+    <form id="contactForm" action="https://api.web3forms.com/submit" method="POST" class="mt-4">
+      <!-- CSRF is harmless if present when posting to external API -->
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <!-- Web3Forms required fields -->
+      <input type="hidden" name="access_key" value="49e8202e-a1a4-4a60-a70c-d261269b6abc">
+      <input type="hidden" name="to" value="scholagro@gmail.com">
+      <input type="hidden" name="replyto" value="from_email">
+      <!-- Optional botcheck field used by some providers -->
+      <input type="checkbox" name="botcheck" value="" class="d-none" tabindex="-1" autocomplete="off">
       <div class="mb-3">
         <label for="name" class="form-label">Name</label>
-        <input type="text" class="form-control" id="name" name="name" required>
+        <input type="text" class="form-control" id="name" name="from_name" required>
       </div>
       <div class="mb-3">
         <label for="email" class="form-label">Email</label>
-        <input type="email" class="form-control" id="email" name="email" required>
+        <input type="email" class="form-control" id="email" name="from_email" required>
       </div>
       <div class="mb-3">
         <label for="subject" class="form-label">Subject</label>
@@ -23,7 +30,8 @@
         <label for="message" class="form-label">Message</label>
         <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
       </div>
-      <button type="submit" class="btn btn-success">
+      <div id="contactAlert" class="mb-3" role="status" aria-live="polite"></div>
+      <button type="submit" class="btn btn-success" id="contactSubmitBtn">
         <i class="bi bi-envelope"></i> Send Message
       </button>
     </form>
@@ -44,4 +52,62 @@
     {% include 'partials/hours_map.html' %}
   </div>
 </div>
+<script>
+  (function(){
+    const form = document.getElementById('contactForm');
+    const alertBox = document.getElementById('contactAlert');
+    const btn = document.getElementById('contactSubmitBtn');
+    if(!form) return;
+    function showAlert(kind, msg){
+      alertBox.innerHTML = '<div class="alert alert-' + kind + '">' + msg + '</div>';
+      if (kind) {
+        setTimeout(() => { alertBox.innerHTML = ''; }, 3000);
+      }
+    }
+    form.addEventListener('submit', async function(e){
+      e.preventDefault();
+      showAlert('', '');
+      btn.disabled = true;
+      try{
+        const fd = new FormData(form);
+        // Web3Forms expects urlencoded body
+        const params = new URLSearchParams();
+        for (const [k,v] of fd.entries()) params.append(k, v);
+        const res = await fetch(form.action, { method:'POST', mode:'cors', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: params.toString() });
+        const ok = res.ok;
+        let data = {};
+        try { data = await res.json(); } catch(_){ data = {}; }
+        if (ok && (data.success === true || data.success === undefined)){
+          showAlert('success', 'MESSAGE SENT SUCCESSFULLY, THANK YOU FOR CONTACTING US');
+          form.reset();
+        } else {
+          // Try backend SMTP fallback
+          try {
+            const fallbackParams = new URLSearchParams();
+            fallbackParams.append('name', document.getElementById('name').value);
+            fallbackParams.append('email', document.getElementById('email').value);
+            fallbackParams.append('subject', document.getElementById('subject').value);
+            fallbackParams.append('message', document.getElementById('message').value);
+            fallbackParams.append('csrf_token', '{{ csrf_token() }}');
+            const resp2 = await fetch("{{ url_for('shop.contact') }}", { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: fallbackParams.toString() });
+            if (resp2.redirected || resp2.ok){
+              showAlert('success', 'MESSAGE SENT SUCCESSFULLY, THANK YOU FOR CONTACTING US');
+              form.reset();
+            } else {
+              const errMsg = (data.message || (data.errors ? JSON.stringify(data.errors) : 'We could not send your message right now. Please try again later.'));
+              showAlert('danger', errMsg);
+            }
+          } catch (e) {
+            const errMsg = (data.message || (data.errors ? JSON.stringify(data.errors) : 'We could not send your message right now. Please try again later.'));
+            showAlert('danger', errMsg);
+          }
+        }
+      } catch(err){
+        showAlert('danger', 'Network error. Please try again later.');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  })();
+</script>
 {% endblock %}

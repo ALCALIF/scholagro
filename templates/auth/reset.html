@@ -3,7 +3,9 @@
 <h3>Reset Password</h3>
 <form method="post" class="col-md-6">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <div class="mb-3"><label class="form-label">New Password</label><input class="form-control" type="password" name="password" required></div>
+  <div class="mb-3"><label class="form-label">New Password</label><input class="form-control js-pass" aria-label="New Password" type="password" name="password" required></div>
+  <div class="mb-3"><label class="form-label">Confirm Password</label><input class="form-control js-pass" aria-label="Confirm Password" type="password" name="confirm_password" required></div>
+  <div class="form-check mb-3"><input class="form-check-input js-show-pass" type="checkbox" id="resetShowPass"><label class="form-check-label small" for="resetShowPass">Show password</label></div>
   <button class="btn btn-success">Update Password</button>
 </form>
 {% endblock %}

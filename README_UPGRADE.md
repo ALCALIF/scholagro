@@ -165,6 +165,21 @@ Your Scholagro e-commerce platform has been completely transformed from a **basi
 ### 1. No Additional Setup Required
 The upgrade is ready to use immediately. All files are in place and working.
 
+### Database changes
+This upgrade adds two admin-controlled boolean fields to `Product`:
+
+- `is_top_pick` — mark a product to show in the Top Picks section on the home page
+- `is_new_arrival_featured` — mark a product to appear in the New Arrivals section
+
+If you are updating an existing installation, run a new migration to add these columns to your database:
+
+```bash
+flask db migrate -m "Add product flags for homepage sections"
+flask db upgrade
+```
+
+If you are working on a development environment without migrations, you can run `FORCE_CREATE_ALL=true python -m scripts.init_db` to create the new columns, but prefer migrations for production.
+
 ### 2. Browser Cache Clear
 After deployment, users may need to clear cache:
 - Chrome: Ctrl+Shift+Delete

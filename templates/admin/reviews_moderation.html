@@ -1,0 +1,76 @@
+{% extends 'admin/base.html' %}
+{% block title %}Reviews Moderation{% endblock %}
+{% block content %}
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <h2 class="text-lg font-semibold">Pending Reviews</h2>
+    <a href="/admin" class="inline-flex items-center px-3 py-1.5 rounded-md border border-slate-300 dark:border-slate-700">Back</a>
+  </div>
+
+  {% if reviews %}
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 dark:bg-slate-900/40">
+        <tr>
+          <th class="text-left p-3">Product</th>
+          <th class="text-left p-3">User</th>
+          <th class="text-left p-3">Rating</th>
+          <th class="text-left p-3">Comment</th>
+          <th class="text-left p-3">Photos</th>
+          <th class="text-left p-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in reviews %}
+        <tr class="border-t border-slate-100 dark:border-slate-700/60">
+          <td class="p-3">
+            <div class="flex items-center gap-2">
+              <img src="{{ cl_transform(r.product.image_url, 80, 60) if r.product else '' }}" class="h-12 w-16 object-cover rounded" alt="">
+              <div>
+                <div class="font-medium">{{ r.product.name if r.product else '—' }}</div>
+                <div class="text-xs text-slate-500">#{{ r.product_id }}</div>
+              </div>
+            </div>
+          </td>
+          <td class="p-3">
+            <div class="font-medium">{{ r.user.name or r.user.email if r.user else 'Anonymous' }}</div>
+            <div class="text-xs text-slate-500">#{{ r.user_id }}</div>
+          </td>
+          <td class="p-3">{{ r.rating }}★</td>
+          <td class="p-3 max-w-xs">
+            <div class="line-clamp-3">{{ r.comment or '(no comment)' }}</div>
+          </td>
+          <td class="p-3">
+            <div class="flex items-center gap-2 flex-wrap">
+              {% for p in r.review_photos if r.review_photos %}
+              <a href="{{ p.image_url }}" target="_blank" rel="noopener">
+                <img src="{{ p.image_url }}" class="h-12 w-12 object-cover rounded border border-slate-200 dark:border-slate-700" alt="">
+              </a>
+              {% endfor %}
+              {% if not r.review_photos %}<span class="text-slate-400 text-xs">—</span>{% endif %}
+            </div>
+          </td>
+          <td class="p-3">
+            <div class="flex items-center gap-2">
+              <form method="post" action="/admin/reviews/{{ r.id }}/approve">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="px-3 py-1 rounded-md bg-emerald-600 text-white">Approve</button>
+              </form>
+              <form method="post" action="/admin/reviews/{{ r.id }}/reject" onsubmit="return confirm('Reject this review?')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="px-3 py-1 rounded-md border border-red-300 text-red-600">Reject</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 text-slate-500">
+    No pending reviews.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'admin/base.html' %}
+{% block breadcrumbs %}
+  <nav class="px-4 pb-3 text-sm text-slate-500 dark:text-slate-400" aria-label="breadcrumb">
+    <ol class="breadcrumb m-0">
+      <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+      <li class="breadcrumb-item"><a href="/admin/products">Products</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Top Picks</li>
+    </ol>
+  </nav>
+{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-3">
+  <h3 class="text-xl font-semibold">Manage Top Picks</h3>
+  <div>
+    <a href="/admin/products" class="btn btn-outline-light">Back to products</a>
+  </div>
+</div>
+<div class="mb-3">
+  <span class="text-sm text-slate-500">Select products to add/remove Top Picks</span>
+</div>
+<form id="topPicksForm" method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="mb-2">
+    <button id="btnAddSelected" type="button" class="btn btn-brand btn-sm">Add selected to Top Picks</button>
+    <button id="btnRemoveSelected" type="button" class="btn btn-outline-light btn-sm">Remove selected from Top Picks</button>
+    <button id="btnClearAll" type="button" class="btn btn-danger btn-sm">Clear all Top Picks</button>
+  </div>
+  <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-0 overflow-x-auto">
+    <table class="min-w-full text-sm text-slate-800 dark:text-slate-200">
+      <thead class="text-left text-slate-600 dark:text-slate-300">
+        <tr>
+          <th class="py-2 px-3 w-10"><input type="checkbox" id="tpSelectAll" class="h-4 w-4"></th>
+          <th class="py-2 px-3">Name</th>
+          <th class="py-2 px-3">Top pick</th>
+          <th class="py-2 px-3">Price</th>
+          <th class="py-2 px-3">Category</th>
+          <th class="py-2 px-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+        {% for p in products %}
+          <tr data-id="{{p.id}}">
+            <td class="py-2 px-3">
+              <input type="checkbox" name="ids[]" value="{{p.id}}" class="tp-row-check h-4 w-4">
+            </td>
+            <td class="py-2 px-3">{{p.name}}</td>
+            <td class="py-2 px-3">{{ 'Yes' if p.is_top_pick else 'No' }}</td>
+            <td class="py-2 px-3">{{p.price}}</td>
+            <td class="py-2 px-3">{{p.category.name if p.category else ''}}</td>
+            <td class="py-2 px-3">
+              <button data-id="{{p.id}}" class="btn btn-sm btn-outline-light tp-btn-toggle">Toggle</button>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</form>
+<script>
+  (function(){
+    const form = document.getElementById('topPicksForm');
+    const selectAll = document.getElementById('tpSelectAll');
+    const rows = () => Array.from(form.querySelectorAll('input[name="ids[]"]'));
+    const btnAdd = document.getElementById('btnAddSelected');
+    const btnRemove = document.getElementById('btnRemoveSelected');
+    const btnClear = document.getElementById('btnClearAll');
+    const csrf = form.querySelector('input[name="csrf_token"]').value;
+    function selectedIds(){ return rows().filter(r => r.checked).map(r => r.value); }
+    if(selectAll){ selectAll.addEventListener('change', e => rows().forEach(r => r.checked = e.target.checked)); }
+    btnAdd.addEventListener('click', function(){
+      const ids = selectedIds(); if(!ids.length){ alert('Select at least one product'); return; }
+      fetch('/admin/products/bulk-set-top-pick', {method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrf}, body: JSON.stringify({ids: ids, value: true})}).then(r=>r.json()).then(d=>{ if(!d.ok){ alert('Failed'); } else { location.reload(); } }).catch(()=>alert('Network error'));
+    });
+    btnRemove.addEventListener('click', function(){
+      const ids = selectedIds(); if(!ids.length){ alert('Select at least one product'); return; }
+      fetch('/admin/products/bulk-set-top-pick', {method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrf}, body: JSON.stringify({ids: ids, value: false})}).then(r=>r.json()).then(d=>{ if(!d.ok){ alert('Failed'); } else { location.reload(); } }).catch(()=>alert('Network error'));
+    });
+    btnClear.addEventListener('click', function(){
+      if(!confirm('Clear ALL Top Picks?')) return; fetch('/admin/products/bulk-set-top-pick', {method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrf}, body: JSON.stringify({ids: {{ all_product_ids|tojson }}, value: false})}).then(r=>r.json()).then(d=>{ if(!d.ok){ alert('Failed clearing picks'); } else { location.reload(); } }).catch(()=>alert('Network error'));
+    });
+    document.querySelectorAll('.tp-btn-toggle').forEach(function(b){ b.addEventListener('click', function(){ const id = b.dataset.id; b.disabled = true; fetch('/admin/products/'+id+'/toggle-top-pick', {method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrf}}).then(r=>r.json()).then(d=>{ if(!d.ok){ alert('Failed to toggle'); } else { location.reload(); } }).catch(()=>alert('Network error')).finally(()=>b.disabled=false); }); });
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/orders" class="text-emerald">My Orders</a></li>
+      <li class="breadcrumb-item active">Track Order #{{ order.id }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4">
+    <div class="col-12 col-lg-8">
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-1">Order #{{ order.id }}</h5>
+          <div class="small text-muted mb-4">Status: <span class="fw-semibold">{{ order.status|replace('_',' ')|capitalize }}</span> • Placed {{ order.created_at.strftime('%b %d, %Y %I:%M %p') }}</div>
+
+          {% if logs and logs|length %}
+          <ul class="list-unstyled">
+            {% for l in logs %}
+            <li class="d-flex align-items-start mb-4">
+              <div class="me-3" style="width:12px;height:12px;border-radius:50%;background: {% if l.status in ['confirmed','packed','on_the_way','delivered'] %}#10b981{% else %}#cbd5e1{% endif %};"></div>
+              <div>
+                <div class="fw-semibold">{{ l.status|replace('_',' ')|capitalize }}</div>
+                <div class="small text-muted">{{ l.created_at.strftime('%b %d, %Y %I:%M %p') if l.created_at else '' }}</div>
+                {% if l.notes %}<div class="text-muted small">{{ l.notes }}</div>{% endif %}
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <div class="text-muted">No tracking updates yet.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-4">
+          <div class="fw-semibold mb-2">Delivery</div>
+          <div class="small text-muted mb-1">Zone</div>
+          <div class="mb-2">{{ order.delivery_zone.name if order.delivery_zone else 'N/A' }}</div>
+          <div class="small text-muted mb-1">Time Slot</div>
+          <div class="mb-2">{{ order.delivery_time_slot or 'N/A' }}</div>
+          <div class="small text-muted mb-1">Total</div>
+          <div class="mb-2">Ksh {{ '%.2f'|format(order.total_amount or 0) }}</div>
+          <a href="/orders/{{ order.id }}" class="btn btn-outline-secondary w-100"><i class="bi bi-receipt"></i> View Order</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

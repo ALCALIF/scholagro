@@ -21,15 +21,120 @@
         <div id="checkout-steps">
           <!-- Step 1: Delivery Address -->
           <div class="checkout-step" id="step-address">
-            ...existing code...
+            <h5 class="fw-bold mb-3">Delivery Address</h5>
+            {% if addresses and addresses|length %}
+            <div class="list-group mb-3">
+              {% for a in addresses %}
+              <label class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                <input class="form-check-input mt-1" type="radio" name="address_id" value="{{ a.id }}" {% if loop.first %}checked{% endif %} required>
+                <div class="small">
+                  <div class="fw-600">{{ a.name or 'Address' }}</div>
+                  <div class="text-muted">{{ a.line1 }}{% if a.line2 %}, {{ a.line2 }}{% endif %}</div>
+                  <div class="text-muted">{{ a.city }}{% if a.postal_code %}, {{ a.postal_code }}{% endif %}</div>
+                </div>
+              </label>
+              {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">No saved addresses yet. Please add one in your account or enter delivery details in the next step.</div>
+            {% endif %}
           </div>
           <!-- Step 2: Delivery Options -->
           <div class="checkout-step d-none" id="step-delivery">
-            ...existing code...
+            <h5 class="fw-bold mb-3">Delivery Options</h5>
+            <div class="row g-3">
+              {% if config.get('ALLOW_PICKUP') %}
+              <div class="col-12">
+                <label class="form-label d-block">Fulfillment</label>
+                <div class="btn-group" role="group" aria-label="Fulfillment">
+                  <input type="radio" class="btn-check" name="fulfillment" id="fulfill_delivery" value="delivery" checked>
+                  <label class="btn btn-outline-emerald" for="fulfill_delivery"><i class="bi bi-truck"></i> Delivery</label>
+                  <input type="radio" class="btn-check" name="fulfillment" id="fulfill_pickup" value="pickup">
+                  <label class="btn btn-outline-secondary" for="fulfill_pickup"><i class="bi bi-shop"></i> Pickup</label>
+                </div>
+                {% if config.get('PICKUP_LOCATION') %}
+                <div class="form-text">Pickup location: {{ config.get('PICKUP_LOCATION') }}</div>
+                {% endif %}
+              </div>
+              {% endif %}
+              <div class="col-md-6">
+                <label class="form-label">Delivery Zone</label>
+                <select class="form-select" name="zone_id" onchange="updateDeliveryFee()" required>
+                  <option value="">Select zone</option>
+                  {% for z in zones %}
+                  <option value="{{ z.id }}" data-fee="{{ '%.2f'|format(z.fee or 0) }}">{{ z.name }} — Ksh {{ '%.2f'|format(z.fee or 0) }}</option>
+                  {% endfor %}
+                </select>
+                <div class="form-text">Fee: <span id="delivery-fee-display">Ksh 0.00</span></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Delivery Slot</label>
+                <select class="form-select" name="slot" required>
+                  {% set today = datetime.utcnow().date() %}
+                  {% for d in range(0,3) %}
+                    {% set day = (today + timedelta(days=d)).strftime('%Y-%m-%d') %}
+                    <option value="{{ day }} Morning (8:00 - 12:00)">{{ day }} Morning (8:00 - 12:00)</option>
+                    <option value="{{ day }} Afternoon (12:00 - 16:00)">{{ day }} Afternoon (12:00 - 16:00)</option>
+                    <option value="{{ day }} Evening (16:00 - 20:00)">{{ day }} Evening (16:00 - 20:00)</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
           </div>
           <!-- Step 3: Payment & Discounts -->
           <div class="checkout-step d-none" id="step-payment">
-            ...existing code...
+            <h5 class="fw-bold mb-3">Payment & Discounts</h5>
+            <div class="row g-3">
+              <div class="col-md-7">
+                <label class="form-label d-block">Payment Method</label>
+                <div class="d-flex gap-3 align-items-center flex-wrap mb-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="payment_method" id="pay_mpesa" value="mpesa" checked>
+                    <label class="form-check-label" for="pay_mpesa"><i class="bi bi-phone"></i> M-Pesa (STK Push)</label>
+                  </div>
+                  {% if config.get('ALLOW_COD') %}
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="payment_method" id="pay_cod" value="cod">
+                    <label class="form-check-label" for="pay_cod"><i class="bi bi-cash-coin"></i> Cash on Delivery</label>
+                  </div>
+                  {% endif %}
+                </div>
+                <label class="form-label">Coupon Code</label>
+                <div class="input-group">
+                  <input type="text" id="coupon-input" class="form-control" placeholder="Enter coupon code" name="coupon_code">
+                  <button type="button" class="btn btn-outline-emerald" onclick="applyCoupon()">Apply</button>
+                </div>
+                <div id="coupon-feedback" class="small mt-2"></div>
+              </div>
+              <div class="col-md-5">
+                <div class="card border-0 shadow-sm">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>Subtotal</span>
+                      <span>Ksh {{ '%.2f'|format(total) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>Delivery</span>
+                      <span id="delivery-fee-display">Ksh 0.00</span>
+                    </div>
+                    {% if config.get('FREE_DELIVERY_THRESHOLD') %}
+                    <div class="small text-success" id="free-delivery-note" style="display:none;">
+                      <i class="bi bi-truck"></i> Free delivery applied (threshold Ksh {{ '%.2f'|format(config.get('FREE_DELIVERY_THRESHOLD')|float) }})
+                    </div>
+                    {% endif %}
+                    <div class="d-flex justify-content-between mb-2" id="discount-display-row" style="display:none;">
+                      <span>Discount</span>
+                      <span id="discount-display">-Ksh 0.00</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold">
+                      <span>Total</span>
+                      <span id="total-amount-display">Ksh {{ '%.2f'|format(total) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="d-flex justify-content-between mt-4">
@@ -37,7 +142,38 @@
           <button type="button" class="btn btn-emerald" id="nextStep">Next</button>
         </div>
       </div>
-      ...existing code...
+      <div class="col-12 col-lg-4">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h6 class="fw-bold mb-3">Order Summary</h6>
+            <div class="d-flex justify-content-between mb-2">
+              <span>Items Subtotal</span>
+              <span>Ksh {{ '%.2f'|format(total) }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span>Delivery</span>
+              <span id="delivery-fee-display">Ksh 0.00</span>
+            </div>
+            {% if config.get('FREE_DELIVERY_THRESHOLD') %}
+            <div class="small text-success" id="free-delivery-note-side" style="display:none;">
+              <i class="bi bi-truck"></i> Free delivery applied (threshold Ksh {{ '%.2f'|format(config.get('FREE_DELIVERY_THRESHOLD')|float) }})
+            </div>
+            {% endif %}
+            <div class="d-flex justify-content-between mb-2" id="discount-display-row" style="display:none;">
+              <span>Discount</span>
+              <span id="discount-display">-Ksh 0.00</span>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between fw-bold">
+              <span>Total</span>
+              <span id="total-amount-display">Ksh {{ '%.2f'|format(total) }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="alert alert-sm bg-emerald-light border-0 rounded-2 mt-3">
+          <i class="bi bi-shield-check text-emerald"></i> Secure payment with MPesa
+        </div>
+      </div>
     </div>
   </form>
 
@@ -82,8 +218,24 @@ function getCsrfToken() {
 function recalcTotal() {
   const select = document.querySelector('select[name="zone_id"]');
   const option = select && select.options[select.selectedIndex] ? select.options[select.selectedIndex] : { dataset: { fee: 0 } };
-  const fee = parseFloat(option.dataset.fee || 0);
-  const subtotal = {{ total }};
+  var fEl = document.querySelector('input[name="fulfillment"]:checked');
+  var fulfillment = (fEl && fEl.value) ? fEl.value : 'delivery';
+  let fee = fulfillment === 'pickup' ? 0 : parseFloat(option.dataset.fee || 0);
+  const subtotal = {{ total|tojson }};
+  // Free delivery threshold (from admin settings)
+  var threshold = {{ (config.get('FREE_DELIVERY_THRESHOLD') or 0)|tojson }};
+  if (fulfillment !== 'pickup' && threshold && subtotal >= parseFloat(threshold || 0)) {
+    fee = 0;
+    var n1 = document.getElementById('free-delivery-note');
+    var n2 = document.getElementById('free-delivery-note-side');
+    if (n1) n1.style.display = 'block';
+    if (n2) n2.style.display = 'block';
+  } else {
+    var n1h = document.getElementById('free-delivery-note');
+    var n2h = document.getElementById('free-delivery-note-side');
+    if (n1h) n1h.style.display = 'none';
+    if (n2h) n2h.style.display = 'none';
+  }
   const total = Math.max(0, subtotal + fee - appliedDiscount);
   document.getElementById('delivery-fee-display').textContent = `Ksh ${fee.toFixed(2)}`;
   document.getElementById('total-amount-display').textContent = `Ksh ${total.toFixed(2)}`;
@@ -93,13 +245,29 @@ function updateDeliveryFee() {
   recalcTotal();
 }
 
+// Toggle delivery zone requirement if pickup selected
+document.addEventListener('change', function(e){
+  if (e.target && e.target.name === 'fulfillment'){
+    var v = e.target.value;
+    var zoneSelect = document.querySelector('select[name="zone_id"]');
+    if (zoneSelect){
+      if (v === 'pickup'){
+        zoneSelect.removeAttribute('required');
+      } else {
+        zoneSelect.setAttribute('required', 'required');
+      }
+    }
+    recalcTotal();
+  }
+});
+
 async function applyCoupon() {
   const code = document.getElementById('coupon-input').value.trim();
   if (!code) {
     showCouponFeedback('Please enter a coupon code', 'warning');
     return;
   }
-  const subtotal = {{ total }};
+  const subtotal = {{ total|tojson }};
   try {
     const res = await fetch('/orders/apply-coupon', {
       method: 'POST',

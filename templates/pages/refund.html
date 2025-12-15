@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Refund Policy • {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/" class="text-emerald">Home</a></li>
+      <li class="breadcrumb-item active">Refund Policy</li>
+    </ol>
+  </nav>
+  <h1 class="fw-bold mb-3 heading-accent"><i class="bi bi-receipt-cutoff me-2"></i>Refund Policy</h1>
+  <p class="text-muted">We want you to be delighted with your purchase. If something isn’t right, we’re here to help.</p>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="fw-bold">Eligibility</h5>
+      <ul>
+        <li>Report issues within 24 hours of delivery or pickup.</li>
+        <li>Perishables must be reported immediately upon receipt with clear photos.</li>
+        <li>Non-perishables must be unopened and in original packaging.</li>
+      </ul>
+      <h5 class="fw-bold mt-3">How to Request</h5>
+      <ul>
+        <li>WhatsApp us at <a href="https://wa.me/{{ (config.get('WHATSAPP_NUMBER') or '')|replace(' ', '') }}" target="_blank" rel="noopener">WhatsApp</a> with your Order ID and photos.</li>
+        <li>Or email <a href="mailto:{{ config.get('scholagro@gmail.com') or 'support@scholagro.com' }}">{{ config.get('CONTACT_EMAIL') or 'support@scholagro.com' }}</a>.</li>
+      </ul>
+      <h5 class="fw-bold mt-3">Resolution</h5>
+      <ul>
+        <li>We may offer a replacement, partial/full refund, or store credit.</li>
+        <li>Refunds for M-Pesa/Paystack may take 3–7 business days depending on provider timelines.</li>
+      </ul>
+      <h5 class="fw-bold mt-3">Exclusions</h5>
+      <ul>
+        <li>Change-of-mind on perishable goods after delivery.</li>
+        <li>Items left unattended after delivery where spoilage may occur.</li>
+      </ul>
+      <p class="small text-muted mb-0">This policy does not limit your statutory rights.</p>
+    </div>
+  </div>
+
+  <p class="text-muted small">Last updated {{ (datetime.utcnow().strftime('%d %b %Y')) if datetime else '' }}</p>
+</div>
+{% endblock %}

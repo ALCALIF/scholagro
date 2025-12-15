@@ -1,0 +1,58 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<div class="container-fluid p-4 p-md-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0 fw-bold">Edit Flash Sale</h3>
+    <a href="/admin/flash-sales" class="btn btn-outline-secondary">Back</a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-8">
+      <div class="admin-card">
+        <form method="post" class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Product</label>
+            <select name="product_id" class="form-select" required>
+              <option value="">-- select product --</option>
+              {% for p in products %}
+                <option value="{{ p.id }}" {% if p.id == fs.product_id %}selected{% endif %}>{{ p.name }} (Ksh {{ p.price }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Discount %</label>
+            <input type="number" name="discount_percent" class="form-control" min="1" max="99" value="{{ fs.discount_percent }}" placeholder="e.g. 20">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Sale Price (optional)</label>
+            <input type="text" name="sale_price" class="form-control" placeholder="Leave empty to calculate from discount">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Starts At</label>
+            <input type="datetime-local" name="starts_at" class="form-control" value="{{ fs.starts_at.isoformat() }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Ends At</label>
+            <input type="datetime-local" name="ends_at" class="form-control" value="{{ fs.ends_at.isoformat() }}" required>
+          </div>
+          <div class="col-12 d-flex gap-2">
+            <button class="btn btn-success" type="submit">Update Flash Sale</button>
+            <a href="/admin/flash-sales" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="admin-card">
+        <h5 class="mb-3">Sale Details</h5>
+        <p><strong>Product:</strong> {{ fs.product.name }}</p>
+        <p><strong>Discount:</strong> {{ fs.discount_percent }}%</p>
+        <p><strong>Original Price:</strong> Ksh {{ fs.original_price or fs.product.old_price or fs.product.price }}</p>
+        <p><strong>Current Price:</strong> Ksh {{ fs.product.price }}</p>
+        <p><strong>Status:</strong> <span class="badge {% if fs.is_active %}bg-success{% else %}bg-secondary{% endif %}">{{ 'Active' if fs.is_active else 'Inactive' }}</span></p>
+        <p><strong>Created:</strong> {{ fs.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

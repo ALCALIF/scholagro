@@ -22,7 +22,7 @@ def toggle():
         pid = int(pid)
     except Exception:
         return {"ok": False, "message": "Invalid product"}, 400
-    product = Product.query.get(pid)
+    product = db.session.get(Product, pid)
     if not product:
         return {"ok": False, "message": "Product not found"}, 404
     item = WishlistItem.query.filter_by(user_id=current_user.id, product_id=pid).first()

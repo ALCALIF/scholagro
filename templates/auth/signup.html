@@ -18,11 +18,19 @@
               </div>
               <div class="mb-3">
                 <label class="form-label">Email</label>
-                <input class="form-control form-control-lg" name="email" type="email" required autocomplete="email">
+                <input class="form-control form-control-lg" name="email" type="email" required autocomplete="email" inputmode="email" pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$" title="Enter a valid email address (e.g., name@example.com)">
               </div>
               <div class="mb-3">
                 <label class="form-label">Password</label>
-                <input class="form-control form-control-lg" name="password" type="password" required autocomplete="new-password">
+                <input class="form-control form-control-lg js-pass" aria-label="Password" name="password" type="password" required autocomplete="new-password">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Confirm Password</label>
+                <input class="form-control form-control-lg js-pass" aria-label="Confirm password" name="confirm_password" type="password" required autocomplete="new-password">
+              </div>
+              <div class="form-check mb-3">
+                <input class="form-check-input js-show-pass" type="checkbox" id="signupShowPass">
+                <label class="form-check-label small" for="signupShowPass">Show password</label>
               </div>
               <div class="d-grid gap-2">
                 <button class="btn btn-success btn-lg" type="submit"><i class="bi bi-person-plus me-1"></i>Sign up</button>

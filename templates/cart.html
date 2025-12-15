@@ -13,88 +13,47 @@
   <div class="row g-4">
     <!-- Cart Items -->
     <div class="col-12 col-lg-8">
-      <h2 class="mb-4 animate-fadeInUp">
+      <div class="d-flex justify-content-between align-items-center mb-4 animate-fadeInUp flex-wrap gap-2">
+        <h2 class="m-0">
         <i class="bi bi-cart3 text-emerald me-2"></i>My Shopping Cart
-      </h2>
-
-      <div class="row g-3">
-        {% for i in items %}
-        <div class="col-12 animate-fadeInUp" style="animation-delay: {{ loop.index0 * 0.1 }}s">
-          <div class="card border-0 shadow-sm hover-shadow transition-all rounded-3" id="cart-item-{{ i.id }}">
-            <div class="card-body p-4">
-              <div class="row align-items-center g-4">
-                <!-- Product Image -->
-                <div class="col-12 col-sm-auto text-center">
-                  {% if i.product.main_image %}
-                    <img src="{{ i.product.main_image | cl_transform(w=120, h=120, c='fill', q='auto') }}" 
-                         alt="{{ i.product.name }}"
-                         class="img-fluid rounded-2" style="width: 120px; height: 120px; object-fit: cover;">
-                  {% else %}
-                    <div class="bg-slate-100 rounded-2 d-flex align-items-center justify-content-center" 
-                         style="width: 120px; height: 120px;">
-                      <i class="bi bi-image text-slate-400" style="font-size: 2rem;"></i>
-                    </div>
-                  {% endif %}
-                </div>
-
-                <!-- Promo Code -->
-                <div class="mb-4">
-                  <label class="form-label text-sm fw-semibold">Promo Code</label>
-                  <div class="input-group input-group-sm rounded-2 overflow-hidden">
-                    <input type="text" class="form-control border-0 bg-slate-50" 
-                           placeholder="Enter promo code" id="promo-input">
-                    <button class="btn btn-emerald" onclick="applyPromo()">
-                      <i class="bi bi-check"></i>
-                    </button>
-                  </div>
-                  <div id="promo-feedback" class="text-sm mt-2"></div>
-                </div>
-
-                <hr class="my-3">
-
-                <!-- Price Breakdown -->
-                <div class="mb-3">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-slate-600">Subtotal:</span>
-                    <span id="subtotal-display">Ksh {{ '%.2f'|format(total) }}</span>
-                  </div>
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-slate-600">Delivery:</span>
-                    <span id="delivery-display" class="text-emerald fw-semibold">FREE</span>
-                  </div>
-                  <div class="d-flex justify-content-between align-items-center" id="discount-row" style="display: none;">
-                    <span class="text-slate-600">Discount:</span>
-                    <span id="discount-display" class="text-success fw-semibold">-Ksh 0.00</span>
-                  </div>
-                </div>
-
-                <hr class="my-3">
-
-                <!-- Total -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                  <span class="fw-bold text-lg">Total:</span>
-                  <span class="fw-bold text-lg text-emerald" id="total-display">Ksh {{ '%.2f'|format(total) }}</span>
-                </div>
-
-                <!-- Security Badge -->
-                <div class="alert alert-sm bg-emerald-light border-0 rounded-2 mb-3 text-center text-sm">
-                  <i class="bi bi-shield-check text-emerald"></i> Secure Checkout - SSL Encrypted
-                </div>
-
-          <!-- Checkout Button -->
-          <a href="/orders/checkout" class="btn btn-emerald w-100 rounded-2 fw-semibold btn-lg">
-            <i class="bi bi-lock-fill"></i> Proceed to Checkout
-          </a>
-
-          <!-- Continue Shopping -->
-          <a href="/shop" class="btn btn-outline-emerald w-100 rounded-2 mt-3 fw-semibold">
-            <i class="bi bi-arrow-left"></i> Continue Shopping
-          </a>
+        </h2>
+        <a id="wa-cart-order" class="btn btn-outline-success fw-600" target="_blank" rel="noopener">
+          <i class="bi bi-whatsapp"></i> Order on WhatsApp
+        </a>
+      </div>
+      {% for i in items %}
+      <div class="card border-0 shadow-sm hover-shadow transition-all rounded-3 mb-3 animate-fadeInUp" style="animation-delay: {{ loop.index0 * 0.05 }}s" id="cart-item-{{ i.id }}">
+        <div class="card-body p-3 p-md-4">
+          <div class="row align-items-center g-3">
+            <div class="col-auto">
+              {% if i.product.image_url %}
+              <img src="{{ cl_transform(i.product.image_url, 120, 120) or i.product.image_url }}" alt="{{ i.product.name }}" class="img-fluid rounded-2" style="width:120px;height:120px;object-fit:cover;">
+              {% else %}
+              <div class="bg-slate-100 rounded-2 d-flex align-items-center justify-content-center" style="width:120px;height:120px;"><i class="bi bi-image text-slate-400" style="font-size:2rem;"></i></div>
+              {% endif %}
+            </div>
+            <div class="col">
+              <a href="/product/{{ i.product.slug }}" class="text-decoration-none fw-600 d-block mb-1">{{ i.product.name }}</a>
+              <div class="text-muted small">Unit: Ksh {{ '%.2f'|format(i.product.price) }}</div>
+            </div>
+            <div class="col-auto">
+              <div class="input-group input-group-sm" style="width: 140px;">
+                <button class="btn btn-outline-secondary js-cart-dec" type="button" aria-label="Decrease" data-item-id="{{ i.id }}">-</button>
+                <input type="number" min="1" max="99" class="form-control text-center js-cart-qty" value="{{ i.quantity }}" data-item-id="{{ i.id }}">
+                <button class="btn btn-outline-secondary js-cart-inc" type="button" aria-label="Increase" data-item-id="{{ i.id }}">+</button>
+              </div>
+              <div class="small mt-1">Qty: <span id="qty-{{ i.id }}">{{ i.quantity }}</span></div>
+            </div>
+            <div class="col-auto text-end" style="width: 160px;">
+              <div class="fw-600">Subtotal</div>
+              <div id="subtotal-{{ i.id }}">Ksh {{ '%.2f'|format((i.quantity or 0) * (i.product.price or 0)) }}</div>
+              <a href="/cart/remove/{{ i.id }}" class="btn btn-link p-0 text-danger small">Remove</a>
+            </div>
+          </div>
         </div>
       </div>
+      {% endfor %}
     </div>
-    {% endfor %}
-  </div>
   {% else %}
   <!-- Empty Cart State -->
   <div class="row justify-content-center py-5">
@@ -266,6 +225,76 @@ document.addEventListener('DOMContentLoaded', () => {
     card.classList.add('skeleton-loading');
     setTimeout(() => card.classList.remove('skeleton-loading'), 400 + Math.random() * 400);
   });
+  // Quantity controls
+  document.body.addEventListener('click', (e)=>{
+    const dec = e.target.closest('.js-cart-dec');
+    const inc = e.target.closest('.js-cart-inc');
+    if (!dec && !inc) return;
+    const id = parseInt((dec||inc).getAttribute('data-item-id'));
+    const input = document.querySelector(`.js-cart-qty[data-item-id="${id}"]`);
+    let qty = parseInt(input && input.value || '1');
+    if (dec) qty = Math.max(1, qty - 1);
+    if (inc) qty = Math.min(99, qty + 1);
+    if (input) input.value = String(qty);
+    updateQty(id, qty);
+  });
+  document.body.addEventListener('change', (e)=>{
+    const inp = e.target.closest('.js-cart-qty');
+    if (!inp) return;
+    const id = parseInt(inp.getAttribute('data-item-id'));
+    let qty = parseInt(inp.value || '1');
+    qty = Math.max(1, Math.min(99, isNaN(qty) ? 1 : qty));
+    inp.value = String(qty);
+    updateQty(id, qty);
+  });
+  // Build WhatsApp cart deeplink (prefilled with items and subtotal)
+  try{
+    var waBtn = document.getElementById('wa-cart-order');
+    if (waBtn){
+      var site = {{ (site_name or 'ScholaGro')|tojson }};
+      var waNum = {{ (config.get('WHATSAPP_NUMBER') or '')|tojson }};
+      waNum = (waNum || '').replace(/\D/g,'');
+      if (waNum && waNum.charAt(0) === '0' && waNum.length >= 9) waNum = '254' + waNum.slice(1);
+      if (waNum && /^7\d{8}$/.test(waNum)) waNum = '254' + waNum;
+      var lines = [site + ' Order Request'];
+      var items = document.querySelectorAll('[id^="cart-item-"]');
+      items.forEach(function(card){
+        try{
+          var nameEl = card.querySelector('a[href^="/product/"]');
+          var name = nameEl ? (nameEl.textContent||'').trim() : 'Item';
+          var url = nameEl ? (nameEl.getAttribute('href')||'') : '';
+          var qtyEl = card.querySelector('[id^="qty-"]');
+          var qty = qtyEl ? (qtyEl.textContent||'1').trim() : '1';
+          var imgEl = card.querySelector('img');
+          var img = imgEl ? (imgEl.getAttribute('src')||'') : '';
+          var priceEl = card.querySelector('.text-muted');
+          var price = '';
+          if (priceEl){ var t = (priceEl.textContent||'').replace(/[^0-9.]/g,''); if (t) price = t; }
+          lines.push('- ' + name + ' x' + qty + (price?(' — Ksh ' + price):''));
+          if (img) lines.push(img);
+          if (url){
+            var full = url[0] === '/' ? (window.location.origin + url) : url;
+            lines.push(full);
+          }
+        }catch(_){}
+      });
+      // Subtotal line
+      var totalEl = document.getElementById('total-display');
+      var subText = totalEl && totalEl.textContent ? totalEl.textContent : '';
+      if (!subText){
+        var sum = 0;
+        var subs = document.querySelectorAll('[id^="subtotal-"]');
+        subs.forEach(function(el){
+          var t = (el.textContent||'').replace('Ksh','').trim();
+          var v = parseFloat(t)||0; sum += v;
+        });
+        subText = 'Ksh ' + sum.toFixed(2);
+      }
+      lines.push('Subtotal: ' + subText.replace(/\s+/g,' ').trim());
+      var msg = encodeURIComponent(lines.join('\n'));
+      waBtn.href = waNum ? ('https://wa.me/' + waNum + '?text=' + msg) : ('https://wa.me/?text=' + msg);
+    }
+  }catch(e){}
 });
 </script>
 {% endblock %}
