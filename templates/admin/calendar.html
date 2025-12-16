@@ -1,4 +1,13 @@
 {% extends 'admin/base.html' %}
+{% block breadcrumbs %}
+  <nav class="px-4 pb-3 text-sm text-slate-500 dark:text-slate-400" aria-label="breadcrumb">
+    <ol class="breadcrumb m-0">
+      <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+      <li class="breadcrumb-item">Apps</li>
+      <li class="breadcrumb-item active" aria-current="page">Calendar</li>
+    </ol>
+  </nav>
+{% endblock %}
 {% block content %}
 <div class="container py-4">
   <div class="d-flex align-items-center justify-content-between mb-3">
@@ -20,7 +29,7 @@
         <label class="form-label small mb-1">Zone</label>
         <select id="calZone" class="form-select form-select-sm">
           <option value="">All</option>
-          {% for z in DeliveryZone.query.order_by(DeliveryZone.name.asc()).all() %}
+          {% for z in zones %}
           <option value="{{ z.id }}">{{ z.name }}</option>
           {% endfor %}
         </select>

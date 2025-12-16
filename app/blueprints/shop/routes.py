@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, Response, url_for, flash, redirect
-from ...models import Product, Category, HomePageBanner, Review, Order, OrderItem, FlashSale, DeliveryZone, Coupon, ProductImage, CategoryHeroImage
+from ...models import Product, Category, HomePageBanner, Review, Order, OrderItem, FlashSale, DeliveryZone, Coupon, ProductImage, CategoryHeroImage, Post
 from flask import jsonify, session
 from flask_login import login_required, current_user
 from ...extensions import db, cache
@@ -502,6 +502,27 @@ def terms():
 @shop_bp.route("/pages/refund")
 def refund():
     return render_template("pages/refund.html")
+
+
+# Blog storefront
+@shop_bp.route("/blog")
+def blog_index():
+    page = request.args.get('page', 1, type=int)
+    q = (request.args.get('q') or '').strip()
+    query = Post.query.filter_by(is_published=True)
+    if q:
+        like = f"%{q}%"
+        query = query.filter(db.or_(Post.title.ilike(like), Post.slug.ilike(like)))
+    pagination = query.order_by(Post.published_at.desc().nullslast(), Post.created_at.desc()).paginate(page=page, per_page=10, error_out=False)
+    return render_template('blog/index.html', posts=pagination.items, pagination=pagination, q=q)
+
+
+@shop_bp.route("/blog/<slug>")
+def blog_detail(slug):
+    p = Post.query.filter_by(slug=slug, is_published=True).first_or_404()
+    # Simple related: latest 5 besides this
+    related = Post.query.filter(Post.is_published.is_(True), Post.id != p.id).order_by(Post.published_at.desc().nullslast(), Post.created_at.desc()).limit(5).all()
+    return render_template('blog/detail.html', post=p, related=related)
 
 
 @shop_bp.route("/category/<slug>")

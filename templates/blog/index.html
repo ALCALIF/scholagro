@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+  <h1 class="mb-3">Blog</h1>
+  <form method="get" class="row g-2 mb-3">
+    <div class="col-auto"><input class="form-control" type="search" name="q" value="{{ q or '' }}" placeholder="Search posts..."></div>
+    <div class="col-auto"><button class="btn btn-outline-secondary">Search</button></div>
+  </form>
+  <div class="row g-3">
+    {% for p in posts %}
+    <div class="col-md-6">
+      <div class="card h-100">
+        {% if p.image_url %}
+        <img src="{{ p.image_url }}" class="card-img-top" alt="{{ p.title }}">
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title"><a class="text-decoration-none" href="{{ url_for('shop.blog_detail', slug=p.slug) }}">{{ p.title }}</a></h5>
+          {% if p.published_at %}<div class="text-muted small mb-2">{{ p.published_at.strftime('%b %d, %Y') }}</div>{% endif %}
+          <p class="card-text text-muted">{{ (p.body or '')[:180] }}{% if p.body and p.body|length > 180 %}...{% endif %}</p>
+          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('shop.blog_detail', slug=p.slug) }}">Read more</a>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center text-muted py-5">No posts yet.</div>
+    {% endfor %}
+  </div>
+  {% if pagination and pagination.pages > 1 %}
+  <nav class="mt-4" aria-label="Blog pagination">
+    <ul class="pagination justify-content-center">
+      <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}"><a class="page-link" href="?page={{ pagination.prev_num }}&q={{ q }}">Prev</a></li>
+      <li class="page-item disabled"><span class="page-link">Page {{ pagination.page }} of {{ pagination.pages }}</span></li>
+      <li class="page-item {% if not pagination.has_next %}disabled{% endif %}"><a class="page-link" href="?page={{ pagination.next_num }}&q={{ q }}">Next</a></li>
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

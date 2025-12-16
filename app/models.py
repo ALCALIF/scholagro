@@ -335,6 +335,18 @@ class FlashSale(db.Model, TimestampMixin):
 
 
 
+class AdminEvent(db.Model, TimestampMixin):
+    __tablename__ = 'admin_events'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    start_at = db.Column(db.DateTime, nullable=False)
+    end_at = db.Column(db.DateTime)
+    color = db.Column(db.String(16))
+    url = db.Column(db.String(500))
+    notes = db.Column(db.Text)
+    zone = db.Column(db.String(120))  # optional delivery zone name
+
+
 __all__ = [
     User, Category, Product, Review, DeliveryAddress, DeliveryZone,
     Order, OrderItem, Payment, CartItem, WishlistItem, SavedItem, HomePageBanner, Coupon

@@ -1,35 +1,75 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container-fluid p-4 p-md-5">
+<style>
+  /* Ensure hero images are visible and not hidden by overlays */
+  .hero { position: relative; overflow: hidden; min-height: 500px; }
+  .hero .carousel-inner { min-height: 500px; }
+  .hero-carousel .carousel-item img,
+  .hero .carousel-item img,
+  .carousel-item .carousel-img { height: 500px; width: 100%; object-fit: cover; display: block; }
+  /* Layering: images (z1) -> dark overlays (z2) -> words/content (z3) */
+  #bannerCarousel { position: absolute; inset: 0; z-index: 0; }
+  .hero .carousel-inner, .hero .carousel-item, .hero .carousel-item img { position: absolute; inset: 0; z-index: 0; }
+  .hero-overlay, .hero-gradient { pointer-events: none; z-index: 2; position: absolute; inset: 0; }
+  .hero-overlay { background: linear-gradient(180deg, rgba(0,0,0,.6), rgba(0,0,0,.4)); }
+  .hero-gradient { background: radial-gradient(120% 80% at 50% 30%, rgba(0,0,0,.25) 0%, rgba(0,0,0,0) 60%); }
+  .hero-content { position: absolute; z-index: 2000; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+  .hero-content > .hero-panel { width: 100%; max-width: 1100px; }
+  /* Keep carousel controls below the text panel */
+  .hero .carousel-control-prev, .hero .carousel-control-next, .hero .carousel-indicators { z-index: 10; }
+  .hero .hero-title-main, .hero .hero-subtitle, .hero .hero-info { color: #ffffff !important; text-shadow: 0 2px 8px rgba(0,0,0,.65); opacity: 1 !important; }
+  .hero-content .hero-panel { display: inline-block; background: rgba(0,0,0,.7); padding: 1rem 1.25rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.35); color: #fff !important; }
+  .hero .hero-title-accent { color: #fde68a !important; background: none !important; -webkit-text-fill-color: #fde68a !important; opacity: 1 !important; }
+  @media (max-width: 576px){
+    .hero { min-height: 320px; }
+    .hero .carousel-item img { height: 320px; }
+    .hero .carousel-inner { min-height: 320px; }
+  }
+  /* Prevent layout collapse if no banners and while images are loading */
+  #bannerCarousel { background: #0f172a; }
+  .carousel-img { background: #0f172a; }
+  .carousel-caption-custom { z-index: 3; }
+</style>
 <!-- Premium Hero Section -->
-<section class="hero rounded shadow-lg mb-5 p-5 text-center text-white position-relative" data-aos="zoom-in" data-aos-duration="800" data-aos-offset="60">
-  <h1 class="fw-bold display-4 mb-3 hero-title-main" style="color: white; display: block;">
-    Fresh Groceries Delivered
-    <br>
-    <span class="hero-title-accent" style="background: linear-gradient(135deg, #fbbf24, #fcd34d); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; display: inline-block;">To Your Doorstep</span>
-  </h1>
-  <p class="lead mb-4 hero-subtitle" style="color: white; display: block; max-width: 600px; margin: 0 auto;">Speed, freshness, and convenience across Nairobi & surrounding areas with guaranteed quality produce.</p>
-  <div class="d-flex gap-3 justify-content-center flex-wrap">
-    <a href="/shop" class="btn btn-lg btn-light fw-bold px-5 hover-lift animate-slideInUp">
-      <i class="bi bi-bag-fill me-2"></i>Shop Now
-    </a>
-    <a href="/deals" class="btn btn-lg btn-outline-light fw-bold px-5 hover-lift hero-cta-secondary">
-      <i class="bi bi-lightning-charge-fill me-2"></i>Today's Deals
-    </a>
-  </div>
-  <div class="mt-4 small hero-info">
-    <i class="bi bi-clock-fill me-2"></i>Morning · Afternoon · Evening delivery slots available
+<section class="hero rounded shadow-lg mb-5 p-5 text-center text-white position-relative" style="background:linear-gradient(135deg,#0f172a,#0b1324);" data-aos="zoom-in" data-aos-duration="800" data-aos-offset="60">
+  <div class="hero-content">
+    <div class="hero-panel" style="pointer-events:auto;">
+      <h1 class="fw-bold display-4 mb-3 hero-title-main" style="color: white; display: block;">
+        Fresh Groceries Delivered
+        <br>
+        <span class="hero-title-accent">To Your Doorstep</span>
+      </h1>
+      <p class="lead mb-4 hero-subtitle" style="color: white; display: block; max-width: 600px; margin: 0 auto;">Speed, freshness, and convenience across Nairobi & surrounding areas with guaranteed quality produce.</p>
+      <div class="d-flex gap-3 justify-content-center flex-wrap">
+        <a href="/shop" class="btn btn-lg btn-light fw-bold px-5 hover-lift animate-slideInUp">
+          <i class="bi bi-bag-fill me-2"></i>Shop Now
+        </a>
+        <a href="/deals" class="btn btn-lg btn-outline-light fw-bold px-5 hover-lift hero-cta-secondary">
+          <i class="bi bi-lightning-charge-fill me-2"></i>Today's Deals
+        </a>
+      </div>
+      <div class="mt-4 small hero-info">
+        <i class="bi bi-clock-fill me-2"></i>Morning · Afternoon · Evening delivery slots available
+      </div>
+    </div>
   </div>
   <div class="hero-overlay"></div>
   <div class="hero-gradient"></div>
   
-  <!-- Move the existing Premium Image Carousel inside the hero and make it the background -->
+  {% if current_user.is_authenticated and current_user.is_admin %}
+  <div class="position-absolute top-0 start-0 m-2 small px-2 py-1 rounded" style="z-index:9999;background:rgba(14,165,233,.9);color:#fff;">Banners: {{ (banners|length) if banners else 0 }}</div>
+  {% endif %}
+  <!-- Premium Image Carousel -->
   <div id="bannerCarousel" class="carousel slide hero-carousel animate-fadeIn" data-aos="fade-up" data-aos-delay="150" data-bs-ride="carousel" data-bs-interval="4000">
     <div class="carousel-inner rounded overflow-hidden shadow-lg">
       {% if banners and banners|length > 0 %}
         {% for b in banners %}
+        {% set _src = (cl_transform(b.image_url, 1600, 500) if b.image_url else None) %}
         <div class="carousel-item {% if loop.first %}active{% endif %}">
-          <img loading="lazy" src="{{ cl_transform(b.image_url, 1600, 500) or b.image_url }}" class="d-block w-100 carousel-img" alt="{{ b.title or 'Homepage banner' }}">
+          {% if b.link_url %}<a href="{{ b.link_url }}" class="d-block">{% endif %}
+          <img loading="lazy" src="{{ _src or b.image_url or 'https://placehold.co/1600x500?text=Banner' }}" class="d-block w-100 carousel-img" alt="{{ b.title or 'Homepage banner' }}">
+          {% if b.link_url %}</a>{% endif %}
           <div class="carousel-caption d-none d-md-block carousel-caption-custom">
             {% if b.title %}<h3 class="fw-bold mb-2">{{ b.title }}</h3>{% endif %}
           </div>

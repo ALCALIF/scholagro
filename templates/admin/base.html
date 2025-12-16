@@ -82,7 +82,7 @@ e{% set admin_title = admin_title or 'Admin' %}
       })();
     </script>
     <style>
-      :root { --sidebar-w: 280px; --brand:#16a34a; --brand-dark:#15803d; --brand-contrast:#ffffff; }
+      :root { --sidebar-w: 280px; --brand:#0ea5e9; --brand-2:#6366f1; --brand-dark:#0b87c2; --brand-contrast:#ffffff; }
       html, body { height: 100%; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
       html.sidebar-collapsed { --sidebar-w: 72px; }
       html.sidebar-collapsed .nav-label { display: none; }
@@ -90,12 +90,12 @@ e{% set admin_title = admin_title or 'Admin' %}
       .nav-group > button { width: 100%; }
       .nav-badge { font-size: 10px; padding: 0 6px; border-radius: 999px; background: #fde68a; color: #92400e; }
       /* Fallback layout if Tailwind utilities are unavailable */
-      #sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); overflow-y: auto; background: var(--brand); color: var(--brand-contrast); border-right: 0; }
+      #sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); overflow-y: auto; background: linear-gradient(180deg, var(--brand) 0%, var(--brand-2) 100%); color: var(--brand-contrast); border-right: 0; }
       #sidebar a { color: var(--brand-contrast); text-decoration: none; }
       #sidebar .hover\:bg-slate-100:hover, #sidebar .dark\:hover\:bg-slate-700\/60:hover { background: rgba(255,255,255,.12) !important; }
-      [data-theme="dark"] #sidebar, .dark #sidebar { background: var(--brand-dark); color: var(--brand-contrast); }
+      [data-theme="dark"] #sidebar, .dark #sidebar { background: linear-gradient(180deg, var(--brand-dark) 0%, #374151 100%); color: var(--brand-contrast); }
       .admin-main { margin-left: var(--sidebar-w); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; width: 100%; }
-      .admin-topbar { position: sticky; top: 0; z-index: 20; background: var(--brand); color: var(--brand-contrast); border-bottom: none; height: 64px; }
+      .admin-topbar { position: sticky; top: 0; z-index: 20; background: linear-gradient(90deg, var(--brand) 0%, var(--brand-2) 100%); color: var(--brand-contrast); border-bottom: none; height: 64px; }
       .admin-topbar a { color: var(--brand-contrast); }
       .admin-topbar .form-control { background: rgba(255,255,255,.95); color:#0f172a; }
       [data-theme="dark"] .admin-topbar, .dark .admin-topbar { background: var(--brand-dark); color: var(--brand-contrast); }
@@ -122,14 +122,11 @@ e{% set admin_title = admin_title or 'Admin' %}
       [data-theme="dark"] #userMenu, .dark #userMenu { color: #e5e7eb; background-color: #1f2937; border-color: #374151; }
       [data-theme="dark"] #userMenu a { color: #e5e7eb !important; }
       [data-theme="dark"] #userMenu a:hover { background-color: rgba(55,65,81,0.6) !important; }
-      /* Ensure admin content text is always readable even if Tailwind utilities are blocked
-         or CSP prevents external styles — force a strong contrasting color for body content */
-      .admin-content, .admin-content * {
-        color: var(--sg-text-primary, #0f172a) !important;
-      }
-      [data-theme="dark"] .admin-content, .dark .admin-content * {
-        color: var(--sg-text-primary, #e5e7eb) !important;
-      }
+      /* Improve visibility across the app content */
+      .admin-content { color: #0f172a; }
+      .admin-content .text-muted { color: #64748b !important; opacity: 1 !important; }
+      .admin-content table th, .admin-content table td { color: inherit; opacity: 1; }
+      .admin-content .badge, .admin-content .btn { filter: none !important; opacity: 1 !important; }
     </style>
     {% block head %}{% endblock %}
   </head>
@@ -181,11 +178,13 @@ e{% set admin_title = admin_title or 'Admin' %}
             <li><a href="/admin/reviews/moderation" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>⭐</span><span class="nav-label">Reviews</span></a></li>
             <li><a href="#" data-open="chat" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>💬</span><span class="nav-label">Chat</span><span class="nav-badge ml-auto">NEW</span></a></li>
             <li><a href="/admin/calendar" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>📆</span><span class="nav-label">Calendar</span></a></li>
+            <li><a href="/admin/posts" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>📰</span><span class="nav-label">Blog</span></a></li>
           </ul>
 
           <div class="pt-3 text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 mb-2">Pages</div>
           <ul class="space-y-1">
             <li><a href="/admin/users" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>👤</span><span class="nav-label">Users</span></a></li>
+            <li><a href="/admin/settings" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>⚙️</span><span class="nav-label">Settings</span></a></li>
             <li><a href="/auth/login" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>🔐</span><span class="nav-label">Authentication</span></a></li>
             <li><a href="/pages/faqs" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>❓</span><span class="nav-label">FAQ</span></a></li>
             <li><a href="/pages/contact" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/60"><span>📨</span><span class="nav-label">Contact</span></a></li>
@@ -289,6 +288,59 @@ e{% set admin_title = admin_title or 'Admin' %}
     </div>
 
     <script src="{{ url_for('static', filename='js/admin.js') }}?v={{ datetime.utcnow().timestamp()|int }}"></script>
+    <script>
+      (function(){
+        const KEY_COLLAPSE = 'sg_admin_sidebar_collapsed';
+        const KEY_GROUPS = 'sg_admin_nav_groups';
+        function setActive(){
+          var here = location.pathname;
+          document.querySelectorAll('#sidebar a[href]').forEach(function(a){
+            var href = a.getAttribute('href');
+            if (!href) return;
+            if (href === here || (href !== '/' && here.startsWith(href))){
+              a.classList.add('bg-slate-100','dark:bg-slate-700\/60');
+              a.classList.add('active');
+            }
+          });
+        }
+        function restoreCollapsed(){
+          try{
+            var col = localStorage.getItem(KEY_COLLAPSE) === '1';
+            if (col) document.documentElement.classList.add('sidebar-collapsed');
+          }catch(e){}
+          var btn = document.getElementById('collapseToggle');
+          if (btn){
+            btn.addEventListener('click', function(){
+              document.documentElement.classList.toggle('sidebar-collapsed');
+              try{ localStorage.setItem(KEY_COLLAPSE, document.documentElement.classList.contains('sidebar-collapsed') ? '1' : '0'); }catch(e){}
+            });
+          }
+        }
+        function restoreGroups(){
+          var state = {};
+          try{ state = JSON.parse(localStorage.getItem(KEY_GROUPS) || '{}') || {}; }catch(e){ state = {}; }
+          document.querySelectorAll('.nav-group').forEach(function(group, idx){
+            var id = group.getAttribute('data-id') || ('g'+idx);
+            var content = group.querySelector('[data-group-content]');
+            var toggle = group.querySelector('[data-group-toggle]');
+            var open = !!state[id];
+            if (open) content.classList.remove('hidden');
+            if (toggle){
+              toggle.addEventListener('click', function(){
+                content.classList.toggle('hidden');
+                state[id] = !content.classList.contains('hidden');
+                try{ localStorage.setItem(KEY_GROUPS, JSON.stringify(state)); }catch(e){}
+              });
+            }
+          });
+        }
+        document.addEventListener('DOMContentLoaded', function(){
+          setActive();
+          restoreCollapsed();
+          restoreGroups();
+        });
+      })();
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

@@ -8,12 +8,13 @@ from flask_login import login_required, current_user
 from ...extensions import db, cache
 from werkzeug.security import generate_password_hash, check_password_hash
 from ...utils.media import upload_image
-from ...models import Product, Category, Order, HomePageBanner, Payment, User, Review, DeliveryZone, CategoryHeroImage, FlashSale, Coupon
+from ...models import Product, Category, Order, HomePageBanner, Payment, User, Review, DeliveryZone, CategoryHeroImage, FlashSale, Coupon, AdminEvent
 from ...models import ReviewPhoto
 from ...models import Post
 from ...utils.search import index_product
 from ...models import Notification
 from ...utils.email import send_email
+from ...extensions import csrf
 from ...extensions import socketio
 from werkzeug.security import generate_password_hash
 
@@ -54,12 +55,85 @@ def dashboard():
         .limit(5)
         .all()
     )
-
+    # Build last 12 months analytics series for charts
+    def month_range(d: date):
+        start = d.replace(day=1)
+        last_day = calendar.monthrange(start.year, start.month)[1]
+        end = start.replace(day=last_day) + timedelta(days=1)  # exclusive
+        return start, end
+    today = date.today()
+    months = []
+    for i in range(11, -1, -1):
+        y = today.year
+        m = today.month - i
+        while m <= 0:
+            m += 12
+            y -= 1
+        months.append(date(y, m, 1))
+    labels = [d.strftime('%b %Y') for d in months]
+    sales_series = []
+    orders_series = []
+    users_series = []
+    products_series = []
+    for d in months:
+        start, end = month_range(d)
+        sales = db.session.query(db.func.coalesce(db.func.sum(Order.total_amount), 0)) \
+            .filter(Order.created_at >= start, Order.created_at < end).scalar() or 0
+        sales_series.append(float(sales))
+        oc = db.session.query(db.func.count(Order.id)) \
+            .filter(Order.created_at >= start, Order.created_at < end).scalar() or 0
+        orders_series.append(int(oc))
+        uc = db.session.query(db.func.count(User.id)) \
+            .filter(User.created_at >= start, User.created_at < end).scalar() or 0
+        users_series.append(int(uc))
+        pc = db.session.query(db.func.count(Product.id)) \
+            .filter(Product.created_at >= start, Product.created_at < end).scalar() or 0
+        products_series.append(int(pc))
+    # Active homepage banners preview
+    active_banners = HomePageBanner.query.filter_by(is_active=True).order_by(HomePageBanner.sort_order.asc(), HomePageBanner.created_at.desc()).all()
+    # Announcement messages (best-effort load from instance file)
+    promo_messages = [
+        'Fresh groceries delivered to your doorstep—fast and affordable!',
+        'Order today and enjoy same-day delivery across KU, Ruiru & Nairobi!',
+        'Get the best prices on fruits, veggies, and household essentials!',
+        'ScholaGro—We deliver exactly what you ordered, fresh and clean!',
+        'Save more this season with our daily offers and discounts!'
+    ]
+    try:
+        inst = current_app.instance_path if hasattr(current_app, 'instance_path') else os.path.join(os.getcwd(), 'instance')
+        os.makedirs(inst, exist_ok=True)
+        p = os.path.join(inst, 'announcements.json')
+        if os.path.exists(p):
+            with open(p, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                if isinstance(data, list) and data:
+                    promo_messages = [str(x) for x in data if str(x).strip()]
+    except Exception:
+        pass
+    return render_template(
+        "admin/dashboard.html",
+        product_count=product_count,
+        order_count=order_count,
+        user_count=user_count,
+        total_sales=total_sales,
+        recent_orders=recent_orders,
+        recent_payments=recent_payments,
+        latest_reviews=latest_reviews,
+        revenue_by_zone=revenue_by_zone,
+        chart_labels=labels,
+        chart_sales=sales_series,
+        chart_orders=orders_series,
+        chart_users=users_series,
+        chart_products=products_series,
+        active_banners=active_banners,
+        promo_messages=promo_messages,
+    )
 @admin_bp.route("/calendar")
 @login_required
 @admin_required
 def calendar_view():
-    return render_template("admin/calendar.html")
+    zones = DeliveryZone.query.order_by(DeliveryZone.name.asc()).all()
+    return render_template("admin/calendar.html", zones=zones)
 
 @admin_bp.route("/calendar/events")
 @login_required
@@ -101,10 +175,211 @@ def calendar_events():
             'url': url_for('admin.orders') + f"?q={o.id}",
             'color': '#10b981' if (o.status or '').startswith('delivered') else '#3b82f6'
         })
+    # Include admin-created events
+    try:
+        s_raw = request.args.get('start')
+        e_raw = request.args.get('end')
+        evq = AdminEvent.query
+        if s_raw and e_raw:
+            from datetime import datetime
+            s = datetime.fromisoformat(s_raw[:19])
+            e = datetime.fromisoformat(e_raw[:19])
+            evq = evq.filter(AdminEvent.start_at < e, (AdminEvent.end_at.is_(None)) | (AdminEvent.end_at >= s))
+        for ev in evq.order_by(AdminEvent.start_at.asc()).all():
+            events.append({
+                'id': f"ev-{ev.id}",
+                'title': ev.title,
+                'start': ev.start_at.isoformat() if ev.start_at else None,
+                'end': ev.end_at.isoformat() if ev.end_at else None,
+                'url': ev.url,
+                'color': ev.color or '#f59e0b',
+                'notes': ev.notes,
+            })
+    except Exception:
+        pass
     return Response(json.dumps(events), mimetype='application/json')
+
+@admin_bp.route('/calendar/events', methods=['POST'])
+@login_required
+@admin_required
+def create_calendar_event():
+    from datetime import datetime
+    title = (request.form.get('title') or '').strip()
+    start_raw = request.form.get('start_at')
+    end_raw = request.form.get('end_at')
+    color = request.form.get('color')
+    urlf = request.form.get('url')
+    notes = request.form.get('notes')
+    if not title or not start_raw:
+        return Response('Missing title or start_at', status=400)
+    try:
+        start_at = datetime.fromisoformat(start_raw)
+        end_at = datetime.fromisoformat(end_raw) if end_raw else None
+    except Exception:
+        return Response('Invalid datetime', status=400)
+    ev = AdminEvent(title=title, start_at=start_at, end_at=end_at, color=color, url=urlf, notes=notes)
+    db.session.add(ev)
+    db.session.commit()
+    return Response(json.dumps({'id': ev.id}), mimetype='application/json')
+
+@admin_bp.route('/calendar/events/<int:event_id>', methods=['POST'])
+@login_required
+@admin_required
+def update_calendar_event(event_id):
+    from datetime import datetime
+    ev = db.session.get(AdminEvent, event_id)
+    if not ev:
+        return Response('Not found', status=404)
+    title = request.form.get('title')
+    start_raw = request.form.get('start_at')
+    end_raw = request.form.get('end_at')
+    if title is not None:
+        ev.title = title
+    if start_raw:
+        try:
+            ev.start_at = datetime.fromisoformat(start_raw)
+        except Exception:
+            pass
+    if end_raw:
+        try:
+            ev.end_at = datetime.fromisoformat(end_raw)
+        except Exception:
+            pass
+    for key in ['color','url','notes']:
+        val = request.form.get(key)
+        if val is not None:
+            setattr(ev, key, val)
+    db.session.commit()
+    return Response('OK', status=200)
+
+@admin_bp.route('/calendar/events/<int:event_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def delete_calendar_event(event_id):
+    ev = db.session.get(AdminEvent, event_id)
+    if not ev:
+        return Response('Not found', status=404)
+    db.session.delete(ev)
+    db.session.commit()
+    return Response('OK', status=200)
+
+@admin_bp.route('/analytics/series')
+@login_required
+@admin_required
+def analytics_series():
+    from datetime import datetime, timedelta, date
+    mode = (request.args.get('mode') or 'm').lower()  # d=days, w=weeks, m=months
+    days = request.args.get('days', type=int)
+    start_str = request.args.get('start')
+    end_str = request.args.get('end')
+    now = datetime.utcnow()
+    if start_str and end_str:
+        try:
+            start = datetime.fromisoformat(start_str[:19])
+            end = datetime.fromisoformat(end_str[:19])
+        except Exception:
+            start = now - timedelta(days=30)
+            end = now
+    else:
+        if mode == 'd':
+            days = days or 30
+            start = now - timedelta(days=days-1)
+            end = now
+        elif mode == 'w':
+            weeks = (days // 7) if days else 12
+            start = now - timedelta(weeks=weeks-1)
+            end = now
+        else:
+            months = 12
+            # approx 365 days
+            start = now - timedelta(days=365)
+            end = now
+    # Build buckets
+    labels = []
+    buckets = []
+    if mode == 'd':
+        cur = datetime(start.year, start.month, start.day)
+        while cur.date() <= end.date():
+            nxt = cur + timedelta(days=1)
+            labels.append(cur.strftime('%Y-%m-%d'))
+            buckets.append((cur, nxt))
+            cur = nxt
+    elif mode == 'w':
+        # week buckets starting Mondays
+        cur = datetime(start.year, start.month, start.day) - timedelta(days=datetime(start.year, start.month, start.day).weekday())
+        while cur <= end:
+            nxt = cur + timedelta(days=7)
+            labels.append('Wk ' + cur.strftime('%Y-%m-%d'))
+            buckets.append((cur, nxt))
+            cur = nxt
+    else:
+        # month buckets
+        cur = date(start.year, start.month, 1)
+        while cur <= date(end.year, end.month, 1):
+            from calendar import monthrange
+            last_day = monthrange(cur.year, cur.month)[1]
+            s = datetime(cur.year, cur.month, 1)
+            e = s.replace(day=last_day) + timedelta(days=1)
+            labels.append(cur.strftime('%b %Y'))
+            buckets.append((s, e))
+            # next month
+            if cur.month == 12:
+                cur = date(cur.year+1, 1, 1)
+            else:
+                cur = date(cur.year, cur.month+1, 1)
+    # Fetch data in one go and bucket in Python
+    orders_q = Order.query.filter(Order.created_at >= buckets[0][0], Order.created_at < buckets[-1][1]).all() if buckets else []
+    users_q = User.query.filter(User.created_at >= buckets[0][0], User.created_at < buckets[-1][1]).all() if buckets else []
+    products_q = Product.query.filter(Product.created_at >= buckets[0][0], Product.created_at < buckets[-1][1]).all() if buckets else []
+    sales = [0.0 for _ in buckets]
+    orders = [0 for _ in buckets]
+    users = [0 for _ in buckets]
+    products = [0 for _ in buckets]
+    def find_bucket(dt):
+        for i,(s,e) in enumerate(buckets):
+            if s <= dt < e:
+                return i
+        return None
+    for o in orders_q:
+        if not o.created_at: continue
+        i = find_bucket(o.created_at)
+        if i is None: continue
+        try:
+            sales[i] += float(o.total_amount or 0)
+        except Exception:
+            pass
+        try:
+            orders[i] += 1
+        except Exception:
+            pass
+    for u in users_q:
+        if not u.created_at: continue
+        i = find_bucket(u.created_at)
+        if i is None: continue
+        users[i] += 1
+    for p in products_q:
+        if not p.created_at: continue
+        i = find_bucket(p.created_at)
+        if i is None: continue
+        products[i] += 1
+    # Derived metrics
+    aov = [ (sales[i]/orders[i]) if orders[i] else 0 for i in range(len(buckets)) ]
+    # conversion approximated as orders/new users; avoid div by zero
+    conversion = [ (orders[i]/users[i])*100 if users[i] else 0 for i in range(len(buckets)) ]
+    payload = {
+        'labels': labels,
+        'sales': [round(x,2) for x in sales],
+        'orders': orders,
+        'users': users,
+        'products': products,
+        'aov': [round(x,2) for x in aov],
+        'conversion': [round(x,2) for x in conversion],
+    }
+    return Response(json.dumps(payload), mimetype='application/json')
 
 # --- Coupons management ---
 @admin_bp.route("/coupons", methods=["GET", "POST"])
+@csrf.exempt
 @login_required
 @admin_required
 def coupons():
@@ -140,6 +415,7 @@ def coupons():
     return render_template('admin/coupons.html', coupons=items, q=q)
 
 @admin_bp.route('/coupons/<int:coupon_id>/edit', methods=['GET','POST'])
+@csrf.exempt
 @login_required
 @admin_required
 def edit_coupon(coupon_id):
@@ -158,6 +434,7 @@ def edit_coupon(coupon_id):
     return render_template('admin/coupon_edit.html', coupon=c)
 
 @admin_bp.route('/coupons/<int:coupon_id>/toggle', methods=['POST'])
+@csrf.exempt
 @login_required
 @admin_required
 def toggle_coupon(coupon_id):
@@ -169,6 +446,7 @@ def toggle_coupon(coupon_id):
     return redirect(url_for('admin.coupons'))
 
 @admin_bp.route('/coupons/<int:coupon_id>/delete', methods=['POST'])
+@csrf.exempt
 @login_required
 @admin_required
 def delete_coupon(coupon_id):
@@ -186,14 +464,45 @@ def delete_coupon(coupon_id):
 @admin_required
 def posts():
     if request.method == 'POST':
-        title = (request.form.get('title') or '').strip()
-        slug = (request.form.get('slug') or '').strip().lower()
-        body = request.form.get('body')
-        image_url = (request.form.get('image_url') or '').strip()
-        is_published = (request.form.get('is_published') or '') in {'1','true','on','yes'}
-        if not title:
-            flash('Title is required', 'warning')
+        try:
+            title = (request.form.get('title') or '').strip()
+            slug = (request.form.get('slug') or '').strip().lower()
+            body = request.form.get('body')
+            image_url = (request.form.get('image_url') or '').strip()
+            is_published = (request.form.get('is_published') or '') in {'1','true','on','yes'}
+            if not title:
+                flash('Title is required', 'warning')
+                return redirect(url_for('admin.posts'))
+            if not slug:
+                import re
+                slug = re.sub(r"[^a-z0-9\-]+","-", title.lower()).strip('-')
+            if Post.query.filter_by(slug=slug).first():
+                flash('Slug already exists', 'warning')
+                return redirect(url_for('admin.posts'))
+            p = Post(title=title, slug=slug, body=body, image_url=image_url, is_published=is_published)
+            if is_published:
+                from datetime import datetime
+                p.published_at = datetime.utcnow()
+            db.session.add(p)
+            db.session.commit()
+            flash('Post created', 'success')
             return redirect(url_for('admin.posts'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Cannot create post until the database is migrated (missing table). Please run migrations.', 'danger')
+            return redirect(url_for('admin.posts'))
+    q = (request.args.get('q') or '').strip()
+    query = Post.query
+    if q:
+        like = f"%{q}%"
+        query = query.filter(db.or_(Post.title.ilike(like), Post.slug.ilike(like)))
+    try:
+        items = query.order_by(Post.created_at.desc()).all() if hasattr(Post, 'created_at') else query.all()
+    except Exception:
+        # Likely the posts table doesn't exist yet
+        items = []
+        flash('Blog posts table is not created yet. Run DB migrations to enable Blog.', 'warning')
+    return render_template('admin/posts.html', posts=items, q=q)
 
 @admin_bp.route('/settings', methods=['GET','POST'])
 @login_required
@@ -275,27 +584,6 @@ def settings():
             return getattr(self, k, default)
     settings_obj = Obj(data)
     return render_template('admin/settings.html', settings=settings_obj)
-        if not slug:
-            import re
-            slug = re.sub(r"[^a-z0-9\-]+","-", title.lower()).strip('-')
-        if Post.query.filter_by(slug=slug).first():
-            flash('Slug already exists', 'warning')
-            return redirect(url_for('admin.posts'))
-        p = Post(title=title, slug=slug, body=body, image_url=image_url, is_published=is_published)
-        if is_published:
-            from datetime import datetime
-            p.published_at = datetime.utcnow()
-        db.session.add(p)
-        db.session.commit()
-        flash('Post created', 'success')
-        return redirect(url_for('admin.posts'))
-    q = (request.args.get('q') or '').strip()
-    query = Post.query
-    if q:
-        like = f"%{q}%"
-        query = query.filter(db.or_(Post.title.ilike(like), Post.slug.ilike(like)))
-    items = query.order_by(Post.created_at.desc()).all() if hasattr(Post, 'created_at') else query.all()
-    return render_template('admin/posts.html', posts=items, q=q)
 
 @admin_bp.route('/posts/<int:post_id>/edit', methods=['GET','POST'])
 @login_required
@@ -1295,6 +1583,10 @@ def toggle_banner(banner_id):
         abort(404)
     b.is_active = not b.is_active
     db.session.commit()
+    try:
+        cache.clear()
+    except Exception:
+        pass
     flash("Banner updated", "success")
     return redirect(url_for("admin.banners"))
 
@@ -1307,6 +1599,10 @@ def delete_banner(banner_id):
         abort(404)
     db.session.delete(b)
     db.session.commit()
+    try:
+        cache.clear()
+    except Exception:
+        pass
     flash("Banner deleted", "info")
     return redirect(url_for("admin.banners"))
 

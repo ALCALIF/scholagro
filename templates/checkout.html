@@ -103,6 +103,7 @@
                 <div class="input-group">
                   <input type="text" id="coupon-input" class="form-control" placeholder="Enter coupon code" name="coupon_code">
                   <button type="button" class="btn btn-outline-emerald" onclick="applyCoupon()">Apply</button>
+                  <button type="button" class="btn btn-outline-secondary" onclick="removeCoupon()">Remove</button>
                 </div>
                 <div id="coupon-feedback" class="small mt-2"></div>
               </div>
@@ -299,6 +300,17 @@ function showCouponFeedback(msg, type) {
   const el = document.getElementById('coupon-feedback');
   el.className = `text-${type === 'success' ? 'success' : 'warning'}`;
   el.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`;
+}
+
+function removeCoupon(){
+  appliedDiscount = 0;
+  const row = document.getElementById('discount-display-row');
+  if (row) row.style.display = 'none';
+  const fb = document.getElementById('coupon-feedback');
+  if (fb){ fb.className = 'text-muted'; fb.textContent = 'Coupon removed'; }
+  const input = document.getElementById('coupon-input');
+  if (input) input.value = '';
+  recalcTotal();
 }
 
 // Init totals and form validation
